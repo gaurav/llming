@@ -7,11 +7,11 @@ This project contains a Python script (`enrich_mesh_types.py`) that enriches MeS
 ## What the Script Does
 
 ### Input
-- Reads `ctd-mesh-ids.tsv` - a TSV file with MeSH identifiers in the format "MESH:D012345" or "MESH:C012345"
+- Reads `data/ctd-mesh-ids.tsv` - a TSV file with MeSH identifiers in the format "MESH:D012345" or "MESH:C012345"
 - Original columns: CTD-ASSIGNED CONCEPT ID, CTD-ASSIGNED CONCEPT NAME, CTD-ASSIGNED CONCEPT CATEGORY
 
 ### Output
-- Creates `ctd-mesh-ids-enriched.tsv` with five additional columns:
+- Creates `data/ctd-mesh-ids-enriched.tsv` with five additional columns:
   1. **MESH_LABEL**: Official concept name from MeSH API
   2. **MESH_TREE_NUMBERS**: Full hierarchical tree positions (e.g., "D04.345.566;D12.644.641")
   3. **MESH_TREE_LABELS**: Descriptor labels for those tree positions (e.g., "Peptides, Cyclic")
@@ -120,8 +120,8 @@ On the current dataset (773 MeSH identifiers):
 
 ## Related Files
 
-- `ctd-mesh-ids.tsv` - Input file with CTD MeSH identifiers
-- `ctd-mesh-ids-enriched.tsv` - Output file with enriched data
+- `data/ctd-mesh-ids.tsv` - Input file with CTD MeSH identifiers
+- `data/ctd-mesh-ids-enriched.tsv` - Output file with enriched data
 - `enrich_mesh_types.py` - Main enrichment script
 
 ## Session Context
