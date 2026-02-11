@@ -315,11 +315,11 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[dict], Optional[str]]:
 
 
 @click.command()
-@click.argument('input_file', type=click.Path(exists=True), default='./ctd-mesh-ids.tsv')
+@click.argument('input_file', type=click.Path(exists=True), default='./data/ctd-mesh-ids.tsv')
 @click.option('-o', '--output', 'output_file',
               type=click.Path(),
-              default='./ctd-mesh-ids-enriched.tsv',
-              help='Output file path (default: ./ctd-mesh-ids-enriched.tsv)')
+              default='./data/ctd-mesh-ids-enriched.tsv',
+              help='Output file path (default: ./data/ctd-mesh-ids-enriched.tsv)')
 @click.option('-d', '--delay',
               type=float,
               default=0.2,
