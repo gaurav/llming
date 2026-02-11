@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-/// script
-requires-python = ">=3.8"
-dependencies = [
-    "requests",
-    "click",
-]
-///
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "requests",
+#     "click",
+#     "tqdm",
+# ]
+# ///
 """
-Script to enrich MeSH identifiers with top-level type information.
-Reads a TSV file with MeSH IDs and adds type identifier and label columns.
+Script to enrich MeSH identifiers with detailed hierarchical information.
+
+Reads a TSV file with MeSH IDs and adds the following columns:
+- MESH_LABEL: The primary label/name for the MeSH concept
+- MESH_TREE_NUMBERS: Full tree numbers (semicolon-separated if multiple)
+- MESH_TREE_LABELS: Labels for each tree number (semicolon-separated)
+- MESH_TREE_TOP_CODES: First part of tree numbers before '.' (semicolon-separated)
+- MESH_TREE_TOP_LABELS: Labels for the top-level tree codes (semicolon-separated)
 """
 
 import csv
@@ -17,44 +24,150 @@ import time
 import logging
 import click
 import requests
+from tqdm import tqdm
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
+from functools import lru_cache
 
-# MeSH top-level category mappings
-MESH_CATEGORIES = {
-    'A': 'Anatomy',
-    'B': 'Organisms',
-    'C': 'Diseases',
-    'D': 'Chemicals and Drugs',
-    'E': 'Analytical, Diagnostic and Therapeutic Techniques, and Equipment',
-    'F': 'Psychiatry and Psychology',
-    'G': 'Phenomena and Processes',
-    'H': 'Disciplines and Occupations',
-    'I': 'Anthropology, Education, Sociology, and Social Phenomena',
-    'J': 'Technology, Industry, and Agriculture',
-    'K': 'Humanities',
-    'L': 'Information Science',
-    'M': 'Named Groups',
-    'N': 'Health Care',
-    'V': 'Publication Characteristics',
-    'Z': 'Geographicals'
-}
-
-def get_mesh_info(mesh_id: str) -> Tuple[Optional[List[str]], Optional[str]]:
+@lru_cache(maxsize=1000)
+def get_tree_descriptor_label(tree_number: str) -> Optional[str]:
     """
-    Query MeSH API for tree numbers and extract top-level categories.
+    Query MeSH API for a tree number's descriptor label.
+
+    Args:
+        tree_number: MeSH tree number (e.g., 'D03.633' or 'D04')
+
+    Returns:
+        Label for the descriptor at this tree position, or None if not found
+    """
+    try:
+        # Method 1: Try direct tree lookup
+        url = f"https://id.nlm.nih.gov/mesh/{tree_number}.json"
+        response = requests.get(url, timeout=5)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract label from response
+            label = None
+            if 'label' in data:
+                if isinstance(data['label'], dict):
+                    label = data['label'].get('@value') or data['label'].get('en')
+                else:
+                    label = data['label']
+            elif '@graph' in data and len(data['@graph']) > 0:
+                graph_label = data['@graph'][0].get('label')
+                if isinstance(graph_label, dict):
+                    label = graph_label.get('@value') or graph_label.get('en')
+                else:
+                    label = graph_label
+
+            if label:
+                return label
+
+        # Method 2: Try the lookup API
+        url2 = f"https://id.nlm.nih.gov/mesh/lookup/label?descriptor={tree_number}"
+        response2 = requests.get(url2, timeout=5)
+
+        if response2.status_code == 200 and response2.text.strip():
+            return response2.text.strip()
+
+        return None
+
+    except Exception:
+        return None
+
+
+def extract_tree_number_from_uri(tree_value: str) -> str:
+    """
+    Extract tree number from URI or return as-is if already a tree number.
+
+    Args:
+        tree_value: Either a URI like "http://id.nlm.nih.gov/mesh/D04.345.566" or "D04.345.566"
+
+    Returns:
+        Clean tree number like "D04.345.566"
+    """
+    if tree_value.startswith('http://') or tree_value.startswith('https://'):
+        # Extract the last part of the URI
+        return tree_value.split('/mesh/')[-1]
+    return tree_value
+
+
+def get_tree_numbers_from_concept(clean_id: str) -> Tuple[Optional[List[str]], Optional[str], Optional[dict]]:
+    """
+    Fetch tree numbers and label for a MeSH concept.
+
+    Args:
+        clean_id: Clean MeSH identifier without prefix
+
+    Returns:
+        Tuple of (tree_numbers list, concept label, full data dict) or (None, None, None) if not found
+    """
+    url = f"https://id.nlm.nih.gov/mesh/{clean_id}.json"
+
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return None, None, None
+
+        data = response.json()
+
+        # Extract the label
+        label = None
+        if 'label' in data:
+            if isinstance(data['label'], dict):
+                label = data['label'].get('@value') or data['label'].get('en')
+            else:
+                label = data['label']
+        elif 'name' in data:
+            label = data['name']
+        elif '@graph' in data and len(data['@graph']) > 0:
+            graph_label = data['@graph'][0].get('label')
+            if isinstance(graph_label, dict):
+                label = graph_label.get('@value') or graph_label.get('en')
+            else:
+                label = graph_label
+
+        # Extract tree numbers (can be in various formats)
+        tree_numbers_raw = []
+        if 'treeNumber' in data:
+            tree_numbers_raw = data['treeNumber']
+        elif 'treeNumbers' in data:
+            tree_numbers_raw = data['treeNumbers']
+        elif '@graph' in data and len(data['@graph']) > 0:
+            tree_numbers_raw = data['@graph'][0].get('treeNumber', [])
+
+        # Convert to list if single value
+        if isinstance(tree_numbers_raw, str):
+            tree_numbers_raw = [tree_numbers_raw]
+
+        # Extract clean tree numbers from URIs
+        tree_numbers = [extract_tree_number_from_uri(tn) for tn in tree_numbers_raw]
+
+        return tree_numbers if tree_numbers else None, label, data
+
+    except Exception:
+        return None, None, None
+
+
+def get_mesh_info(mesh_id: str) -> Tuple[Optional[dict], Optional[str]]:
+    """
+    Query MeSH API for comprehensive information about a MeSH identifier.
 
     Args:
         mesh_id: MeSH identifier (e.g., 'D015059' or 'C471568')
 
     Returns:
-        Tuple of (list of top-level category codes, error message)
+        Tuple of (dict with mesh info, error message)
+        Dict contains: label, tree_numbers, tree_labels, tree_top_codes, tree_top_labels,
+                      used_mapped_concept (bool)
     """
     # Remove MESH: prefix if present
-    mesh_id = mesh_id.replace('MESH:', '').strip()
+    clean_id = mesh_id.replace('MESH:', '').strip()
 
     # Build API URL
-    url = f"https://id.nlm.nih.gov/mesh/{mesh_id}.json"
+    url = f"https://id.nlm.nih.gov/mesh/{clean_id}.json"
 
     try:
         response = requests.get(url, timeout=10)
@@ -67,24 +180,126 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[List[str]], Optional[str]]:
 
         data = response.json()
 
+        # Extract the label/name
+        label = None
+        if 'label' in data:
+            if isinstance(data['label'], dict):
+                label = data['label'].get('@value') or data['label'].get('en')
+            else:
+                label = data['label']
+        elif 'name' in data:
+            if isinstance(data['name'], dict):
+                label = data['name'].get('@value') or data['name'].get('en')
+            else:
+                label = data['name']
+        elif '@graph' in data and len(data['@graph']) > 0:
+            # Sometimes the data is in @graph format
+            graph_data = data['@graph'][0]
+            graph_label = graph_data.get('label') or graph_data.get('name')
+            if isinstance(graph_label, dict):
+                label = graph_label.get('@value') or graph_label.get('en')
+            else:
+                label = graph_label
+
+        if not label:
+            return None, f"No label found for: {mesh_id}"
+
         # Extract tree numbers
-        tree_numbers = []
-        if 'treeNumbers' in data:
-            tree_numbers = data['treeNumbers']
+        tree_numbers_raw = []
+        used_mapped_concept = False
+
+        if 'treeNumber' in data:
+            tree_numbers_raw = data['treeNumber']
+        elif 'treeNumbers' in data:
+            tree_numbers_raw = data['treeNumbers']
+        elif '@graph' in data and len(data['@graph']) > 0:
+            tree_numbers_raw = data['@graph'][0].get('treeNumber', [])
+
+        # Convert to list if single value
+        if isinstance(tree_numbers_raw, str):
+            tree_numbers_raw = [tree_numbers_raw]
+
+        # Extract clean tree numbers from URIs
+        tree_numbers = [extract_tree_number_from_uri(tn) for tn in tree_numbers_raw] if tree_numbers_raw else []
+
+        # Track the descriptor label for tree numbers
+        descriptor_label_for_trees = label  # Default to the concept's own label
+
+        # If no tree numbers found, try preferredMappedTo
+        if not tree_numbers:
+            logging.debug(f"No tree numbers for {mesh_id}, checking preferredMappedTo")
+
+            # Look for preferredMappedTo in various locations
+            mapped_to = None
+            if 'preferredMappedTo' in data:
+                mapped_to = data['preferredMappedTo']
+            elif '@graph' in data and len(data['@graph']) > 0:
+                mapped_to = data['@graph'][0].get('preferredMappedTo')
+
+            if mapped_to:
+                # mapped_to can be a single URI or a list
+                if isinstance(mapped_to, str):
+                    mapped_to = [mapped_to]
+
+                # Try each mapped concept until we find tree numbers
+                for mapped_uri in mapped_to:
+                    # Extract the ID from the URI (e.g., http://id.nlm.nih.gov/mesh/D123456 -> D123456)
+                    if '/' in mapped_uri:
+                        mapped_id = mapped_uri.split('/')[-1]
+                    else:
+                        mapped_id = mapped_uri
+
+                    logging.debug(f"Trying mapped concept: {mapped_id}")
+                    mapped_tree_numbers, mapped_label, _ = get_tree_numbers_from_concept(mapped_id)
+
+                    if mapped_tree_numbers:
+                        tree_numbers = mapped_tree_numbers
+                        descriptor_label_for_trees = mapped_label or label
+                        used_mapped_concept = True
+                        logging.debug(f"Found tree numbers from mapped concept {mapped_id}")
+                        break
 
         if not tree_numbers:
-            return None, f"No tree numbers found for: {mesh_id}"
+            return None, f"No tree numbers found for: {mesh_id} (even after checking preferredMappedTo)"
 
-        # Extract top-level categories (first letter of tree number)
-        top_level_codes = set()
+        # Tree labels: all tree numbers for a descriptor share the same label (the descriptor's label)
+        tree_labels = [descriptor_label_for_trees] * len(tree_numbers)
+
+        # Extract top-level tree codes (before first dot)
+        tree_top_codes = []
+        tree_top_labels = []
+        seen_tops = set()
+
         for tree_num in tree_numbers:
-            if tree_num and len(tree_num) > 0:
-                top_level_codes.add(tree_num[0])
+            if '.' in tree_num:
+                top_code = tree_num.split('.')[0]
+            else:
+                top_code = tree_num
 
-        if not top_level_codes:
-            return None, f"Could not extract top-level categories for: {mesh_id}"
+            if top_code not in seen_tops:
+                seen_tops.add(top_code)
+                tree_top_codes.append(top_code)
 
-        return sorted(list(top_level_codes)), None
+                # Try to get label for top-level code
+                # Note: MeSH API doesn't provide an easy reverse lookup from tree number to descriptor
+                # So these labels may often be empty
+                top_label = get_tree_descriptor_label(top_code)
+                if not top_label or top_label == top_code:
+                    # If we can't find a meaningful label, leave it empty
+                    tree_top_labels.append("")
+                else:
+                    tree_top_labels.append(top_label)
+
+        result = {
+            'label': label,
+            'tree_numbers': tree_numbers,
+            'tree_labels': tree_labels,
+            'tree_top_codes': tree_top_codes,
+            'tree_top_labels': tree_top_labels,
+            'used_mapped_concept': used_mapped_concept
+        }
+
+        return result, None
 
     except requests.exceptions.Timeout:
         return None, f"Timeout querying API for: {mesh_id}"
@@ -102,8 +317,8 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[List[str]], Optional[str]]:
               help='Output file path (default: ./ctd-mesh-ids-enriched.tsv)')
 @click.option('-d', '--delay',
               type=float,
-              default=0.1,
-              help='Delay between API requests in seconds (default: 0.1)')
+              default=0.2,
+              help='Delay between rows in seconds (default: 0.2). Note: multiple API calls may be made per row.')
 @click.option('--log-level',
               type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR'], case_sensitive=False),
               default='INFO',
@@ -124,6 +339,8 @@ def main(input_file, output_file, delay, log_level):
     total = 0
     success = 0
     errors = 0
+    concepts_without_tree_numbers = 0
+    concepts_using_mapped = 0
     error_messages = defaultdict(int)
 
     try:
@@ -136,12 +353,19 @@ def main(input_file, output_file, delay, log_level):
                 logging.error("Could not read header from input file")
                 sys.exit(1)
 
-            # Add new columns for type information
-            fieldnames = list(reader.fieldnames) + ['MESH_TOP_LEVEL_CODES', 'MESH_TOP_LEVEL_LABELS']
+            # Add new columns for MeSH information
+            fieldnames = list(reader.fieldnames) + [
+                'MESH_LABEL',
+                'MESH_TREE_NUMBERS',
+                'MESH_TREE_LABELS',
+                'MESH_TREE_TOP_CODES',
+                'MESH_TREE_TOP_LABELS'
+            ]
             writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter='\t')
             writer.writeheader()
 
-            for row in reader:
+            # Wrap reader with tqdm for progress bar
+            for row in tqdm(reader, desc="Processing MeSH IDs", unit="rows"):
                 total += 1
                 mesh_id = row.get('CTD-ASSIGNED CONCEPT ID', '')
 
@@ -150,35 +374,44 @@ def main(input_file, output_file, delay, log_level):
                     logging.warning(warning)
                     error_messages[warning] += 1
                     errors += 1
-                    row['MESH_TOP_LEVEL_CODES'] = ''
-                    row['MESH_TOP_LEVEL_LABELS'] = ''
+                    row['MESH_LABEL'] = ''
+                    row['MESH_TREE_NUMBERS'] = ''
+                    row['MESH_TREE_LABELS'] = ''
+                    row['MESH_TREE_TOP_CODES'] = ''
+                    row['MESH_TREE_TOP_LABELS'] = ''
                     writer.writerow(row)
                     continue
 
                 # Query MeSH API
-                top_level_codes, error = get_mesh_info(mesh_id)
+                mesh_info, error = get_mesh_info(mesh_id)
 
                 if error:
                     logging.warning(error)
                     error_messages[error[:50]] += 1  # Group similar errors
                     errors += 1
-                    row['MESH_TOP_LEVEL_CODES'] = ''
-                    row['MESH_TOP_LEVEL_LABELS'] = ''
+                    # Track if error was due to no tree numbers
+                    if "No tree numbers found" in error:
+                        concepts_without_tree_numbers += 1
+                    row['MESH_LABEL'] = ''
+                    row['MESH_TREE_NUMBERS'] = ''
+                    row['MESH_TREE_LABELS'] = ''
+                    row['MESH_TREE_TOP_CODES'] = ''
+                    row['MESH_TREE_TOP_LABELS'] = ''
                 else:
-                    # Map codes to labels
-                    labels = [MESH_CATEGORIES.get(code, f'Unknown-{code}') for code in top_level_codes]
+                    # Populate new columns with MeSH information
+                    row['MESH_LABEL'] = mesh_info['label']
+                    row['MESH_TREE_NUMBERS'] = ';'.join(mesh_info['tree_numbers'])
+                    row['MESH_TREE_LABELS'] = ';'.join(mesh_info['tree_labels'])
+                    row['MESH_TREE_TOP_CODES'] = ';'.join(mesh_info['tree_top_codes'])
+                    row['MESH_TREE_TOP_LABELS'] = ';'.join(mesh_info['tree_top_labels'])
 
-                    row['MESH_TOP_LEVEL_CODES'] = ';'.join(top_level_codes)
-                    row['MESH_TOP_LEVEL_LABELS'] = ';'.join(labels)
+                    # Track if we used a mapped concept
+                    if mesh_info.get('used_mapped_concept', False):
+                        concepts_using_mapped += 1
+
                     success += 1
 
                 writer.writerow(row)
-
-                # Progress indicators
-                if total % 100 == 0:
-                    logging.debug(f"Processed {total} rows ({success} success, {errors} errors)")
-                if total % 500 == 0:
-                    logging.info(f"Processed {total} rows")
 
                 # Rate limiting: be nice to the API
                 time.sleep(delay)
@@ -189,6 +422,8 @@ def main(input_file, output_file, delay, log_level):
         logging.info(f"Total rows: {total}")
         logging.info(f"Successful: {success}")
         logging.info(f"Errors: {errors}")
+        logging.info(f"Concepts without tree numbers: {concepts_without_tree_numbers}")
+        logging.info(f"Concepts using preferredMappedTo: {concepts_using_mapped}")
         logging.info(f"Output written to: {output_file}")
 
         if error_messages:
