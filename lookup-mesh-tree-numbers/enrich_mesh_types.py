@@ -349,6 +349,13 @@ def main(input_file, output_file, delay, log_level):
     error_messages = defaultdict(int)
 
     try:
+        # First, count total rows for accurate progress estimation
+        logging.debug(f"Counting rows in {input_file}")
+        with open(input_file, 'r', encoding='utf-8') as count_file:
+            # Count non-header rows
+            total_rows = sum(1 for _ in count_file) - 1  # Subtract 1 for header
+        logging.debug(f"Found {total_rows} rows to process")
+
         with open(input_file, 'r', encoding='utf-8') as infile, \
              open(output_file, 'w', encoding='utf-8', newline='') as outfile:
 
@@ -369,8 +376,8 @@ def main(input_file, output_file, delay, log_level):
             writer = csv.DictWriter(outfile, fieldnames=fieldnames)
             writer.writeheader()
 
-            # Wrap reader with tqdm for progress bar
-            for row in tqdm(reader, desc="Processing MeSH IDs", unit="rows"):
+            # Wrap reader with tqdm for progress bar with total
+            for row in tqdm(reader, desc="Processing MeSH IDs", unit=" rows", total=total_rows):
                 total += 1
                 mesh_id = row.get('CTD-ASSIGNED CONCEPT ID', '')
 
