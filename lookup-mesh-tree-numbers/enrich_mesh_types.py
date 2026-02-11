@@ -212,6 +212,7 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[dict], Optional[str]]:
         # Extract tree numbers
         tree_numbers_raw = []
         used_mapped_concept = False
+        found_mapped_label_only = False  # Track if we found a mapping without tree numbers
 
         if 'treeNumber' in data:
             tree_numbers_raw = data['treeNumber']
@@ -235,65 +236,116 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[dict], Optional[str]]:
             logging.debug(f"No tree numbers for {mesh_id}, checking preferredMappedTo")
 
             # Look for preferredMappedTo in various locations
-            mapped_to = None
+            preferred_mapped = None
             if 'preferredMappedTo' in data:
-                mapped_to = data['preferredMappedTo']
+                preferred_mapped = data['preferredMappedTo']
             elif '@graph' in data and len(data['@graph']) > 0:
-                mapped_to = data['@graph'][0].get('preferredMappedTo')
+                preferred_mapped = data['@graph'][0].get('preferredMappedTo')
 
-            if mapped_to:
+            if preferred_mapped:
                 # mapped_to can be a single URI or a list
-                if isinstance(mapped_to, str):
-                    mapped_to = [mapped_to]
+                if isinstance(preferred_mapped, str):
+                    preferred_mapped = [preferred_mapped]
 
                 # Try each mapped concept until we find tree numbers
-                for mapped_uri in mapped_to:
+                for mapped_uri in preferred_mapped:
                     # Extract the ID from the URI (e.g., http://id.nlm.nih.gov/mesh/D123456 -> D123456)
                     if '/' in mapped_uri:
                         mapped_id = mapped_uri.split('/')[-1]
                     else:
                         mapped_id = mapped_uri
 
-                    logging.debug(f"Trying mapped concept: {mapped_id}")
+                    logging.debug(f"Trying preferredMappedTo concept: {mapped_id}")
                     mapped_tree_numbers, mapped_label, _ = get_tree_numbers_from_concept(mapped_id)
 
                     if mapped_tree_numbers:
                         tree_numbers = mapped_tree_numbers
                         descriptor_label_for_trees = mapped_label or label
                         used_mapped_concept = True
-                        logging.debug(f"Found tree numbers from mapped concept {mapped_id}")
+                        logging.debug(f"Found tree numbers from preferredMappedTo concept {mapped_id}")
                         break
 
+        # If still no tree numbers, try mappedTo (use label instead of tree numbers)
         if not tree_numbers:
-            return None, f"No tree numbers found for: {mesh_id} (even after checking preferredMappedTo)"
+            logging.debug(f"No tree numbers from preferredMappedTo for {mesh_id}, checking mappedTo")
 
-        # Tree labels: all tree numbers for a descriptor share the same label (the descriptor's label)
-        tree_labels = [descriptor_label_for_trees] * len(tree_numbers)
+            # Look for mappedTo in various locations
+            mapped_to = None
+            if 'mappedTo' in data:
+                mapped_to = data['mappedTo']
+            elif '@graph' in data and len(data['@graph']) > 0:
+                mapped_to = data['@graph'][0].get('mappedTo')
 
-        # Extract top-level tree codes (before first dot)
-        tree_top_codes = []
-        tree_top_labels = []
-        seen_tops = set()
+            if mapped_to:
+                # mapped_to can be a single URI or a list
+                if isinstance(mapped_to, str):
+                    mapped_to = [mapped_to]
 
-        for tree_num in tree_numbers:
-            if '.' in tree_num:
-                top_code = tree_num.split('.')[0]
-            else:
-                top_code = tree_num
+                # Try each mapped concept - use its label even without tree numbers
+                for mapped_uri in mapped_to:
+                    # Extract the ID from the URI
+                    if '/' in mapped_uri:
+                        mapped_id = mapped_uri.split('/')[-1]
+                    else:
+                        mapped_id = mapped_uri
 
-            if top_code not in seen_tops:
-                seen_tops.add(top_code)
-                tree_top_codes.append(top_code)
+                    logging.debug(f"Trying mappedTo concept: {mapped_id}")
+                    mapped_tree_numbers, mapped_label, _ = get_tree_numbers_from_concept(mapped_id)
 
-                # Try to get label for top-level code
-                # Note: MeSH API doesn't provide an easy reverse lookup from tree number to descriptor
-                # So these labels may often be empty
-                top_label = get_tree_descriptor_label(top_code)
-                if not top_label or top_label == top_code:
-                    # If we can't find a meaningful label, leave it empty
-                    tree_top_labels.append("")
+                    # For mappedTo, accept it even without tree numbers if we have a label
+                    if mapped_tree_numbers:
+                        tree_numbers = mapped_tree_numbers
+                        descriptor_label_for_trees = mapped_label or label
+                        used_mapped_concept = True
+                        logging.debug(f"Found tree numbers from mappedTo concept {mapped_id}")
+                        break
+                    elif mapped_label:
+                        # Use the mapped label but mark that we don't have tree numbers
+                        descriptor_label_for_trees = mapped_label
+                        used_mapped_concept = True
+                        found_mapped_label_only = True
+                        logging.debug(f"Using label from mappedTo concept {mapped_id} (no tree numbers)")
+                        break
+
+        # If we have neither tree numbers nor a useful mapping, return error
+        if not tree_numbers and not found_mapped_label_only:
+            return None, f"No tree numbers or mappings found for: {mesh_id} (checked preferredMappedTo and mappedTo)"
+
+        # If we only have a mapped label without tree numbers, use empty values for tree fields
+        if found_mapped_label_only:
+            logging.debug(f"Using mapped label without tree numbers for {mesh_id}")
+            tree_numbers = []
+            tree_labels = []
+            tree_top_codes = []
+            tree_top_labels = []
+        else:
+            # Tree labels: all tree numbers for a descriptor share the same label (the descriptor's label)
+            tree_labels = [descriptor_label_for_trees] * len(tree_numbers)
+
+            # Extract top-level tree codes (before first dot)
+            tree_top_codes = []
+            tree_top_labels = []
+            seen_tops = set()
+
+            for tree_num in tree_numbers:
+                if '.' in tree_num:
+                    top_code = tree_num.split('.')[0]
                 else:
-                    tree_top_labels.append(top_label)
+                    top_code = tree_num
+
+                if top_code not in seen_tops:
+                    seen_tops.add(top_code)
+                    tree_top_codes.append(top_code)
+
+                    # Try to get label for top-level code
+                    # Note: MeSH API doesn't provide an easy reverse lookup from tree number to descriptor
+                    # So these labels may often be empty
+                    top_label = get_tree_descriptor_label(top_code)
+                    if not top_label or top_label == top_code:
+                        # If we can't find a meaningful label, leave it empty
+                        tree_top_labels.append("")
+                    else:
+                        tree_top_labels.append(top_label)
 
         result = {
             'label': label,
@@ -346,6 +398,7 @@ def main(input_file, output_file, delay, log_level):
     errors = 0
     concepts_without_tree_numbers = 0
     concepts_using_mapped = 0
+    concepts_using_mapped_label_only = 0
     error_messages = defaultdict(int)
 
     try:
@@ -420,6 +473,9 @@ def main(input_file, output_file, delay, log_level):
                     # Track if we used a mapped concept
                     if mesh_info.get('used_mapped_concept', False):
                         concepts_using_mapped += 1
+                        # Track if we only got a label without tree numbers (from mappedTo)
+                        if not mesh_info['tree_numbers']:
+                            concepts_using_mapped_label_only += 1
 
                     success += 1
 
@@ -435,7 +491,9 @@ def main(input_file, output_file, delay, log_level):
         logging.info(f"Successful: {success}")
         logging.info(f"Errors: {errors}")
         logging.info(f"Concepts without tree numbers: {concepts_without_tree_numbers}")
-        logging.info(f"Concepts using preferredMappedTo: {concepts_using_mapped}")
+        logging.info(f"Concepts using mappings (preferredMappedTo/mappedTo): {concepts_using_mapped}")
+        logging.info(f"  - With tree numbers: {concepts_using_mapped - concepts_using_mapped_label_only}")
+        logging.info(f"  - Label only (no tree numbers): {concepts_using_mapped_label_only}")
         logging.info(f"Output written to: {output_file}")
 
         if error_messages:

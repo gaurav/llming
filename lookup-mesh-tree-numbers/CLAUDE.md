@@ -21,10 +21,10 @@ This project contains a Python script (`enrich_mesh_types.py`) that enriches MeS
 ### How It Works
 
 1. **Primary Lookup**: Queries the MeSH API at `https://id.nlm.nih.gov/mesh/{id}.json` for each identifier
-2. **Supplementary Concept Handling**: Many CTD concepts are supplementary records (C-numbers) that don't have tree numbers. For these, the script:
-   - Looks for the `preferredMappedTo` field
-   - Follows the mapping to the preferred descriptor
-   - Uses that descriptor's tree numbers and label
+2. **Supplementary Concept Handling**: Many CTD concepts are supplementary records (C-numbers) that don't have tree numbers. For these, the script follows a fallback strategy:
+   - First tries the `preferredMappedTo` field to find a preferred descriptor with tree numbers
+   - If that fails, tries the `mappedTo` field as a fallback
+   - For `mappedTo`, uses the mapped concept's label even if it has no tree numbers (tree fields will be empty)
 3. **Tree Label Extraction**: Tree numbers belong to descriptors; all tree numbers for a descriptor share that descriptor's label
 4. **Top-Level Label Lookup**: Uses SPARQL queries against `https://id.nlm.nih.gov/mesh/sparql` to find which descriptor exists at each top-level tree position
 
