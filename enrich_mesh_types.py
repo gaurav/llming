@@ -32,7 +32,7 @@ from functools import lru_cache
 @lru_cache(maxsize=1000)
 def get_tree_descriptor_label(tree_number: str) -> Optional[str]:
     """
-    Query MeSH API for a tree number's descriptor label.
+    Query MeSH SPARQL endpoint to find the descriptor at a tree position and get its label.
 
     Args:
         tree_number: MeSH tree number (e.g., 'D03.633' or 'D04')
@@ -41,40 +41,45 @@ def get_tree_descriptor_label(tree_number: str) -> Optional[str]:
         Label for the descriptor at this tree position, or None if not found
     """
     try:
-        # Method 1: Try direct tree lookup
-        url = f"https://id.nlm.nih.gov/mesh/{tree_number}.json"
-        response = requests.get(url, timeout=5)
+        # Build SPARQL query to find descriptor with this tree number
+        sparql_query = f"""PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
+PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
+
+SELECT ?label
+FROM <http://id.nlm.nih.gov/mesh>
+
+WHERE {{
+  ?descriptor meshv:treeNumber mesh:{tree_number} .
+  ?descriptor rdfs:label ?label
+}}"""
+
+        # Query the SPARQL endpoint
+        url = "https://id.nlm.nih.gov/mesh/sparql"
+        params = {
+            'query': sparql_query,
+            'format': 'JSON',
+            'limit': 1,
+            'inference': 'true'
+        }
+
+        response = requests.get(url, params=params, timeout=10)
 
         if response.status_code == 200:
             data = response.json()
 
-            # Extract label from response
-            label = None
-            if 'label' in data:
-                if isinstance(data['label'], dict):
-                    label = data['label'].get('@value') or data['label'].get('en')
-                else:
-                    label = data['label']
-            elif '@graph' in data and len(data['@graph']) > 0:
-                graph_label = data['@graph'][0].get('label')
-                if isinstance(graph_label, dict):
-                    label = graph_label.get('@value') or graph_label.get('en')
-                else:
-                    label = graph_label
-
-            if label:
-                return label
-
-        # Method 2: Try the lookup API
-        url2 = f"https://id.nlm.nih.gov/mesh/lookup/label?descriptor={tree_number}"
-        response2 = requests.get(url2, timeout=5)
-
-        if response2.status_code == 200 and response2.text.strip():
-            return response2.text.strip()
+            # Extract label from SPARQL results
+            if 'results' in data and 'bindings' in data['results']:
+                bindings = data['results']['bindings']
+                if bindings and len(bindings) > 0:
+                    label_binding = bindings[0].get('label')
+                    if label_binding and 'value' in label_binding:
+                        return label_binding['value']
 
         return None
 
-    except Exception:
+    except Exception as e:
+        logging.debug(f"Error looking up tree descriptor label for {tree_number}: {e}")
         return None
 
 
