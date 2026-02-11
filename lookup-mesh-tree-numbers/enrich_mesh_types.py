@@ -10,7 +10,7 @@
 """
 Script to enrich MeSH identifiers with detailed hierarchical information.
 
-Reads a TSV file with MeSH IDs and adds the following columns:
+Reads a TSV file with MeSH IDs and outputs a CSV file with the following additional columns:
 - MESH_LABEL: The primary label/name for the MeSH concept
 - MESH_TREE_NUMBERS: Full tree numbers (semicolon-separated if multiple)
 - MESH_TREE_LABELS: Labels for each tree number (semicolon-separated)
@@ -318,8 +318,8 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[dict], Optional[str]]:
 @click.argument('input_file', type=click.Path(exists=True), default='./data/ctd-mesh-ids.tsv')
 @click.option('-o', '--output', 'output_file',
               type=click.Path(),
-              default='./data/ctd-mesh-ids-enriched.tsv',
-              help='Output file path (default: ./data/ctd-mesh-ids-enriched.tsv)')
+              default='./data/ctd-mesh-ids-enriched.csv',
+              help='Output file path (default: ./data/ctd-mesh-ids-enriched.csv)')
 @click.option('-d', '--delay',
               type=float,
               default=0.2,
@@ -332,7 +332,7 @@ def main(input_file, output_file, delay, log_level):
     """
     Enrich MeSH identifiers with top-level type information.
 
-    Reads INPUT_FILE (TSV with MeSH IDs) and adds type identifier and label columns.
+    Reads INPUT_FILE (TSV with MeSH IDs) and outputs a CSV file with type identifier and label columns.
     """
     # Configure logging
     logging.basicConfig(
@@ -366,7 +366,7 @@ def main(input_file, output_file, delay, log_level):
                 'MESH_TREE_TOP_CODES',
                 'MESH_TREE_TOP_LABELS'
             ]
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter='\t')
+            writer = csv.DictWriter(outfile, fieldnames=fieldnames)
             writer.writeheader()
 
             # Wrap reader with tqdm for progress bar
