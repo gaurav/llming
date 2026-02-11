@@ -3,6 +3,7 @@
 requires-python = ">=3.8"
 dependencies = [
     "requests",
+    "click",
 ]
 ///
 """
@@ -13,6 +14,8 @@ Reads a TSV file with MeSH IDs and adds type identifier and label columns.
 import csv
 import sys
 import time
+import logging
+import click
 import requests
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
@@ -91,10 +94,32 @@ def get_mesh_info(mesh_id: str) -> Tuple[Optional[List[str]], Optional[str]]:
         return None, f"Unexpected error for {mesh_id}: {str(e)}"
 
 
-def main():
-    input_file = './ctd-mesh-ids.tsv'
-    output_file = './ctd-mesh-ids-enriched.tsv'
+@click.command()
+@click.argument('input_file', type=click.Path(exists=True), default='./ctd-mesh-ids.tsv')
+@click.option('-o', '--output', 'output_file',
+              type=click.Path(),
+              default='./ctd-mesh-ids-enriched.tsv',
+              help='Output file path (default: ./ctd-mesh-ids-enriched.tsv)')
+@click.option('-d', '--delay',
+              type=float,
+              default=0.1,
+              help='Delay between API requests in seconds (default: 0.1)')
+@click.option('--log-level',
+              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR'], case_sensitive=False),
+              default='INFO',
+              help='Set logging level (default: INFO)')
+def main(input_file, output_file, delay, log_level):
+    """
+    Enrich MeSH identifiers with top-level type information.
 
+    Reads INPUT_FILE (TSV with MeSH IDs) and adds type identifier and label columns.
+    """
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper()),
+        format='%(levelname)s: %(message)s',
+        stream=sys.stderr
+    )
     # Track statistics
     total = 0
     success = 0
@@ -108,8 +133,8 @@ def main():
             reader = csv.DictReader(infile, delimiter='\t')
 
             if not reader.fieldnames:
-                print("ERROR: Could not read header from input file", file=sys.stderr)
-                return 1
+                logging.error("Could not read header from input file")
+                sys.exit(1)
 
             # Add new columns for type information
             fieldnames = list(reader.fieldnames) + ['MESH_TOP_LEVEL_CODES', 'MESH_TOP_LEVEL_LABELS']
@@ -122,7 +147,7 @@ def main():
 
                 if not mesh_id or not mesh_id.startswith('MESH:'):
                     warning = f"Invalid or missing MeSH ID in row {total}: {mesh_id}"
-                    print(f"WARNING: {warning}", file=sys.stderr)
+                    logging.warning(warning)
                     error_messages[warning] += 1
                     errors += 1
                     row['MESH_TOP_LEVEL_CODES'] = ''
@@ -134,7 +159,7 @@ def main():
                 top_level_codes, error = get_mesh_info(mesh_id)
 
                 if error:
-                    print(f"WARNING: {error}", file=sys.stderr)
+                    logging.warning(error)
                     error_messages[error[:50]] += 1  # Group similar errors
                     errors += 1
                     row['MESH_TOP_LEVEL_CODES'] = ''
@@ -149,35 +174,35 @@ def main():
 
                 writer.writerow(row)
 
-                # Progress indicator
+                # Progress indicators
                 if total % 100 == 0:
-                    print(f"Processed {total} rows ({success} success, {errors} errors)...", file=sys.stderr)
+                    logging.debug(f"Processed {total} rows ({success} success, {errors} errors)")
+                if total % 500 == 0:
+                    logging.info(f"Processed {total} rows")
 
                 # Rate limiting: be nice to the API
-                time.sleep(0.1)
+                time.sleep(delay)
 
         # Final summary
-        print(f"\n{'='*60}", file=sys.stderr)
-        print(f"Processing complete!", file=sys.stderr)
-        print(f"Total rows: {total}", file=sys.stderr)
-        print(f"Successful: {success}", file=sys.stderr)
-        print(f"Errors: {errors}", file=sys.stderr)
-        print(f"Output written to: {output_file}", file=sys.stderr)
+        logging.info("="*60)
+        logging.info("Processing complete!")
+        logging.info(f"Total rows: {total}")
+        logging.info(f"Successful: {success}")
+        logging.info(f"Errors: {errors}")
+        logging.info(f"Output written to: {output_file}")
 
         if error_messages:
-            print(f"\nError summary:", file=sys.stderr)
+            logging.info("\nError summary:")
             for msg, count in sorted(error_messages.items(), key=lambda x: -x[1])[:10]:
-                print(f"  {count}x: {msg}", file=sys.stderr)
-
-        return 0
+                logging.info(f"  {count}x: {msg}")
 
     except FileNotFoundError:
-        print(f"ERROR: Input file not found: {input_file}", file=sys.stderr)
-        return 1
+        logging.error(f"Input file not found: {input_file}")
+        sys.exit(1)
     except Exception as e:
-        print(f"ERROR: Unexpected error: {str(e)}", file=sys.stderr)
-        return 1
+        logging.error(f"Unexpected error: {str(e)}")
+        sys.exit(1)
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
