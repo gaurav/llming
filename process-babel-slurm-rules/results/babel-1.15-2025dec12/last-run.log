@@ -1,0 +1,20 @@
+Installed 2 packages in 10ms
+18:12:09 INFO Log directory: /Users/gaurav/Development/llming/process-babel-slurm-rules/data/babel-1.15-2025dec12
+18:12:09 INFO Output directory: /Users/gaurav/Development/llming/process-babel-slurm-rules/data
+Parsing sbatch logs:   0%|          | 0/7 [00:00<?, ?file/s]18:12:09 INFO Parsing sbatch-babel-1.15-run-1.err as run-1
+18:12:10 INFO Parsing sbatch-babel-1.15-run-2.err as run-2
+18:12:10 INFO Parsing sbatch-babel-1.15-run-3.err as run-3
+18:12:10 INFO Parsing sbatch-babel-1.15-run-4.err as run-4
+18:12:10 INFO Parsing sbatch-babel-1.15-run-5.err as run-5
+18:12:10 INFO Parsing sbatch-babel-1.15-run-6.err as run-6
+18:12:10 INFO Parsing sbatch-babel-1.15-run-7.err as run-7
+Parsing sbatch logs: 100%|██████████| 7/7 [00:00<00:00, 277.93file/s]
+18:12:10 INFO Enriching 14 failed jobs with rule log details
+Reading rule logs:   0%|          | 0/14 [00:00<?, ?job/s]Reading rule logs: 100%|██████████| 14/14 [00:00<00:00, 4334.24job/s]
+18:12:10 INFO Parsed 7 runs, 398 total job events (384 success, 14 failed, 0 unknown)
+18:12:10 INFO Wrote /Users/gaurav/Development/llming/process-babel-slurm-rules/data/jobs.csv
+18:12:10 INFO Wrote /Users/gaurav/Development/llming/process-babel-slurm-rules/data/report.md
+
+Reports written to: /Users/gaurav/Development/llming/process-babel-slurm-rules/data
+  - /Users/gaurav/Development/llming/process-babel-slurm-rules/data/report.md
+  - /Users/gaurav/Development/llming/process-babel-slurm-rules/data/jobs.csv
