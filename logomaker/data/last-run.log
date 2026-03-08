@@ -1,12 +1,6 @@
-Installed 1 package in 3ms
-INFO: Reading data/wikimedia-us-nc-logo/Flag-map_of_North_Carolina.svg
-DEBUG: SVG viewBox: -43999 -10822 106958 40401, width: 817.33, height: 310.33
-DEBUG: Main group transform: matrix(1.269 0 0 1.269 87813 70460)
-INFO: Main group has 57 children (1 outline + 56 flag elements)
-DEBUG: Found NC outline stroke path
-INFO: Removing 56 flag elements
-DEBUG: Original outline style: fill:none;stroke-linejoin:round;stroke-width:68.747px;stroke:#000000
-DEBUG: New outline style: fill:#ffffff;stroke-linejoin:round;stroke-width:68.747px;stroke:#000000
-INFO: Removed unreferenced anonymous <clipPath> from root
-INFO: Wrote output to data/nc-outline.svg
-INFO: Done! SVG dimensions: 817.33 x 310.33 (viewBox: -43999 -10822 106958 40401)
+Installed 1 package in 9ms
+INFO: Reading data/nc-outline.svg
+INFO: ViewBox: (-43999.0, -10822.0, 106958.0, 40401.0)
+INFO: Layout: below
+INFO: Text lines: ['NORTH CAROLINA', 'WIKIPEDIANS']
+INFO: Wrote data/nc-logo.svg
