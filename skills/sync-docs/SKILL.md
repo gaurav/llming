@@ -1,5 +1,5 @@
 ---
-name: Synchronize documentation
+name: sync-docs
 description: Checks that the documentation files in a repository don't drift far from the source code. Also called a documentation audit.
 ---
 
