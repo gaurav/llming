@@ -23,7 +23,7 @@ from datetime import date, datetime, timezone
 
 import click
 from dotenv import load_dotenv
-from github import Github, GithubException
+from github import Auth, Github, GithubException
 from tqdm import tqdm
 
 FIELDNAMES = [
@@ -86,7 +86,7 @@ def get_username(cli_value: str | None) -> str:
 
 def check_rate_limit(g: Github) -> None:
     rl = g.get_rate_limit()
-    core = rl.core
+    core = rl.resources.core
     logging.info(
         f"GitHub API rate limit: {core.remaining}/{core.limit} remaining, "
         f"resets at {core.reset.strftime('%H:%M:%S UTC')}"
@@ -243,7 +243,7 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
     logging.info(f"GitHub username: {username}")
 
     token = get_github_token()
-    g = Github(token)
+    g = Github(auth=Auth.Token(token))
     check_rate_limit(g)
 
     pr_rows = collect_prs(g, username, start, end)
