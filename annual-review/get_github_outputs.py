@@ -172,15 +172,22 @@ def collect_prs(g: Github, username: str, start: date, end: date) -> list[dict]:
     return rows
 
 
-def collect_releases(g: Github, username: str, start: date, end: date) -> list[dict]:
+def collect_releases(g: Github, username: str, start: date, end: date,
+                     extra_repos: set[str] | None = None) -> list[dict]:
+    # Personal repos owned by the user
     user = g.get_user(username)
-    logging.info(f"Fetching repos for {username}…")
-    repos = list(user.get_repos())
-    logging.info(f"Scanning {len(repos)} repos for releases in {start} – {end}")
+    logging.info(f"Fetching personal repos for {username}…")
+    personal_repo_names = {r.full_name for r in user.get_repos()}
+    logging.debug(f"Found {len(personal_repo_names)} personal repos")
+
+    # Union with extra repos (e.g. from PR data) to cover org repos
+    all_repo_names = personal_repo_names | (extra_repos or set())
+    logging.info(f"Scanning {len(all_repo_names)} repos for releases by {username} in {start} – {end}")
 
     rows = []
-    for repo in tqdm(repos, desc="Scanning repos", unit=" repos"):
+    for full_name in tqdm(sorted(all_repo_names), desc="Scanning repos for releases", unit=" repos"):
         try:
+            repo = g.get_repo(full_name)
             for release in repo.get_releases():
                 if release.draft:
                     continue
@@ -191,13 +198,16 @@ def collect_releases(g: Github, username: str, start: date, end: date) -> list[d
                     break  # releases are newest-first; nothing older will match
                 if pub > end:
                     continue
+                # Only include releases published by the user
+                if not release.author or release.author.login != username:
+                    continue
                 rows.append({
                     "Goal": "",
                     "Type": "Release",
                     "Organization": repo.owner.login,
                     "Repository": repo.name,
                     "Number": release.tag_name,
-                    "Title": release.title or release.tag_name,
+                    "Title": release.name or release.tag_name,
                     "URL": release.html_url,
                     "Status": "released",
                     "Created": pub.isoformat(),
@@ -207,10 +217,34 @@ def collect_releases(g: Github, username: str, start: date, end: date) -> list[d
                     "Description": (release.body or "")[:500],
                 })
         except GithubException as e:
-            logging.warning(f"Could not fetch releases for {repo.full_name}: {e}")
+            logging.warning(f"Could not fetch releases for {full_name}: {e}")
 
     logging.info(f"Collected {len(rows)} releases")
     return rows
+
+
+def write_csv(rows: list[dict], path: str) -> None:
+    os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def read_repos_from_csv(path: str) -> set[str]:
+    """Extract unique org/repo slugs from an existing PR CSV."""
+    repos: set[str] = set()
+    try:
+        with open(path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                org = row.get("Organization", "").strip()
+                repo = row.get("Repository", "").strip()
+                if org and repo:
+                    repos.add(f"{org}/{repo}")
+        logging.info(f"Read {len(repos)} unique repos from {path}")
+    except FileNotFoundError:
+        logging.warning(f"Could not read repos from {path}: file not found")
+    return repos
 
 
 @click.command()
@@ -222,11 +256,15 @@ def collect_releases(g: Github, username: str, start: date, end: date) -> list[d
               help="GitHub username (overrides GITHUB_USERNAME in .env)")
 @click.option("--output", "-o", default="data/github_outputs.csv", show_default=True,
               help="Output CSV file path")
+@click.option("--releases-output", default=None, metavar="PATH",
+              help="Also write releases to this separate CSV (useful for testing)")
+@click.option("--releases-only", is_flag=True, default=False,
+              help="Skip PR download; read repos from --output (if it exists) and write releases to --releases-output")
 @click.option("--log-level", default="INFO", show_default=True,
               type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False),
               help="Logging verbosity")
 def main(start_str: str | None, end_str: str | None, username: str | None,
-         output: str, log_level: str) -> None:
+         output: str, releases_output: str | None, releases_only: bool, log_level: str) -> None:
     """Download GitHub PRs and Releases for an annual review period."""
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
@@ -246,17 +284,28 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
     g = Github(auth=Auth.Token(token))
     check_rate_limit(g)
 
+    if releases_only:
+        # Skip PR download; use repos from the existing output CSV
+        extra_repos = read_repos_from_csv(output)
+        release_rows = collect_releases(g, username, start, end, extra_repos=extra_repos)
+        dest = releases_output or output
+        write_csv(release_rows, dest)
+        logging.info(f"Wrote {len(release_rows)} releases to {dest}")
+        return
+
     pr_rows = collect_prs(g, username, start, end)
     check_rate_limit(g)
-    release_rows = collect_releases(g, username, start, end)
+
+    # Pass PR repos so org repos (not in get_repos()) are also scanned for releases
+    pr_repos = {f"{r['Organization']}/{r['Repository']}" for r in pr_rows}
+    release_rows = collect_releases(g, username, start, end, extra_repos=pr_repos)
+
+    if releases_output:
+        write_csv(release_rows, releases_output)
+        logging.info(f"Wrote {len(release_rows)} releases to {releases_output}")
 
     all_rows = sorted(pr_rows + release_rows, key=lambda r: r["Created"])
-
-    os.makedirs(os.path.dirname(output) if os.path.dirname(output) else ".", exist_ok=True)
-    with open(output, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        writer.writeheader()
-        writer.writerows(all_rows)
+    write_csv(all_rows, output)
 
     pr_count = sum(1 for r in all_rows if r["Type"] == "PR")
     release_count = sum(1 for r in all_rows if r["Type"] == "Release")
