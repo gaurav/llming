@@ -73,11 +73,14 @@ def format_release_line(row: dict) -> str:
     return f"- [{org}/{repo} {tag}: {title} (released {date_str})]({url})"
 
 
-def sort_key(row: dict) -> datetime:
+def sort_key(row: dict) -> tuple:
+    # Releases before PRs; within each type, sort by creation date ascending
+    type_order = 0 if row.get("Type") == "Release" else 1
     try:
-        return datetime.fromisoformat(row["Created"])
+        dt = datetime.fromisoformat(row["Created"])
     except (ValueError, KeyError):
-        return datetime.min
+        dt = datetime.min
+    return (type_order, dt)
 
 
 @click.command()
