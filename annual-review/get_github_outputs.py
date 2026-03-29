@@ -19,6 +19,7 @@ import os
 import subprocess
 import sys
 import time
+import tomllib
 from datetime import date, datetime, timezone
 
 import click
@@ -247,6 +248,53 @@ def read_repos_from_csv(path: str) -> set[str]:
     return repos
 
 
+def load_goals_config(path: str) -> tuple[dict[str, str], dict[str, str]]:
+    """
+    Parse a TOML goals config and return two lookup dicts:
+      repo_goals: {"org/repo" -> "Goal Name"}  (specific repo rules, higher priority)
+      org_goals:  {"org"      -> "Goal Name"}  (org-level fallback)
+    Returns empty dicts if the file does not exist (config is optional).
+    """
+    repo_goals: dict[str, str] = {}
+    org_goals: dict[str, str] = {}
+    try:
+        with open(path, "rb") as f:
+            config = tomllib.load(f)
+    except FileNotFoundError:
+        logging.debug(f"Goals config not found at {path} — skipping")
+        return repo_goals, org_goals
+
+    for goal_name, entries in config.get("goals", {}).items():
+        for entry in entries:
+            if "/" in entry:
+                repo_goals[entry] = goal_name
+            else:
+                org_goals[entry] = goal_name
+
+    logging.info(
+        f"Loaded goals config from {path}: "
+        f"{len(repo_goals)} repo rules, {len(org_goals)} org rules"
+    )
+    return repo_goals, org_goals
+
+
+def apply_goal(row: dict, repo_goals: dict[str, str], org_goals: dict[str, str]) -> dict:
+    """Fill in the Goal field if blank using the goals config. Never overwrites existing values."""
+    if row.get("Goal", "").strip():
+        return row
+    full_name = f"{row['Organization']}/{row['Repository']}"
+    if full_name in repo_goals:
+        row["Goal"] = repo_goals[full_name]
+    elif row["Organization"] in org_goals:
+        row["Goal"] = org_goals[row["Organization"]]
+    return row
+
+
+def read_csv(path: str) -> list[dict]:
+    with open(path, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
 @click.command()
 @click.option("--start", "start_str", default=None, metavar="YYYY-MM-DD",
               help="Start date (default: start of current review period)")
@@ -260,17 +308,37 @@ def read_repos_from_csv(path: str) -> set[str]:
               help="Also write releases to this separate CSV (useful for testing)")
 @click.option("--releases-only", is_flag=True, default=False,
               help="Skip PR download; read repos from --output (if it exists) and write releases to --releases-output")
+@click.option("--goals", "goals_path", default="goals.toml", show_default=True, metavar="PATH",
+              help="TOML config mapping repos/orgs to goal names (skipped if file not found)")
+@click.option("--apply-goals", is_flag=True, default=False,
+              help="Apply goals config to blank Goal cells in existing --output CSV (no GitHub download)")
 @click.option("--log-level", default="INFO", show_default=True,
               type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False),
               help="Logging verbosity")
 def main(start_str: str | None, end_str: str | None, username: str | None,
-         output: str, releases_output: str | None, releases_only: bool, log_level: str) -> None:
+         output: str, releases_output: str | None, releases_only: bool,
+         goals_path: str, apply_goals: bool, log_level: str) -> None:
     """Download GitHub PRs and Releases for an annual review period."""
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(levelname)s: %(message)s",
         stream=sys.stderr,
     )
+
+    repo_goals, org_goals = load_goals_config(goals_path)
+
+    if apply_goals:
+        rows = read_csv(output)
+        before = sum(1 for r in rows if r.get("Goal", "").strip())
+        rows = [apply_goal(r, repo_goals, org_goals) for r in rows]
+        after = sum(1 for r in rows if r.get("Goal", "").strip())
+        write_csv(rows, output)
+        logging.info(
+            f"Applied goals to {output}: "
+            f"{after - before} new goals set, {before} existing preserved "
+            f"({len(rows) - after} still unset)"
+        )
+        return
 
     default_start, default_end = default_review_period()
     start = date.fromisoformat(start_str) if start_str else default_start
@@ -305,15 +373,17 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
         logging.info(f"Wrote {len(release_rows)} releases to {releases_output}")
 
     all_rows = sorted(pr_rows + release_rows, key=lambda r: r["Created"])
+    all_rows = [apply_goal(r, repo_goals, org_goals) for r in all_rows]
     write_csv(all_rows, output)
 
     pr_count = sum(1 for r in all_rows if r["Type"] == "PR")
     release_count = sum(1 for r in all_rows if r["Type"] == "Release")
+    goal_count = sum(1 for r in all_rows if r.get("Goal", "").strip())
     logging.info(
         f"Wrote {len(all_rows)} rows to {output} "
-        f"({pr_count} PRs, {release_count} releases)"
+        f"({pr_count} PRs, {release_count} releases, {goal_count} with goals pre-filled)"
     )
-    logging.info(f"Next step: fill in the Goal column in {output}, then run generate_review.py")
+    logging.info(f"Next step: fill in any remaining Goal cells in {output}, then run generate_review.py")
 
 
 if __name__ == "__main__":
