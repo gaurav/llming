@@ -407,9 +407,12 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
     pr_count = sum(1 for r in all_rows if r["Type"] == "PR")
     release_count = sum(1 for r in all_rows if r["Type"] == "Release")
     goal_count = sum(1 for r in all_rows if r.get("Goal", "").strip())
+    unfilled = len(all_rows) - goal_count
+    pct_unfilled = (unfilled / len(all_rows) * 100) if all_rows else 0
     logging.info(
         f"Wrote {len(all_rows)} rows to {output} "
-        f"({pr_count} PRs, {release_count} releases, {goal_count} with goals pre-filled)"
+        f"({pr_count} PRs, {release_count} releases, {goal_count} with goals pre-filled, "
+        f"{unfilled} not yet filled ({pct_unfilled:.0f}%))"
     )
     logging.info(f"Next step: fill in any remaining Goal cells in {output}, then run generate_review.py")
 
