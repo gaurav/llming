@@ -93,6 +93,21 @@ After editing `goals.toml`, apply the new mappings to the existing CSV in place 
 uv run get_github_outputs.py --apply-goals 2>&1 | tee data/last-run.log
 ```
 
+### Refreshing an existing annotated CSV
+
+If you've already annotated the `Goal` column but new PRs or releases have appeared since your last download, re-fetch everything and carry forward your annotations:
+
+```bash
+uv run get_github_outputs.py \
+  --input "data/github_outputs - 2025mar30.csv" \
+  --output data/github_outputs.csv \
+  2>&1 | tee data/last-run.log
+```
+
+`--output` is required alongside `--input` to prevent accidentally overwriting the source file.
+
+The script fetches a fresh set of PRs and releases, then overlays the `Goal` values from the input CSV onto any matching rows (identified by org, repo, type, and PR number / release tag). New rows without a match are filled from `goals.toml` as usual. Rows from the input CSV that no longer appear in the search results are dropped.
+
 ### Testing releases only
 
 To re-fetch releases without re-downloading all PRs (useful after fixing a bug):

@@ -34,6 +34,16 @@ uv run get_github_outputs.py --start 2024-04-01 --end 2025-03-31
 uv run generate_review.py --start 2024-04-01 --end 2025-03-31
 ```
 
+To refresh an already-annotated CSV (re-fetch fresh data while preserving manual Goal values):
+```bash
+uv run get_github_outputs.py --input "data/github_outputs - snapshot.csv" --output data/github_outputs.csv 2>&1 | tee data/last-run.log
+```
+`--output` is required alongside `--input` to prevent accidental overwrites. The script loads Goal annotations keyed by `(org, repo, type, number)` from the input file, runs the normal full fetch, then overlays those annotations on matching rows. New rows get goals.toml treatment; rows from the snapshot that no longer appear in search results are dropped.
+
+Other modes:
+- `--apply-goals` — apply `goals.toml` to blank Goal cells in the existing output CSV without any GitHub API calls
+- `--releases-only` — skip PR download; fetch releases only from repos already in the output CSV
+
 ## Authentication
 
 The scripts try to acquire a GitHub token in this order:

@@ -302,8 +302,10 @@ def read_csv(path: str) -> list[dict]:
               help="End date (default: end of current review period)")
 @click.option("--username", "-u", default=None,
               help="GitHub username (overrides GITHUB_USERNAME in .env)")
-@click.option("--output", "-o", default="data/github_outputs.csv", show_default=True,
-              help="Output CSV file path")
+@click.option("--input", "-i", "input_path", default=None, metavar="PATH",
+              help="Existing CSV with manual Goal annotations; Goal values are preserved in the refreshed output")
+@click.option("--output", "-o", default=None, show_default=True, metavar="PATH",
+              help="Output CSV file path (default: data/github_outputs.csv; required when --input is used)")
 @click.option("--releases-output", default=None, metavar="PATH",
               help="Also write releases to this separate CSV (useful for testing)")
 @click.option("--releases-only", is_flag=True, default=False,
@@ -316,14 +318,21 @@ def read_csv(path: str) -> list[dict]:
               type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False),
               help="Logging verbosity")
 def main(start_str: str | None, end_str: str | None, username: str | None,
-         output: str, releases_output: str | None, releases_only: bool,
-         goals_path: str, apply_goals: bool, log_level: str) -> None:
+         input_path: str | None, output: str | None, releases_output: str | None,
+         releases_only: bool, goals_path: str, apply_goals: bool, log_level: str) -> None:
     """Download GitHub PRs and Releases for an annual review period."""
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(levelname)s: %(message)s",
         stream=sys.stderr,
     )
+
+    if input_path and output is None:
+        raise click.ClickException(
+            "--output is required when using --input (to avoid overwriting the input file)"
+        )
+    if output is None:
+        output = "data/github_outputs.csv"
 
     repo_goals, org_goals = load_goals_config(goals_path)
 
@@ -339,6 +348,17 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
             f"({len(rows) - after} still unset)"
         )
         return
+
+    # Load manual Goal annotations from an existing CSV (if --input was given).
+    # These override goals.toml results after the normal pipeline runs.
+    manual_goals: dict[tuple[str, str, str, str], str] = {}
+    if input_path:
+        for row in read_csv(input_path):
+            goal = row.get("Goal", "").strip()
+            if goal:
+                key = (row["Organization"], row["Repository"], row["Type"], row["Number"])
+                manual_goals[key] = goal
+        logging.info(f"Loaded {len(manual_goals)} manual goal annotations from {input_path}")
 
     default_start, default_end = default_review_period()
     start = date.fromisoformat(start_str) if start_str else default_start
@@ -374,6 +394,14 @@ def main(start_str: str | None, end_str: str | None, username: str | None,
 
     all_rows = sorted(pr_rows + release_rows, key=lambda r: r["Created"])
     all_rows = [apply_goal(r, repo_goals, org_goals) for r in all_rows]
+
+    if manual_goals:
+        for row in all_rows:
+            key = (row["Organization"], row["Repository"], row["Type"], row["Number"])
+            if key in manual_goals:
+                row["Goal"] = manual_goals[key]
+        logging.info(f"Applied {len(manual_goals)} manual goal annotations from {input_path}")
+
     write_csv(all_rows, output)
 
     pr_count = sum(1 for r in all_rows if r["Type"] == "PR")
