@@ -58,7 +58,7 @@ def format_pr_line(row: dict) -> str:
     else:
         disposition = status
 
-    return f"- [{org}/{repo}#{num}: {title} ({disposition})]({url})"
+    return f"- [{disposition}] {title} ({url})"
 
 
 def format_release_line(row: dict) -> str:
@@ -70,7 +70,7 @@ def format_release_line(row: dict) -> str:
     created = row["Created"].strip()
 
     date_str = fmt_date(created) if created else "unknown date"
-    return f"- [{org}/{repo} {tag}: {title} (released {date_str})]({url})"
+    return f"- [released {date_str}] {title} ({url})"
 
 
 def sort_key(row: dict) -> tuple:

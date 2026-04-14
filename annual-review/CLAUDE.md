@@ -72,9 +72,9 @@ The generated Markdown looks like:
 
 > [Your narrative here]
 
-- [org/repo#123: PR Title (merged Mar 5, 2026)](https://github.com/...)
-- [org/repo#124: PR Title (in progress)](https://github.com/...)
-- [org/repo v1.2.0: Release Title (released Nov 10, 2025)](https://github.com/...)
+- [merged Mar 5, 2026] PR Title (https://github.com/...)
+- [in progress] PR Title (https://github.com/...)
+- [released Nov 10, 2025] Release Title (https://github.com/...)
 
 ## Other
 
