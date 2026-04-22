@@ -5,6 +5,7 @@ description: Checks that the documentation files in a repository don't drift far
 
 This repository probably contains multiple documentation files in Markdown format with `.md` extension,
 most of them in a `docs/` or `documentation/` folder as well as `README.md` files everywhere.
+This includes coding agent skills or agent instructions like CLAUDE.md or AGENTS.md.
 
 For every Markdown file, look for statements about how to use the software in this repository or
 descriptions of how it works, then read the relevant parts of the source code to confirm that these
