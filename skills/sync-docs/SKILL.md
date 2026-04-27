@@ -18,4 +18,5 @@ it may not be important to record the exact number of tests or files in particul
 these will need to be updated often.
 
 If there are many Markdown files, it might make sense to spawn subagents to work on each Markdown file
-separately.
+separately. If there are lots of unrelated changes that need to be committed to source control, it
+might make sense to commit them in groups of related changes.
