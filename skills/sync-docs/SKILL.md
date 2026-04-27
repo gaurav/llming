@@ -13,5 +13,9 @@ statements are still accurate. If not, modify the Markdown file so that it is ac
 might want to warn the user first if the code might actually need to be fixed yet. You don't need
 to check URLs or other resources outside of this repository.
 
+Think also about strategies for simplifying documentation synchronization in the future: for example,
+it may not be important to record the exact number of tests or files in particular directories, as
+these will need to be updated often.
+
 If there are many Markdown files, it might make sense to spawn subagents to work on each Markdown file
 separately.
