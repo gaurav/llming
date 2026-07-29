@@ -36,7 +36,7 @@ Find the behavior this session changed that no test covers, and **write those te
 
 ## 4. Suggest follow-up issues
 
-Loose ends, deferred fixes, things noticed but out of scope. One line each.
+Loose ends, deferred fixes, things noticed but out of scope. One line each, numbered, so that we can reference them in follow-up conversation.
 
 **Suggestions only — assume none of these will be done.** Do not file, create, or start any of them. Offer `gh issue create` and wait for the user to name the specific ones they want.
 
