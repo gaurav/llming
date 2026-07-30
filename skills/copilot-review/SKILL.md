@@ -42,21 +42,67 @@ Only ask the user directly if you are hard-blocked (e.g. missing auth, can't det
 
 ## Step 2 — Fetch unresolved Copilot threads
 
-Run the bundled script that lives next to this SKILL.md. It calls `gh api graphql`, pages through
-all review threads, and prints one block per **unresolved Copilot** thread — each with the thread's
-GraphQL node id, the top comment's `databaseId`, path, line, the `outdated` flag, the url, and the
-full comment text plus any replies. Invoke it by its absolute path (the working directory is the
-repo you're reviewing, not this skill's directory):
+`--paginate` walks every page of review threads (it needs the `$endCursor` variable and the
+`pageInfo` selection to do so), and the `--jq` filter keeps only unresolved threads whose top
+comment is Copilot's. Each surviving thread prints as one JSON object carrying everything the
+later steps need:
 
 ```bash
-python3 ~/.claude/skills/copilot-review/scripts/list_copilot_threads.py "$OWNER" "$REPO" "$PR"
+gh api graphql --paginate \
+  -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" \
+  -f query='
+query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
+  repository(owner:$owner,name:$repo){
+    pullRequest(number:$pr){
+      reviewThreads(first:100, after:$endCursor){
+        pageInfo{ hasNextPage endCursor }
+        nodes{
+          id isResolved isOutdated path line
+          comments(first:100){ nodes{ author{login} body databaseId url } }
+        }
+      }
+    }
+  }
+}' --jq '
+.data.repository.pullRequest.reviewThreads.nodes[]
+| select(.isResolved | not)
+| select((.comments.nodes[0].author.login // "") | ascii_downcase | startswith("copilot"))
+| {thread_id: .id,
+   top_comment_db_id: .comments.nodes[0].databaseId,
+   path, line, outdated: .isOutdated,
+   url: .comments.nodes[0].url,
+   comments: [.comments.nodes[] | {author: (.author.login // "ghost"), body}]}'
 ```
 
-It already filters to `copilot-pull-request-reviewer` threads that are not resolved, and prints
-`No unresolved Copilot review threads.` when there's nothing to do. An `isOutdated: true` thread
-points at code that has since changed — read the *current* code to see whether it's still an issue
-before acting; often it's already addressed, in which case resolve it (with a one-line reply only
-if the reason isn't obvious).
+An `isOutdated: true` thread points at code that has since changed — read the *current* code to see
+whether it's still an issue before acting; often it's already addressed, in which case resolve it
+(with a one-line reply only if the reason isn't obvious).
+
+**If that prints nothing**, don't conclude there's no Copilot review yet — the author filter may
+simply have missed. Distinguish the two before stopping, by listing what's actually there:
+
+```bash
+gh api graphql --paginate \
+  -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" \
+  -f query='
+query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
+  repository(owner:$owner,name:$repo){
+    pullRequest(number:$pr){
+      reviewThreads(first:100, after:$endCursor){
+        pageInfo{ hasNextPage endCursor }
+        nodes{ isResolved comments(first:1){ nodes{ author{login} } } }
+      }
+    }
+  }
+}' --jq '"\(.data.repository.pullRequest.reviewThreads.nodes | length) threads: " +
+  ([.data.repository.pullRequest.reviewThreads.nodes[]
+    | "\(.comments.nodes[0].author.login // "ghost")\(if .isResolved then " (resolved)" else "" end)"]
+   | join(", "))'
+```
+
+Zero threads, or only resolved/human ones, means there is genuinely nothing to do. An unresolved
+thread from a Copilot-ish login the filter didn't match means GitHub changed the bot's login —
+rerun Step 2 matching that login, and say so in the summary.
 
 ## Step 3 — Triage each comment
 
@@ -126,6 +172,10 @@ the push succeeded. Note any thread you couldn't resolve automatically.
 - Replies use the REST `.../comments/{id}/replies` endpoint keyed by the top comment's
   **`databaseId`** (an integer), while resolving uses the thread's **GraphQL node id** (the
   `PRRT_...` string). Don't mix them up.
-- If Step 2 returns no unresolved Copilot threads, say so and stop — nothing to do.
+- If Step 2 finds no unresolved Copilot threads *and* its diagnostic confirms that's real rather
+  than a filter miss, say so and stop — nothing to do.
+- As of this writing the bot's login is `copilot-pull-request-reviewer` in GraphQL and
+  `copilot-pull-request-reviewer[bot]` in REST. Step 2 matches a case-insensitive `copilot` prefix
+  so it survives either form and most renames.
 - This skill only touches Copilot's threads. Leave human reviewers' comments alone unless the user
   says otherwise.
