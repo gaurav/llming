@@ -17,7 +17,11 @@ The hard requirement is **completeness, not autonomy**. Every unresolved Copilot
 the run in one of three states:
 
 1. **Fixed** in this PR, or
-2. **Replied to** with the reason it won't be fixed, or
+2. **Resolved**, either by itself (if the issue is outdated and genuinely no longer relevant) or
+   by replying to it with a comment explaining why it doesn't need to be fixed. The user will
+   rely on your explanation in the coding agent rather than these replies to understand what
+   happened -- these are mostly for future users who want to double-check why a comment
+   was ignored.
 3. **Tracked** in a follow-up issue.
 
 No comment gets silently dropped, and none is left unresolved without the user knowing why. How you
