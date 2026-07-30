@@ -58,10 +58,19 @@ Invoking this skill is authorization to commit and push **the work of this sessi
 
 ## 4. Suggest follow-up issues
 
-Loose ends, deferred fixes, things noticed but out of scope. One line each, numbered, so that we can
+Loose ends, deferred fixes, things noticed but out of scope. One line each, numbered, so we can
 reference them in follow-up conversation.
 
-**Suggestions only — assume none of these will be done.** Do not file, create, or start any of them.
-Offer `gh issue create` and wait for the user to name the specific ones they want.
+Naming something as a follow-up is a thinking tool, not a prediction — plenty of these turn out to
+belong in the current PR once written down, and that's a good outcome, not a scope failure. Write
+each one so it works either way: specific enough to file as an issue, specific enough to just do.
+
+For each, say where it probably belongs, using the same bar as the `copilot-review` skill: fold it
+into the current PR unless it is genuinely unrelated to this work, or needs enough design thinking
+that doing it here would swamp the PR. "Somewhat awkward to do here" does not qualify.
+
+**Do not file, create, or start any of them.** Offer `gh issue create` for the ones the user wants
+tracked, and wait to be told which. If the user pulls one into the current PR instead, that is new
+work — do it, then run section 3 again.
 
 Keep the whole output short. Bullets, not prose.
