@@ -21,10 +21,9 @@ Copilot raises findings in **two** places, and the second is easy to miss:
   `reviewThreads`. A review that reports "generated no new comments" can still carry several.
 
 Suppressed comments are withheld for low *confidence*, not low *value* — Copilot is hedging, not
-saying the finding is wrong. In practice they are often the most substantive things in the review,
-because the checks that make Copilot uncertain (does this doc match that code? is this link really
-a PR? is this scaffolding meant to ship?) are exactly the cross-file checks a human reviewer skips.
-Triage them alongside the threads.
+saying the finding is wrong. The checks that make it uncertain (does this doc match that code? is
+this link really a PR? is this scaffolding meant to ship?) are often cross-file checks a human
+reviewer skips. Triage them alongside the threads.
 
 ## Operating mode
 
@@ -282,8 +281,7 @@ otherwise a silent run is ambiguous between "checked and empty" and "never looke
 - As of this writing the bot's login is `copilot-pull-request-reviewer` in GraphQL and
   `copilot-pull-request-reviewer[bot]` in REST. Steps 2 and 2b match a case-insensitive `copilot`
   prefix so they survive either form and most renames.
-- Suppressed comments live only in the review **body** (`/pulls/{pr}/reviews/{id}`), never in
-  `/reviews/{id}/comments` or the `reviewThreads` GraphQL connection. Querying either for them
-  returns empty and reads as "nothing there".
+- Suppressed comments live only in a review's **body**, never in `/reviews/{id}/comments`. That
+  endpoint is the obvious place to look and returns empty, which reads as "nothing there".
 - This skill only touches Copilot's threads. Leave human reviewers' comments alone unless the user
   says otherwise.
