@@ -20,11 +20,6 @@ Copilot raises findings in **two** places, and the second is easy to miss:
   there is nothing to reply to and nothing to resolve, and they are invisible to any query over
   `reviewThreads`. A review that reports "generated no new comments" can still carry several.
 
-Suppressed comments are withheld for low *confidence*, not low *value* — Copilot is hedging, not
-saying the finding is wrong. The checks that make it uncertain (does this doc match that code? is
-this link really a PR? is this scaffolding meant to ship?) are often cross-file checks a human
-reviewer skips. Triage them alongside the threads.
-
 ## Operating mode
 
 The hard requirement is **completeness, not autonomy**. Every unresolved Copilot comment must end
@@ -41,9 +36,8 @@ the run in one of three states:
 No comment gets silently dropped, and none is left unresolved without the user knowing why. How you
 reach those states is flexible.
 
-A **suppressed** comment can only reach states 1 and 3 — there is no thread to resolve and no reply
-endpoint. So a suppressed comment you decline must be reported in the summary with its reason;
-that summary line is the only record it was considered at all.
+A **suppressed** comment can only reach states 1 and 3. One you decline must be named in the summary
+with its reason — that line is the only record it was considered.
 
 **Asking is fine — discussing options is welcome.** Don't ask about routine calls: a misleading log
 message, a wrong variable name, a missing guard. Just apply the smallest change that addresses the
@@ -153,18 +147,13 @@ gh api --paginate "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
         | "=== \(.submitted_at) ===\n\(.body)"'
 ```
 
-The list endpoint already carries each review's `body`, so there is no need to fetch reviews
-individually. `--paginate` matters: reviews come back **oldest first**, so without it a PR with more
-than a page of pushes silently drops its *newest* Copilot reviews — the ones that matter. The
-`// ""` guard matters too: one review from a deleted account makes a bare `.user.login` filter error
-out and print nothing, which reads exactly like "no suppressed comments".
+Don't trim that command: reviews page **oldest first**, and an unguarded `.user.login` errors on a
+deleted account. Both failures print nothing, which reads exactly like "no suppressed comments".
 
 Copilot labels these blocks inconsistently — `Comments suppressed due to low confidence (N)` and
 `Suppressed comments (N)` are both current — so scan for `<summary>` lines containing *suppressed*
 rather than matching one exact heading. Each entry gives a `path:line` and a quoted code snippet;
 that is enough to find the code, and there is no thread id to carry forward.
-
-Two traps:
 
 - **Later reviews supersede earlier ones.** Copilot re-reviews on each push, so a suppressed comment
   from the first review may already be fixed. Check the *current* file before acting, exactly as
@@ -189,11 +178,8 @@ Read the referenced file and the surrounding code. Classify as:
   or needs real design work.
 
 Judge a suppressed comment on the same terms as a thread — Copilot's own confidence is not evidence
-either way, and several of them assert a *checkable fact* ("this doc disagrees with that rule",
-"#569 is an issue, not a PR", "this tag isn't what the build was cut from"). Check the fact rather
-than weighing the claim: `gh api repos/O/R/issues/N --jq 'if .pull_request then "PR" else "issue" end'`
-settles the second, `git merge-base --is-ancestor` the third. A finding Copilot hedged on is
-frequently just correct.
+either way. Most of them assert a *checkable fact* about the repo (this doc disagrees with that
+rule, that link is an issue rather than a PR); check the fact instead of weighing the claim.
 
 Prefer the smallest change that resolves the concern. Check the repo's `CLAUDE.md`/`AGENTS.md` for
 conventions before choosing an approach. If Copilot raises the same issue in several threads, fix
@@ -275,9 +261,6 @@ otherwise a silent run is ambiguous between "checked and empty" and "never looke
   `PRRT_...` string). Don't mix them up.
 - No unresolved threads is **not** grounds to stop: run Step 2b anyway. Stop only once Step 2's
   diagnostic confirms the empty thread list is real *and* Step 2b finds no live suppressed comments.
-  PR NCATSTranslator/Babel#983 is the case that motivated this — both threads resolved, latest
-  review reporting "generated no new comments", and four suppressed findings sitting in the review
-  bodies, three of them real bugs in the file the PR exists to add.
 - As of this writing the bot's login is `copilot-pull-request-reviewer` in GraphQL and
   `copilot-pull-request-reviewer[bot]` in REST. Steps 2 and 2b match a case-insensitive `copilot`
   prefix so they survive either form and most renames.
