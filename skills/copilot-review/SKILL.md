@@ -149,12 +149,16 @@ the summary.
 comments live in the review body's `<details>` blocks, so read the bodies:
 
 ```bash
-for id in $(gh api "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
-              --jq '.[] | select(.user.login | ascii_downcase | startswith("copilot")) | .id'); do
-  echo "=== review $id ==="
-  gh api "/repos/$OWNER/$REPO/pulls/$PR/reviews/$id" --jq '.submitted_at, .body'
-done
+gh api --paginate "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
+  --jq '.[] | select((.user.login // "") | ascii_downcase | startswith("copilot"))
+        | "=== \(.submitted_at) ===\n\(.body)"'
 ```
+
+The list endpoint already carries each review's `body`, so there is no need to fetch reviews
+individually. `--paginate` matters: reviews come back **oldest first**, so without it a PR with more
+than a page of pushes silently drops its *newest* Copilot reviews — the ones that matter. The
+`// ""` guard matters too: one review from a deleted account makes a bare `.user.login` filter error
+out and print nothing, which reads exactly like "no suppressed comments".
 
 Copilot labels these blocks inconsistently — `Comments suppressed due to low confidence (N)` and
 `Suppressed comments (N)` are both current — so scan for `<summary>` lines containing *suppressed*
