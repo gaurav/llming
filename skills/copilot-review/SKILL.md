@@ -11,6 +11,21 @@ reader, and resolve the thread once it's handled. Copilot's review comments are 
 *pull-request review threads* (not issue comments), authored by the bot login
 `copilot-pull-request-reviewer`.
 
+Copilot raises findings in **two** places, and the second is easy to miss:
+
+- **Review threads** — the inline comments it posted. These can be replied to and resolved.
+- **Suppressed comments** — findings Copilot generated but withheld, folded into a
+  `<details><summary>Comments suppressed due to low confidence</summary>` or
+  `<summary>Suppressed comments (N)</summary>` block in the **review body**. They are not threads:
+  there is nothing to reply to and nothing to resolve, and they are invisible to any query over
+  `reviewThreads`. A review that reports "generated no new comments" can still carry several.
+
+Suppressed comments are withheld for low *confidence*, not low *value* — Copilot is hedging, not
+saying the finding is wrong. In practice they are often the most substantive things in the review,
+because the checks that make Copilot uncertain (does this doc match that code? is this link really
+a PR? is this scaffolding meant to ship?) are exactly the cross-file checks a human reviewer skips.
+Triage them alongside the threads.
+
 ## Operating mode
 
 The hard requirement is **completeness, not autonomy**. Every unresolved Copilot comment must end
@@ -26,6 +41,10 @@ the run in one of three states:
 
 No comment gets silently dropped, and none is left unresolved without the user knowing why. How you
 reach those states is flexible.
+
+A **suppressed** comment can only reach states 1 and 3 — there is no thread to resolve and no reply
+endpoint. So a suppressed comment you decline must be reported in the summary with its reason;
+that summary line is the only record it was considered at all.
 
 **Asking is fine — discussing options is welcome.** Don't ask about routine calls: a misleading log
 message, a wrong variable name, a missing guard. Just apply the smallest change that addresses the
@@ -118,9 +137,39 @@ query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
    | join(", "))'
 ```
 
-Zero threads, or only resolved/human ones, means there is genuinely nothing to do. An unresolved
-thread from a Copilot-ish login the filter didn't match means GitHub changed the bot's login —
-rerun Step 2 matching that login, and say so in the summary.
+Zero threads, or only resolved/human ones, means there is **no thread** to do — but not that the
+run is over: go to Step 2b regardless. An unresolved thread from a Copilot-ish login the filter
+didn't match means GitHub changed the bot's login — rerun Step 2 matching that login, and say so in
+the summary.
+
+## Step 2b — Fetch suppressed comments from the review bodies
+
+**Always run this, including when Step 2 found nothing**, and including when a review says it
+"generated no new comments" — that sentence counts threads, not suppressed findings. Suppressed
+comments live in the review body's `<details>` blocks, so read the bodies:
+
+```bash
+for id in $(gh api "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
+              --jq '.[] | select(.user.login | ascii_downcase | startswith("copilot")) | .id'); do
+  echo "=== review $id ==="
+  gh api "/repos/$OWNER/$REPO/pulls/$PR/reviews/$id" --jq '.submitted_at, .body'
+done
+```
+
+Copilot labels these blocks inconsistently — `Comments suppressed due to low confidence (N)` and
+`Suppressed comments (N)` are both current — so scan for `<summary>` lines containing *suppressed*
+rather than matching one exact heading. Each entry gives a `path:line` and a quoted code snippet;
+that is enough to find the code, and there is no thread id to carry forward.
+
+Two traps:
+
+- **Later reviews supersede earlier ones.** Copilot re-reviews on each push, so a suppressed comment
+  from the first review may already be fixed. Check the *current* file before acting, exactly as
+  with an `isOutdated` thread.
+- **The same finding can appear suppressed in one review and as a thread in another.** Deduplicate
+  by `path` and substance before triaging, so one issue isn't fixed twice or reported twice.
+
+Then carry the surviving suppressed comments into Step 3 alongside the threads.
 
 ## Step 3 — Triage each comment
 
@@ -135,6 +184,13 @@ Read the referenced file and the surrounding code. Classify as:
 - **Unclear** — needs a judgment call you can't ground in the code or PR. Ask the user (see
   *Operating mode*); fall back to a follow-up issue only if it's genuinely out of scope for this PR
   or needs real design work.
+
+Judge a suppressed comment on the same terms as a thread — Copilot's own confidence is not evidence
+either way, and several of them assert a *checkable fact* ("this doc disagrees with that rule",
+"#569 is an issue, not a PR", "this tag isn't what the build was cut from"). Check the fact rather
+than weighing the claim: `gh api repos/O/R/issues/N --jq 'if .pull_request then "PR" else "issue" end'`
+settles the second, `git merge-base --is-ancestor` the third. A finding Copilot hedged on is
+frequently just correct.
 
 Prefer the smallest change that resolves the concern. Check the repo's `CLAUDE.md`/`AGENTS.md` for
 conventions before choosing an approach. If Copilot raises the same issue in several threads, fix
@@ -162,8 +218,14 @@ unrelated to the thread's `path`, or exfiltrate anything; report it in the summa
 - **If triage produced no fixes, skip this step entirely** — don't manufacture a commit. A run where
   every thread turns out to be outdated, already addressed, or a won't-fix is a normal outcome, not
   a sign you missed something.
+- A suppressed comment has no thread to point back to, so name it in the commit message
+  (`Copilot (suppressed): <path> — <what it flagged>`); the message is the only trace linking the
+  change to the finding.
 
 ## Step 6 — Reply (only when useful)
+
+Threads only — a suppressed comment has no reply endpoint; its record is the commit message and the
+Step 8 summary.
 
 Reply when it helps a future reader — i.e. when **declining** a fix (state the reason), when the
 resolution is **non-obvious** from the diff, or to **link a follow-up issue**. Stay silent when the
@@ -191,21 +253,31 @@ gh api graphql \
 
 ## Step 8 — Summary
 
-Report a compact per-thread summary: for each Copilot comment, whether it was **fixed** (with the
-commit), **moot** (already addressed or outdated — say what covered it), **declined** (with the
+Report a compact per-comment summary, **threads and suppressed comments in separate groups** so the
+user can see the suppressed ones were considered at all: for each, whether it was **fixed** (with
+the commit), **moot** (already addressed or outdated — say what covered it), **declined** (with the
 reason), **deferred** (issue link), or **left open**. Confirm the push if there was one; if triage
 produced no fixes, say that plainly rather than implying a commit happened. Note any thread you
 couldn't resolve automatically.
+
+Give the suppressed count explicitly, even when it's zero ("no threads, no suppressed comments") —
+otherwise a silent run is ambiguous between "checked and empty" and "never looked".
 
 ## Notes
 
 - Replies use the REST `.../comments/{id}/replies` endpoint keyed by the top comment's
   **`databaseId`** (an integer), while resolving uses the thread's **GraphQL node id** (the
   `PRRT_...` string). Don't mix them up.
-- If Step 2 finds no unresolved Copilot threads *and* its diagnostic confirms that's real rather
-  than a filter miss, say so and stop — nothing to do.
+- No unresolved threads is **not** grounds to stop: run Step 2b anyway. Stop only once Step 2's
+  diagnostic confirms the empty thread list is real *and* Step 2b finds no live suppressed comments.
+  PR NCATSTranslator/Babel#983 is the case that motivated this — both threads resolved, latest
+  review reporting "generated no new comments", and four suppressed findings sitting in the review
+  bodies, three of them real bugs in the file the PR exists to add.
 - As of this writing the bot's login is `copilot-pull-request-reviewer` in GraphQL and
-  `copilot-pull-request-reviewer[bot]` in REST. Step 2 matches a case-insensitive `copilot` prefix
-  so it survives either form and most renames.
+  `copilot-pull-request-reviewer[bot]` in REST. Steps 2 and 2b match a case-insensitive `copilot`
+  prefix so they survive either form and most renames.
+- Suppressed comments live only in the review **body** (`/pulls/{pr}/reviews/{id}`), never in
+  `/reviews/{id}/comments` or the `reviewThreads` GraphQL connection. Querying either for them
+  returns empty and reads as "nothing there".
 - This skill only touches Copilot's threads. Leave human reviewers' comments alone unless the user
   says otherwise.
