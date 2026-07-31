@@ -174,9 +174,8 @@ cython_debug/
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  The template calls the
-#  following "nuclear" and doesn't recommend it, but nothing in this repo is a JetBrains project
-#  worth sharing settings for, so ignoring the whole folder is what we want.
+#  and can be added to the global gitignore or merged into this file.  The template calls ignoring
+#  the whole folder "nuclear"; nothing here is a JetBrains project with settings worth sharing.
 .idea/
 
 # Abstra
