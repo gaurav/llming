@@ -6,8 +6,9 @@ version = "0"
 requires-python = ">=3.9"
 
 [dependency-groups]
-# Test-only. `click` is here because the tests import the scripts, which import it.
-dev = ["pytest", "click"]
+# Test-only. Everything past pytest is here because the tests import the scripts,
+# which import these.
+dev = ["pytest", "click", "icalendar", "recurring-ical-events"]
 
 [tool.uv]
 package = false
