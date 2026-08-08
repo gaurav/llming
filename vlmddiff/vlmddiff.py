@@ -312,7 +312,8 @@ def render_report(
 
 def write_csv(path: Path, changes: List[Change], artifact_properties: Sequence[str]) -> None:
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
+        # LF, not the csv default CRLF, so git doesn't rewrite the committed report.
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(
             ["variable", "section", "property", "change", "base_value", "revised_value", "category"]
         )

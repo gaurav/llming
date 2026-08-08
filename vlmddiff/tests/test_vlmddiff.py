@@ -1,10 +1,18 @@
 """Tests for vlmddiff.
 
-Run with:  uv run --with pytest pytest vlmddiff/tests
+Run with:  uv run --with pytest --with click pytest tests
+
+The sample pair in fixtures/ is synthetic — the real dictionaries this tool was written for are
+study data and are deliberately not in this repo. fixtures/expected.md and fixtures/expected.csv
+double as the worked example in CLAUDE.md; regenerate them with:
+
+    uv run vlmddiff.py -b tests/fixtures/base.json -r tests/fixtures/revised.json \
+        -o tests/fixtures/expected
 """
 
 import csv
 import json
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -23,34 +31,9 @@ from vlmddiff import (
     write_csv,
 )
 
-BASE = {
-    "schemaVersion": "0.3.2",
-    "title": "Generated dictionary",
-    "fields": [
-        {"name": "AWAKE", "type": "boolean", "section": "Actigraphy",
-         "enumLabels": {"0": "False", "1": "True"}, "constraints": {"enum": ["0", "1"]}},
-        {"name": "WEAR", "type": "boolean", "section": "Actigraphy",
-         "enumLabels": {"0": "False", "1": "True"}, "constraints": {"enum": ["0", "1"]}},
-        {"name": "site", "type": "string", "section": "Demographics",
-         "description": "demographics: Site(blinded)", "format": "any"},
-        {"name": "DROPPED", "type": "string", "section": "Demographics"},
-    ],
-}
-
-REVISED = {
-    "schemaVersion": "0.3.2",
-    "title": "A Study of Something",
-    "description": "Converted from redcap format",
-    "fields": [
-        {"name": "AWAKE", "type": "boolean", "section": "Actigraphy",
-         "constraints": {"enum": ["True", "False"]}},
-        {"name": "WEAR", "type": "boolean", "section": "Actigraphy",
-         "constraints": {"enum": ["True", "False"]}},
-        {"name": "site", "type": "string", "section": "Demographics",
-         "description": "Site(blinded)", "custom": {"Field Note": "Site(blinded)"}},
-        {"name": "ADDED", "type": "string", "section": "Demographics"},
-    ],
-}
+FIXTURES = Path(__file__).parent / "fixtures"
+BASE = json.loads((FIXTURES / "base.json").read_text(encoding="utf-8"))
+REVISED = json.loads((FIXTURES / "revised.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture
@@ -62,7 +45,9 @@ def diff():
 
 
 def test_index_fields_keys_by_id():
-    assert sorted(index_fields(BASE, "name", "base")) == ["AWAKE", "DROPPED", "WEAR", "site"]
+    assert sorted(index_fields(BASE, "name", "base")) == [
+        "AWAKE", "PAINSCORE", "RETIRED", "VISITDAT", "WEAR", "site",
+    ]
 
 
 def test_index_fields_rejects_duplicate_id():
@@ -87,13 +72,19 @@ def test_index_fields_rejects_document_without_fields():
 
 def test_added_and_removed_variables(diff):
     _, added, removed, _ = diff
-    assert added == ["ADDED"]
-    assert removed == ["DROPPED"]
+    assert added == ["CONSENTDAT"]
+    assert removed == ["RETIRED"]
 
 
 def test_unchanged_properties_produce_no_change(diff):
     changes, _, _, _ = diff
     assert not [c for c in changes if c.property in ("type", "section", "name")]
+
+
+def test_unchanged_nested_property_produces_no_change(diff):
+    """PAINSCORE's constraints object is deep-equal across both files."""
+    changes, _, _, _ = diff
+    assert not [c for c in changes if c.variable == "PAINSCORE" and c.property == "constraints"]
 
 
 def test_change_kinds(diff):
@@ -122,7 +113,6 @@ def test_removed_property_has_missing_sentinel_not_none(diff):
 
 
 def test_explicit_null_differs_from_absent():
-    """A property set to null is a change against one that is absent, not a match."""
     base = {"fields": [{"name": "A", "format": None}]}
     revised = {"fields": [{"name": "A"}]}
     changes, _, _, _ = diff_documents(base, revised, "name")
@@ -131,9 +121,9 @@ def test_explicit_null_differs_from_absent():
     ]
 
 
-def test_removed_variables_contribute_no_field_changes(diff):
+def test_added_and_removed_variables_contribute_no_field_changes(diff):
     changes, _, _, _ = diff
-    assert not [c for c in changes if c.variable in ("DROPPED", "ADDED")]
+    assert not [c for c in changes if c.variable in ("RETIRED", "CONSENTDAT")]
 
 
 def test_document_level_changes(diff):
@@ -142,14 +132,13 @@ def test_document_level_changes(diff):
     assert all(c.variable == "(document)" and c.section == "" for c in top_level)
 
 
-def test_document_level_ignores_fields_list():
-    _, _, _, top_level = diff_documents(BASE, REVISED, "name")
+def test_document_level_ignores_fields_list(diff):
+    _, _, _, top_level = diff
     assert "fields" not in {c.property for c in top_level}
 
 
 def test_identical_documents_produce_no_changes():
-    changes, added, removed, top_level = diff_documents(BASE, BASE, "name")
-    assert (changes, added, removed, top_level) == ([], [], [], [])
+    assert diff_documents(BASE, BASE, "name") == ([], [], [], [])
 
 
 def test_custom_id_key():
@@ -237,45 +226,10 @@ def test_code_span_marks_absent_values():
     assert code_span("—") == "*(absent)*"
 
 
-def report():
-    changes, added, removed, top_level = diff_documents(BASE, REVISED, "name")
-    return render_report(
-        "base.json", "revised.json",
-        index_fields(BASE, "name", "base"), index_fields(REVISED, "name", "revised"),
-        changes, added, removed, top_level, ("title", "custom", "format"),
-    )
-
-
-def test_report_headline_counts():
-    assert "3 variables in common, 1 added, 1 removed" in report()
-
-
-def test_report_collapses_repeated_pattern():
-    """The 2-variable constraints rewrite appears once, not once per variable."""
-    text = report()
-    assert text.count('{"enum": ["True", "False"]}') == 1
-    assert "**2 variables**" in text
-
-
-def test_report_uses_a_table_when_every_change_is_a_one_off():
-    text = report()
-    assert "| variable | from | to |" in text
-    assert '| `site` | `"demographics: Site(blinded)"` | `"Site(blinded)"` |' in text
-
-
-def test_report_separates_artifacts_into_appendix():
-    text = report()
-    body, appendix = text.split("## Appendix: conversion-tool conventions")
-    assert "`description`" in body and "`constraints`" in body
-    assert "`format`" in appendix and "`custom`" in appendix
-    assert "`format`" not in body and "`custom`" not in body
-
-
 def test_summarises_a_property_with_too_many_distinct_patterns():
-    """Enumerating 1233 unique one-off values is not skimmable; the CSV keeps them all."""
+    """Enumerating a thousand unique one-off values is not skimmable; the CSV keeps them all."""
     entries = [(f"before {i}", None, [f"VAR{i}"]) for i in range(50)]
-    lines = render_property_section("title", entries, max_patterns=20)
-    text = "\n".join(lines)
+    text = "\n".join(render_property_section("title", entries, max_patterns=20))
     assert "50 distinct changes" in text
     assert "Too many distinct values to list; see the CSV" in text
     assert "VAR49" not in text
@@ -298,16 +252,55 @@ def test_substantive_sections_are_never_summarised():
     assert "VAR49" in text
 
 
+def report(artifact_properties=("title", "custom", "format")):
+    changes, added, removed, top_level = diff_documents(BASE, REVISED, "name")
+    return render_report(
+        "base.json", "revised.json",
+        index_fields(BASE, "name", "base"), index_fields(REVISED, "name", "revised"),
+        changes, added, removed, top_level, artifact_properties,
+    )
+
+
+def test_report_headline_counts():
+    assert "5 variables in common, 1 added, 1 removed" in report()
+
+
+def test_report_collapses_repeated_pattern():
+    """The 2-variable constraints rewrite appears once, not once per variable."""
+    text = report()
+    assert text.count('{"enum": ["True", "False"]}') == 1
+    assert "**2 variables**" in text
+
+
+def test_report_uses_a_table_when_every_change_is_a_one_off():
+    text = report()
+    assert "| variable | from | to |" in text
+    assert '| `site` | `"demographics: Site(blinded)"` | `"Site(blinded)"` |' in text
+
+
+def test_report_separates_artifacts_into_appendix():
+    body, appendix = report().split("## Appendix: conversion-tool conventions")
+    assert "`description`" in body and "`constraints`" in body
+    assert "`format`" in appendix and "`custom`" in appendix
+    assert "`format`" not in body and "`custom`" not in body
+
+
+def test_report_has_no_appendix_when_nothing_is_an_artifact():
+    text = report(artifact_properties=())
+    assert "## Appendix" not in text
+    assert "`custom`" in text
+
+
 def test_report_lists_added_and_removed_variables_with_json():
     text = report()
-    assert "## Variables added (1)" in text and "<code>ADDED</code>" in text
-    assert "## Variables removed (1)" in text and "<code>DROPPED</code>" in text
-    assert '"name": "DROPPED"' in text
+    assert "## Variables added (1)" in text and "<code>CONSENTDAT</code>" in text
+    assert "## Variables removed (1)" in text and "<code>RETIRED</code>" in text
+    assert '"name": "RETIRED"' in text
 
 
 def test_report_shows_document_level_changes():
     text = report()
-    assert '| `title` | `"Generated dictionary"` | `"A Study of Something"` |' in text
+    assert '`"An Example Study of Something"`' in text
     assert "*(absent)*" in text  # description is added at the document level
 
 
@@ -315,7 +308,7 @@ def test_report_of_identical_documents():
     changes, added, removed, top_level = diff_documents(BASE, BASE, "name")
     index = index_fields(BASE, "name", "base")
     text = render_report("a.json", "a.json", index, index, changes, added, removed, top_level, ())
-    assert "4 variables in common, 0 added, 0 removed" in text
+    assert "6 variables in common, 0 added, 0 removed" in text
     assert "*(identical)*" in text
     assert "## Variables added (0)" in text
 
@@ -352,49 +345,67 @@ def test_csv_leaves_absent_values_empty(tmp_path):
 
 def test_csv_values_are_not_truncated(tmp_path):
     long = "x" * 5000
-    changes = [Change("A", "", "description", "changed", long, "short")]
     path = tmp_path / "diff.csv"
-    write_csv(path, changes, ())
+    write_csv(path, [Change("A", "", "description", "changed", long, "short")], ())
     with path.open(encoding="utf-8") as handle:
         assert long in list(csv.DictReader(handle))[0]["base_value"]
+
+
+def test_csv_uses_lf_endings(tmp_path):
+    """The committed example is in git; CRLF would make git rewrite it on every checkout."""
+    path = tmp_path / "diff.csv"
+    write_csv(path, [Change("A", "", "description", "changed", "old", "new")], ())
+    assert b"\r\n" not in path.read_bytes()
 
 
 # ---- cli ----
 
 
-def write_inputs(tmp_path):
-    (tmp_path / "base.json").write_text(json.dumps(BASE), encoding="utf-8")
-    (tmp_path / "revised.json").write_text(json.dumps(REVISED), encoding="utf-8")
-    return tmp_path / "base.json", tmp_path / "revised.json"
-
-
 def test_cli_writes_both_outputs(tmp_path):
-    base, revised = write_inputs(tmp_path)
     result = CliRunner().invoke(
-        main, ["-b", str(base), "-r", str(revised), "-o", str(tmp_path / "out" / "diff")]
+        main,
+        ["-b", str(FIXTURES / "base.json"), "-r", str(FIXTURES / "revised.json"),
+         "-o", str(tmp_path / "out" / "diff")],
     )
     assert result.exit_code == 0, result.output
     assert (tmp_path / "out" / "diff.md").exists()
     assert (tmp_path / "out" / "diff.csv").exists()
 
 
-def test_cli_appends_to_the_prefix_rather_than_replacing_its_suffix(tmp_path):
-    base, revised = write_inputs(tmp_path)
+def test_cli_output_matches_the_committed_example(tmp_path):
+    """fixtures/expected.* is the worked example in CLAUDE.md; keep it from going stale."""
+    out = tmp_path / "expected"
     result = CliRunner().invoke(
-        main, ["-b", str(base), "-r", str(revised), "-o", str(tmp_path / "eppic.v2")]
+        main,
+        ["-b", str(FIXTURES / "base.json"), "-r", str(FIXTURES / "revised.json"), "-o", str(out)],
     )
     assert result.exit_code == 0, result.output
-    assert (tmp_path / "eppic.v2.md").exists()
-    assert not (tmp_path / "eppic.md").exists()
+    for suffix in (".md", ".csv"):
+        expected = (FIXTURES / f"expected{suffix}").read_text(encoding="utf-8")
+        # The report names its inputs, and the test runs them from a different directory.
+        assert Path(f"{out}{suffix}").read_text(encoding="utf-8").replace(
+            str(FIXTURES) + "/", "tests/fixtures/"
+        ) == expected
+
+
+def test_cli_appends_to_the_prefix_rather_than_replacing_its_suffix(tmp_path):
+    result = CliRunner().invoke(
+        main,
+        ["-b", str(FIXTURES / "base.json"), "-r", str(FIXTURES / "revised.json"),
+         "-o", str(tmp_path / "example.v2")],
+    )
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "example.v2.md").exists()
+    assert not (tmp_path / "example.md").exists()
 
 
 def test_cli_refuses_to_overwrite_an_input(tmp_path):
-    base, revised = write_inputs(tmp_path)
     # A prior report handed back as an input: -o .../report then writes report.md over it.
     report_input = tmp_path / "report.md"
     report_input.write_text(json.dumps(REVISED), encoding="utf-8")
     result = CliRunner().invoke(
-        main, ["-b", str(base), "-r", str(report_input), "-o", str(tmp_path / "report")]
+        main,
+        ["-b", str(FIXTURES / "base.json"), "-r", str(report_input), "-o", str(tmp_path / "report")],
     )
     assert result.exit_code != 0
     assert "would overwrite an input file" in result.output
@@ -402,19 +413,20 @@ def test_cli_refuses_to_overwrite_an_input(tmp_path):
 
 
 def test_cli_exits_nonzero_on_duplicate_ids(tmp_path):
-    base, revised = write_inputs(tmp_path)
-    base.write_text(json.dumps({"fields": [{"name": "A"}, {"name": "A"}]}), encoding="utf-8")
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"fields": [{"name": "A"}, {"name": "A"}]}), encoding="utf-8")
     result = CliRunner().invoke(
-        main, ["-b", str(base), "-r", str(revised), "-o", str(tmp_path / "diff")]
+        main, ["-b", str(bad), "-r", str(FIXTURES / "revised.json"), "-o", str(tmp_path / "diff")]
     )
     assert result.exit_code == 1
 
 
 def test_cli_artifact_property_is_configurable(tmp_path):
-    base, revised = write_inputs(tmp_path)
     out = tmp_path / "diff"
     result = CliRunner().invoke(
-        main, ["-b", str(base), "-r", str(revised), "-o", str(out), "--artifact-property", "description"]
+        main,
+        ["-b", str(FIXTURES / "base.json"), "-r", str(FIXTURES / "revised.json"),
+         "-o", str(out), "--artifact-property", "description"],
     )
     assert result.exit_code == 0, result.output
     body, appendix = out.with_suffix(".md").read_text(encoding="utf-8").split("## Appendix")

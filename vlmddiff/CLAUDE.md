@@ -20,7 +20,12 @@ Two VLMD JSON files, each a document with a `fields` list of variable objects. A
 works; nothing is hardcoded to a particular schema version, and `--id-key` allows a different
 matching property.
 
-The pair currently in `data/` describes the same study by two routes:
+**None of the real inputs or outputs are committed.** They are study data and this repo is public;
+`data/` is gitignored repo-wide, and unlike the other script directories here, nothing in it is
+force-added — not even `last-run.log`, whose file paths carry the study ID. The worked example in
+`tests/fixtures/` is synthetic and stands in for them.
+
+The pair in `data/` describes the same study by two routes:
 
 - `eppic_net_EN20_01.vlmd-generated-by-script.json` (**base**) — a deterministic script produced a
   REDCap CSV, and the VLMD tool converted it.
@@ -58,6 +63,9 @@ rather than listed. Without that, `title` and `custom` alone contribute ~2400 un
 the Markdown past 500 KB, which is where GitHub stops rendering it. Substantive properties are never
 summarised.
 
+`tests/fixtures/expected.md` and `expected.csv` are a committed worked example, generated from the
+synthetic pair beside them. They exercise every rendering path except the >20-pattern summary.
+
 ### Usage
 
 ```bash
@@ -72,10 +80,16 @@ uv run vlmddiff.py --artifact-property ''
 uv run vlmddiff.py --help
 ```
 
-Tests (the only directory here with any; the rest of the repo has none):
+Tests (the only directory here with any so far). pytest is a dev dependency in the repo-root
+`pyproject.toml`, so no `--with` flags are needed:
 
 ```bash
-uv run --with pytest --with click pytest tests
+uv run pytest              # from the repo root, runs every test in the repo
+uv run pytest vlmddiff     # just this tool's
+
+# Regenerate the committed worked example after changing the report format:
+cd vlmddiff && uv run vlmddiff.py \
+    -b tests/fixtures/base.json -r tests/fixtures/revised.json -o tests/fixtures/expected
 ```
 
 ## Known Issues & Limitations
@@ -103,9 +117,14 @@ uv run --with pytest --with click pytest tests
 - `vlmddiff.py` — the script.
 - `tests/test_vlmddiff.py`, `tests/conftest.py` — tests. `conftest.py` only puts the parent
   directory on `sys.path`, since `vlmddiff.py` is a plain script rather than an installed package.
+- `tests/fixtures/base.json`, `revised.json` — the synthetic sample pair, used by every test.
+- `tests/fixtures/expected.md`, `expected.csv` — the committed worked example, checked by
+  `test_cli_output_matches_the_committed_example` so it can't go stale.
+
+Not in git — study data, see above:
+
 - `data/eppic_net_EN20_01.vlmd-generated-by-script.json` — base input.
 - `data/HDP01050_eppic_net_EN20_01.vlmd-generated-by-llm-tool.json` — revised input.
 - `data/eppic_net_EN20_01.redcap.csv` — the shared REDCap source, reference only.
-- `data/vlmd-diff.md`, `data/vlmd-diff.csv` — outputs. Force-added to git; `data/` is gitignored
-  repo-wide.
+- `data/vlmd-diff.md`, `data/vlmd-diff.csv` — the real outputs, for review elsewhere.
 - `data/last-run.log` — output of the run that produced them.
