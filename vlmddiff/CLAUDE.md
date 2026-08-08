@@ -20,20 +20,21 @@ Two VLMD JSON files, each a document with a `fields` list of variable objects. A
 works; nothing is hardcoded to a particular schema version, and `--id-key` allows a different
 matching property.
 
-**None of the real inputs or outputs are committed.** They are study data and this repo is public;
-`data/` is gitignored repo-wide, and unlike the other script directories here, nothing in it is
-force-added — not even `last-run.log`, whose file paths carry the study ID. The worked example in
-`tests/fixtures/` is synthetic and stands in for them.
+**None of the real inputs or outputs are committed, and `--base`/`--revised` have no defaults.**
+They are study data and this repo is public; `data/` is gitignored repo-wide, and unlike the other
+script directories here nothing in it is force-added — not even `last-run.log`, whose file paths
+carry the study ID. That is also why the script has no default input paths, breaking the convention
+elsewhere in this repo that a script runs with no arguments: the defaults would have named the
+study. The worked example in `tests/fixtures/` is synthetic and stands in for the real pair.
 
-The pair in `data/` describes the same study by two routes:
+The pair this was written for lives in `data/` and describes one study by two routes:
 
-- `eppic_net_EN20_01.vlmd-generated-by-script.json` (**base**) — a deterministic script produced a
-  REDCap CSV, and the VLMD tool converted it.
-- `HDP01050_eppic_net_EN20_01.vlmd-generated-by-llm-tool.json` (**revised**) — a coworker took that
-  same REDCap CSV, ran an LLM tool over it to fix problems, and emitted VLMD directly.
+- **base** — a deterministic script produced a REDCap CSV, and the VLMD tool converted it.
+- **revised** — a coworker took that same REDCap CSV, ran an LLM tool over it to fix problems, and
+  emitted VLMD directly.
 
-`eppic_net_EN20_01.redcap.csv` is the shared source, kept for reference. The script does not read it
-— see Limitations.
+The shared REDCap CSV is in `data/` too, for reference. The script does not read it — see
+Limitations.
 
 ### Output
 
@@ -69,13 +70,12 @@ synthetic pair beside them. They exercise every rendering path except the >20-pa
 ### Usage
 
 ```bash
-# Defaults point at the two files in data/, so this needs no arguments.
-uv run vlmddiff.py 2>&1 | tee data/last-run.log
+uv run vlmddiff.py --base data/a.json --revised data/b.json 2>&1 | tee data/last-run.log
 
-uv run vlmddiff.py --base data/a.json --revised data/b.json --output-prefix data/a-vs-b
+uv run vlmddiff.py -b data/a.json -r data/b.json --output-prefix data/a-vs-b
 
 # Treat nothing as a conversion artifact — everything lands in the main body.
-uv run vlmddiff.py --artifact-property ''
+uv run vlmddiff.py -b data/a.json -r data/b.json --artifact-property ''
 
 uv run vlmddiff.py --help
 ```
@@ -123,8 +123,8 @@ cd vlmddiff && uv run vlmddiff.py \
 
 Not in git — study data, see above:
 
-- `data/eppic_net_EN20_01.vlmd-generated-by-script.json` — base input.
-- `data/HDP01050_eppic_net_EN20_01.vlmd-generated-by-llm-tool.json` — revised input.
-- `data/eppic_net_EN20_01.redcap.csv` — the shared REDCap source, reference only.
+- `data/*.vlmd-generated-by-script.json` — base input.
+- `data/*.vlmd-generated-by-llm-tool.json` — revised input.
+- `data/*.redcap.csv` — the shared REDCap source, reference only.
 - `data/vlmd-diff.md`, `data/vlmd-diff.csv` — the real outputs, for review elsewhere.
 - `data/last-run.log` — output of the run that produced them.

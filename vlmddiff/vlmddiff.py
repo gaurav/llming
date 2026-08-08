@@ -29,8 +29,6 @@ from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 import click
 
-DEFAULT_BASE = "data/eppic_net_EN20_01.vlmd-generated-by-script.json"
-DEFAULT_REVISED = "data/HDP01050_eppic_net_EN20_01.vlmd-generated-by-llm-tool.json"
 DEFAULT_PREFIX = "data/vlmd-diff"
 
 # Properties that differ because the two conversion tools have different conventions, not because
@@ -336,12 +334,14 @@ def write_csv(path: Path, changes: List[Change], artifact_properties: Sequence[s
 
 @click.command()
 @click.option(
-    "-b", "--base", "base_path", type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=DEFAULT_BASE, show_default=True, help="The VLMD file to diff from.",
+    "-b", "--base", "base_path", required=True,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="The VLMD file to diff from.",
 )
 @click.option(
-    "-r", "--revised", "revised_path", type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=DEFAULT_REVISED, show_default=True, help="The VLMD file to diff to.",
+    "-r", "--revised", "revised_path", required=True,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="The VLMD file to diff to.",
 )
 @click.option(
     "-o", "--output-prefix", type=click.Path(dir_okay=False, path_type=Path),
