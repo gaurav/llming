@@ -1,0 +1,13 @@
+# The scripts here are standalone and declare their own dependencies in PEP 723 headers; this file
+# exists only to give the repo a shared test runner, so `uv run pytest` works from the root.
+[project]
+name = "llming"
+version = "0"
+requires-python = ">=3.9"
+
+[dependency-groups]
+# Test-only. `click` is here because the tests import the scripts, which import it.
+dev = ["pytest", "click"]
+
+[tool.uv]
+package = false

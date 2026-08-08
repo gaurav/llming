@@ -15,6 +15,10 @@ Use tqdm to provide progress bars and completion estimates on long-running loops
 Input and output files should be stored in the `data/` subdirectory.
 When running scripts, use tee to write the output into `data/last-run.log`.
 
+Tests, where a script has them, go in its `tests/` subdirectory. pytest is a dev dependency in the
+root `pyproject.toml`, so `uv run pytest` from the repo root runs everything. Keep test fixtures out
+of `data/` — that path is gitignored, and anything a test needs has to be committed.
+
 ## Skills
 
 A skill is a directory under `skills/` containing a `SKILL.md` with YAML frontmatter (`name` and a
