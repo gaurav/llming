@@ -31,6 +31,12 @@ A skill is a directory under `skills/` containing a `SKILL.md` with YAML frontma
 `description` saying when to use it). The conventions above are for one-off scripts and do **not**
 apply: a skill has no CLI, no `data/` directory, and no run log.
 
+Skills do **not** get a README each — the frontmatter `description` already covers what the skill
+does and when to use it, so a per-skill README would only restate it. Instead there is one shared
+`skills/README.md` recording why each skill exists, what it's for, and where it might go next: the
+things a `SKILL.md` has no room for because it is written for an agent, not for me. Add a section
+there when adding a skill.
+
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
 Python helper in `skills/copilot-review/`, and a script that wraps a flag is a script that can
