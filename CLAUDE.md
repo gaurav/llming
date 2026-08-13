@@ -1,7 +1,10 @@
 This repository holds two unrelated kinds of thing, and the conventions below differ for each:
 
 - **One-off scripts** — small tools solving a single problem, each in its own top-level directory
-  (`lookup-mesh-tree-numbers/`, `process-babel-slurm-rules/`). Not worth a repo apiece.
+  (`lookup-mesh-tree-numbers/`, `process-babel-slurm-rules/`). Not worth a repo apiece. Most live
+  on their own unmerged branch, so a top-level directory holding nothing but a gitignored `data/`
+  is a checked-out leftover, not an abandoned tool — check `git branch -a` before concluding a tool
+  is missing.
 - **Coding agent skills** — everything under `skills/`, kept here so it can be shared across
   machines. These are prose instructions for an agent, not programs.
 
