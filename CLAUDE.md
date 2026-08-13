@@ -15,6 +15,12 @@ Use tqdm to provide progress bars and completion estimates on long-running loops
 Input and output files should be stored in the `data/` subdirectory.
 When running scripts, use tee to write the output into `data/last-run.log`.
 
+Every script directory gets a `README.md` — short, a page at most. It should cover: what the tool
+is for, how to run it (a copy-pasteable command line), any known issues or limitations to be careful
+about, and possible next steps. Write it for someone returning to the tool after six months away.
+Update it whenever the tool's behaviour or CLI changes. This is the human-facing doc; the
+directory's `CLAUDE.md` holds whatever an agent needs beyond it, and shouldn't repeat it.
+
 Tests, where a script has them, go in its `tests/` subdirectory. pytest is a dev dependency in the
 root `pyproject.toml`, so `uv run pytest` from the repo root runs everything. Keep test fixtures out
 of `data/` — that path is gitignored, and anything a test needs has to be committed.
