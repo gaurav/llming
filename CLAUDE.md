@@ -8,9 +8,21 @@ This repository holds two unrelated kinds of thing, and the conventions below di
 - **Coding agent skills** — everything under `skills/`, kept here so it can be shared across
   machines. These are prose instructions for an agent, not programs.
 
+## README.md and CLAUDE.md
+
+Both kinds of thing here are documented by a pair of files, and the split between them is the same
+in each case.
+
+`README.md` is the primary documentation, written for a human. It is allowed to get quite long, as
+long as what someone needs first is at the top — what this is for, how to run it, what to be
+careful about. `CLAUDE.md` takes the extraneous specifics that would bury that: API response
+quirks, the shape of some fallback logic, and above all the gotchas that will save time on the next
+visit. The test is roughly *when would I want to know this?* — before deciding to use the tool at
+all, or only once already elbow-deep in the code. Neither file should restate the other.
+
 ## One-off scripts
 
-When creating a Python script, create or update the corresponding CLAUDE.md file explaining the script.
+When creating a Python script, create or update both files described above.
 All Python scripts should be runnable with `uv run`.
 Use click to provide a simple CLI.
 Use logging to provide progress information.
@@ -18,11 +30,11 @@ Use tqdm to provide progress bars and completion estimates on long-running loops
 Input and output files should be stored in the `data/` subdirectory.
 When running scripts, use tee to write the output into `data/last-run.log`.
 
-Every script directory gets a `README.md` — short, a page at most. It should cover: what the tool
-is for, how to run it (a copy-pasteable command line), any known issues or limitations to be careful
-about, and possible next steps. Write it for someone returning to the tool after six months away.
-Update it whenever the tool's behaviour or CLI changes. This is the human-facing doc; the
-directory's `CLAUDE.md` holds whatever an agent needs beyond it, and shouldn't repeat it.
+Every script directory gets a `README.md` covering four things, in this order: what the tool is for,
+how to run it (a copy-pasteable command line), any known issues or limitations to be careful about,
+and possible next steps. Write it for someone returning to the tool after six months away — those
+four should be readable in a couple of minutes, whatever else the file goes on to say.
+Update it whenever the tool's behaviour or CLI changes.
 
 Tests, where a script has them, go in its `tests/` subdirectory. pytest is a dev dependency in the
 root `pyproject.toml`, so `uv run pytest` from the repo root runs everything. Keep test fixtures out
