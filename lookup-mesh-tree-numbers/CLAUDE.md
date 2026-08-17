@@ -58,14 +58,16 @@ uv run enrich_mesh_types.py --log-level ERROR
 
 ## Current Results
 
-On the current dataset (773 MeSH identifiers):
-- **87% (672)** successfully enriched with tree numbers
-- **13% (101)** have no tree numbers even after checking preferredMappedTo
-- Most successful enrichments use preferredMappedTo (supplementary concepts mapping to descriptors)
+On the current dataset (773 MeSH identifiers), per `data/last-run.log`:
+- **675** enriched with tree numbers
+- **96** resolved through `preferredMappedTo`/`mappedTo` to a descriptor that itself has no tree
+  numbers — these get a `MESH_LABEL` but empty tree columns (`found_mapped_label_only`)
+- **2** failed outright (no concept record, no mapping)
+- 496 rows in total went through a mapping, so the mapping fallback is doing most of the work
 
 ## Known Issues & Limitations
 
-1. **Supplementary Concepts**: Many C-numbers don't have tree numbers and no preferredMappedTo mapping, leaving them unenriched
+1. **Supplementary Concepts**: Many C-numbers have no tree numbers of their own. The mapping fallback finds a descriptor for nearly all of them, but ~96 of those descriptors have no tree numbers either, so the rows end up with a label and empty tree columns rather than an error
 2. **API Response Formats**: MeSH API returns data in multiple JSON-LD formats that require careful parsing
 3. **Performance**: SPARQL queries for tree top labels add significant overhead (~10s of API calls per row in worst case)
 4. **Tree Number URIs**: Tree numbers can be returned as full URIs (`http://id.nlm.nih.gov/mesh/D04.345.566`) or bare codes (`D04.345.566`) requiring normalization
