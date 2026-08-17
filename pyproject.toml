@@ -6,8 +6,8 @@ version = "0"
 requires-python = ">=3.9"
 
 [dependency-groups]
-# Test-only. `click` is here because the tests import the scripts, which import it.
-dev = ["pytest", "click"]
+# Test-only. Everything after pytest is here because the tests import the scripts, which import it.
+dev = ["pytest", "click", "requests", "tqdm"]
 
 [tool.uv]
 package = false
