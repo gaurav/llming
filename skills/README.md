@@ -12,6 +12,8 @@ isn't recoverable from the skill itself.
   re-derive them on every PR.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
+- **update-pr** — keeps the PR honest about itself, since its title and description outlive the
+  session that produced them.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped.
 
 ## copilot-review
@@ -45,6 +47,27 @@ Where it goes if it earns it:
 2. A brake on LLM overdocumentation. The same read-everything pass is well placed to notice where
    documentation has become unclear or duplicative, and to suggest compressing, reorganising or
    trimming it.
+
+## update-pr
+
+A PR title becomes a line in my release notes, and a PR description is the only place the *why*
+of a change survives once the session that produced it is gone. Both drift: the title is written
+when the branch is one commit old and the description when I still remember everything, and neither
+gets revisited as the work turns into something else.
+
+So this skill exists to be run repeatedly, not once at the end — every time a round of work lands.
+It rewrites both against the actual diff rather than against the agent's memory of the session,
+which is the specific failure it's guarding against: an agent asked to summarise a PR will happily
+describe the three approaches it tried, when only the last one shipped.
+
+The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
+directions — items ticked off that got reverted later, items never added because they surfaced
+after the description was written — and the skill forces a decision on each one: do it here, drop
+it, or file it.
+
+Where it goes next: the boundary with `wrap` is fuzzy. Both commit and push, both think about
+follow-up issues, and I'll probably end up running them back to back. If that turns out to be the
+normal case, one should call the other rather than both re-deriving the same git survey.
 
 ## wrap
 
