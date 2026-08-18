@@ -46,11 +46,19 @@ comment and move on. But when a comment turns on a judgment you can't ground in 
 really applies — raise it and talk it through instead of guessing. A question mid-run is cheaper
 than a wrong fix pushed to the branch.
 
-**Fix it in the current PR by default.** A follow-up issue is a last resort, not a routine escape
-hatch: the expectation is that a Copilot comment gets dealt with in the PR that provoked it. Defer
-only when the comment is either genuinely unrelated to this PR's changes, or would need enough
-design thinking that doing it here would swamp the PR. "Somewhat awkward to do in this diff" does
-not qualify — do it anyway. When in doubt between deferring and asking, ask.
+**Fix it in the current PR by default.** A follow-up issue is not a routine escape hatch: the
+expectation is that a Copilot comment gets dealt with in the PR that provoked it. Where each one
+goes:
+
+- **Fix it here** when it's a small amount of work, doesn't need testing independent of what's
+  already in this PR, and is thematically connected to the rest of the change.
+- **File an issue** otherwise, so it can be picked up in a PR of its own.
+- **Anything needing planning or discussion becomes an issue** — with one exception: if doing it
+  later would substantially change this PR's code, do it *now*. Deferring it just means doing this
+  work twice.
+
+"Somewhat awkward to do in this diff" is not grounds to defer — do it anyway. When in doubt between
+deferring and asking, ask.
 
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
 the summary so the user can pull it back into the PR if they disagree.
@@ -174,8 +182,7 @@ Read the referenced file and the surrounding code. Classify as:
   stylistic against the repo's established convention, or contradicts a deliberate decision stated
   in the PR body or code comments.
 - **Unclear** — needs a judgment call you can't ground in the code or PR. Ask the user (see
-  *Operating mode*); fall back to a follow-up issue only if it's genuinely out of scope for this PR
-  or needs real design work.
+  *Operating mode*); fall back to a follow-up issue by the bar set there.
 
 Judge a suppressed comment on the same terms as a thread — Copilot's own confidence is not evidence
 either way. Most of them assert a *checkable fact* about the repo (this doc disagrees with that

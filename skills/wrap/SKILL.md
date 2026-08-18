@@ -65,9 +65,11 @@ Naming something as a follow-up is a thinking tool, not a prediction — plenty 
 belong in the current PR once written down, and that's a good outcome, not a scope failure. Write
 each one so it works either way: specific enough to file as an issue, specific enough to just do.
 
-For each, say where it probably belongs, using the same bar as the `copilot-review` skill: fold it
-into the current PR unless it is genuinely unrelated to this work, or needs enough design thinking
-that doing it here would swamp the PR. "Somewhat awkward to do here" does not qualify.
+For each, say where it probably belongs, using the same bar as the `copilot-review` and `update-pr`
+skills: fold it into the current work when it's small, needs no testing independent of what's
+already there, and is thematically connected; file it otherwise. Anything needing planning or
+discussion becomes an issue, unless deferring it would substantially change this work's code — then
+do it now rather than twice. "Somewhat awkward to do here" is not grounds to defer.
 
 **Do not file, create, or start any of them.** Offer `gh issue create` for the ones the user wants
 tracked, and wait to be told which. If the user pulls one into the current PR instead, that is new
