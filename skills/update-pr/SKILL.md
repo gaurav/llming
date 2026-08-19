@@ -83,9 +83,9 @@ quoting, and a file leaves something to re-read if the edit fails.
 so a wrapped paragraph keeps your wrap points instead of reflowing to the reader's width. Write
 each paragraph and each bullet as one continuous line, however long. (Wrapping is the habit
 everything else in a repo teaches, which is why this one persists — the file you are writing is
-the exception.) When an *existing* body arrives wrapped, `reflow.py` in this skill's
-directory unwraps it in place (`python3 reflow.py body.md`), leaving code fences, headings,
-blockquotes and list structure alone.
+the exception.) When an *existing* body arrives wrapped, this skill's
+`scripts/reflow.py` unwraps it in place (`uv run scripts/reflow.py body.md`), leaving code fences,
+headings, blockquotes and list structure alone.
 
 ## Step 6 — Work the TODO checkboxes
 

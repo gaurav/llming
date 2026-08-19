@@ -63,3 +63,8 @@ rot. If a skill does need one:
   `~/.claude/skills/...` — the same skill gets used as a personal, project, and plugin skill.
 - Skip click, logging, and tqdm. An agent invokes these non-interactively and reads stdout; plain
   arguments and plain output are easier for it to consume than a CLI framework's.
+- Install skills onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
+  the `SKILL.md` inside it (`ln -s ~/code/llming/skills/update-pr ~/.claude/skills/update-pr`). A
+  file symlink brings the prose and leaves the `scripts/` behind, so the skill's own relative path
+  resolves to nothing on the machine that needs it. Editing through either path is the same file,
+  so a script added on one machine is live everywhere the directory is linked.

@@ -1,12 +1,16 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Unwrap hard-wrapped Markdown so GitHub can reflow it.
 
 GitHub renders a single newline inside a paragraph as a line break, so a body
 wrapped at 80 columns keeps those wrap points on every screen width. This joins
 each paragraph and each list item back into one continuous line.
 
-    python3 reflow.py body.md      # rewrite in place
-    python3 reflow.py --selftest   # check the tricky cases still hold
+    uv run scripts/reflow.py body.md      # rewrite in place
+    uv run scripts/reflow.py --selftest   # check the tricky cases still hold
 
 Left alone: fenced code blocks, headings, blockquotes, table rows, and blank
 lines. Each list item starts its own block, so bullets never merge.
