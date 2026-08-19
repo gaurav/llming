@@ -65,6 +65,12 @@ directions — items ticked off that got reverted later, items never added becau
 after the description was written — and the skill forces a decision on each one: do it here, drop
 it, or file it.
 
+It carries the repo's first bundled script, `reflow.py`, for a reason worth stating: the rule it
+supports (don't hard-wrap a PR body, because GitHub turns those newlines into line breaks) is one an
+agent breaks by pattern-matching the wrapped prose in every other file it has been reading. The
+prose rule handles the body being written; the script handles the ones already wrapped, which is the
+case this skill meets most often.
+
 Where it goes next: the boundary with `wrap` is fuzzy. Both commit and push, both think about
 follow-up issues, and I'll probably end up running them back to back. If that turns out to be the
 normal case, one should call the other rather than both re-deriving the same git survey.
