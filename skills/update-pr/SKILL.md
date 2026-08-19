@@ -79,6 +79,12 @@ gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoti
 Write the body to a scratch file rather than passing `--body` inline; long markdown gets mangled by
 quoting, and a file leaves something to re-read if the edit fails.
 
+**Do not hard-wrap the body.** GitHub renders a single newline inside a paragraph as a line break,
+so a wrapped paragraph keeps your wrap points instead of reflowing to the reader's width. Write
+each paragraph and each bullet as one continuous line, however long. (Wrapping is the habit
+everything else in a repo teaches, which is why this one persists — the file you are writing is
+the exception.)
+
 ## Step 6 — Work the TODO checkboxes
 
 The description's `- [ ]` / `- [x]` items are a live list, not decoration. Go through all of them:
