@@ -72,6 +72,52 @@ change:
 Describe the **final state**, not the journey. An approach that was tried and abandoned does not
 belong here (see Step 7).
 
+### Churn goes in a `<details>` block, or goes away
+
+The body above the fold is for **what the PR changes, what that produced, and what is still open**.
+Everything that is a fact about the PR's own history rather than about the code is churn, and a
+reader arriving in six months does not want it first:
+
+- review rounds, and which round found what
+- "the first pass at this was narrower than its commit message claimed"
+- a fix that later got corrected by a second fix — the description states the final behaviour once
+- merges from the base branch, and which side won a conflict
+- work that moved to another branch or landed upstream while this PR was open
+- rebases, force-pushes, renamed commits
+
+Churn is not worthless — it is how someone traces why a particular line looks the way it does — so
+**move it into a collapsed `<details>` block at the end** rather than deleting it:
+
+```markdown
+<details>
+<summary><b>Review history</b> — N rounds, one commit per finding. Kept for anyone tracing why a
+particular line looks the way it does; the durable conclusions are in the code comments and docs
+above.</summary>
+
+...
+</details>
+```
+
+Delete it outright only when it says nothing a reader could ever want — a typo fix, a reverted
+commit that left no trace.
+
+**The test: could this sentence have been written by someone who only read the final diff?** If
+yes, it belongs above the fold. If it needs the commit log to make sense, it is churn.
+
+Two consequences worth stating, because both are easy to get wrong:
+
+- **A fix and its later correction are one row, not two.** "We sorted the statements / …and that
+  sort tied on the only case it had" is churn twice over. Above the fold, the code sorts
+  deterministically; how many attempts that took belongs in the details block.
+- **Durable lessons escape the details block.** If a false path or a review finding produced
+  something a future developer needs — a gotcha, a convention, a "don't use X here" — Step 7 says
+  it goes in a code comment or the repo's docs. Put it there *and* leave the story in the details
+  block; do not let the details block be the only copy.
+
+A useful shape, adapted per PR: lead paragraph (problem, and what this does about it) → `Closes #N`
+→ **What's here** → **What it produces** → **What it deliberately does not do** → **Before merging,
+or before the next run** → `<details>` review history.
+
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
 ```
@@ -116,8 +162,9 @@ If pulling an item into this PR means new code, that's new work — do it, then 
 
 ## Step 7 — Where the false paths go
 
-Approaches that were tried and rejected are **not** PR-description material. A one-line mention is
-enough where a reader would otherwise wonder why the obvious thing wasn't done.
+Approaches that were tried and rejected are **not** PR-description material above the fold. A
+one-line mention is enough where a reader would otherwise wonder why the obvious thing wasn't done;
+the fuller story goes in Step 5's `<details>` block.
 
 They matter in one case: a future developer is likely to try the same thing again. Then record it
 where they'll hit it —
@@ -131,8 +178,9 @@ If you write one of these, it's a file change — commit and push it (Step 2) be
 
 ## Step 8 — Summary
 
-Short. The new title, what changed in the description, the checkbox decisions (done / dropped /
-deferred), any issues you're proposing to file, and confirmation of the push.
+Short. The new title, what changed in the description, what you moved into or out of the
+`<details>` block, the checkbox decisions (done / dropped / deferred), any issues you're proposing
+to file, and confirmation of the push.
 
 ## Notes
 
