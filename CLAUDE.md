@@ -52,6 +52,13 @@ does and when to use it, so a per-skill README would only restate it. Instead th
 things a `SKILL.md` has no room for because it is written for an agent, not for me. Add a section
 there when adding a skill.
 
+Install a skill onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
+the `SKILL.md` inside it (`ln -s ~/code/llming/skills/update-pr ~/.claude/skills/update-pr`).
+Editing through either path is the same file, so a change made on one machine is live everywhere
+the directory is linked. Symlinking the `SKILL.md` alone appears to work and then fails the moment
+a skill has anything beside it — the prose arrives, the rest of the directory doesn't, and the
+skill's own relative paths resolve to nothing on the machine that needs them.
+
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
 Python helper in `skills/copilot-review/`, and `npx prettier --prose-wrap never` replaced a
@@ -66,8 +73,3 @@ Reach for a script only when nothing installed does the job. If a skill does nee
   `~/.claude/skills/...` — the same skill gets used as a personal, project, and plugin skill.
 - Skip click, logging, and tqdm. An agent invokes these non-interactively and reads stdout; plain
   arguments and plain output are easier for it to consume than a CLI framework's.
-- Install skills onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
-  the `SKILL.md` inside it (`ln -s ~/code/llming/skills/update-pr ~/.claude/skills/update-pr`). A
-  file symlink brings the prose and leaves the `scripts/` behind, so the skill's own relative path
-  resolves to nothing on the machine that needs it. Editing through either path is the same file,
-  so a script added on one machine is live everywhere the directory is linked.
