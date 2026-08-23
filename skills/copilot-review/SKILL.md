@@ -31,7 +31,8 @@ the run in one of three states:
    rely on your explanation in the coding agent rather than these replies to understand what
    happened -- these are mostly for future users who want to double-check why a comment
    was ignored.
-3. **Tracked** in a follow-up issue.
+3. **Tracked** — in a follow-up issue, or as a `- [ ]` TODO in the PR description when the finding
+   blocks this PR (see *Fix it in the current PR by default* below for which is which).
 
 No comment gets silently dropped, and none is left unresolved without the user knowing why. How you
 reach those states is flexible.
@@ -52,16 +53,25 @@ goes:
 
 - **Fix it here** when it's a small amount of work, doesn't need testing independent of what's
   already in this PR, and is thematically connected to the rest of the change.
-- **File an issue** otherwise, so it can be picked up in a PR of its own.
-- **Anything needing planning or discussion becomes an issue** — with one exception: if doing it
-  later would substantially change this PR's code, do it *now*. Deferring it just means doing this
-  work twice.
+- If it doesn't fit here, ask whether **this PR ships a defect without it** — behaviour that is
+  wrong under some real circumstance, an error path that loses work or data, or documentation that
+  misdescribes what shipped. If so it **blocks this PR**: add it to the description as a `- [ ]`
+  TODO rather than filing it away, so the next `update-pr` run has to decide about it again instead
+  of merging past it. Say so in the summary, and raise it with the user — they may want it done now.
+- **File an issue** for everything else, so it can be picked up in a PR of its own.
+- **Anything needing planning or discussion becomes an issue** — with two exceptions. If deferring
+  would substantially change this PR's code, do it *now*; deferring just means doing the work twice.
+  And if it blocks by the test above, it is a TODO whether or not it needs planning — an issue would
+  let the PR merge, which is the thing being prevented.
 
-"Somewhat awkward to do in this diff" is not grounds to defer — do it anyway. When in doubt between
-deferring and asking, ask.
+**Size is not severity.** "Too big to fix here" routes a finding out of this PR; it never decides
+the PR is finished without it. "Somewhat awkward to do in this diff" is not grounds to defer — do it
+anyway. When in doubt between deferring and asking, ask.
 
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
-the summary so the user can pull it back into the PR if they disagree.
+the summary so the user can pull it back into the PR if they disagree. If instead it blocks, add the
+TODO to the PR description, reply saying where it went (`Blocks this PR — added as a TODO in the
+description.`), and lead the summary with it rather than burying it among the routine outcomes.
 
 ## Prerequisites
 
@@ -254,7 +264,8 @@ gh api graphql \
 Report a compact per-comment summary, **threads and suppressed comments in separate groups** so the
 user can see the suppressed ones were considered at all: for each, whether it was **fixed** (with
 the commit), **moot** (already addressed or outdated — say what covered it), **declined** (with the
-reason), **deferred** (issue link), or **left open**. Confirm the push if there was one; if triage
+reason), **deferred** (issue link), **blocking** (the TODO you added), or **left open**. Lead with
+the blocking ones — they are the reason the PR isn't ready, and they read as routine in a list. Confirm the push if there was one; if triage
 produced no fixes, say that plainly rather than implying a commit happened. Note any thread you
 couldn't resolve automatically.
 

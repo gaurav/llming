@@ -83,6 +83,22 @@ nothing. `update-pr` is *this has to be good enough to review, and if it isn't, 
 end there becomes a TODO in the PR that gets worked rather than an issue that gets filed and
 forgotten. Expect these to drift further apart, and let them.
 
+What all three do share is the shape of the decision, and it took a second pass to get right. The
+first version tested only size and scope — small and connected, fix it here; otherwise file an
+issue — which quietly treats "too big for this PR" as though it settled whether the PR was finished.
+It doesn't. A missing error case or a doc paragraph that misdescribes what shipped can be too large
+to fix in the diff and still be a thing the PR shouldn't merge without. So there are two questions
+now: does it fit here, and if not, does the PR ship a defect without it. Only the second one can
+block.
+
+The bar for blocking is deliberately concrete — wrong behaviour under some real circumstance, an
+error path that loses work or data, documentation that misdescribes what shipped — because the
+obvious phrasing ("is this essential?") is one an agent answers yes to almost every time, and a
+blocker list everything lands on is just a slower version of the issue tracker nothing comes back
+out of. The mechanism then differs by skill: `update-pr` and `copilot-review` park a blocker as a
+`- [ ]` in the PR body, where `update-pr`'s checkbox pass has to re-decide it on every run, and
+`wrap` has no PR to write to so it lists them first and says they block.
+
 The same answer covers the wider overlap, which is worth writing down because it looks like an
 obvious cleanup: `update-pr` and `wrap` both commit, both push, both think about follow-up issues,
 and I'll often run them back to back. Having one call the other would collapse a shared git survey

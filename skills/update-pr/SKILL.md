@@ -74,6 +74,8 @@ change:
 - **Outcomes** — what the change achieves, and anything it deliberately doesn't.
 - **Issues closed** — with `Closes #N` / `Fixes #N` so GitHub links them.
 - **Follow-on work** — issues opened for what was deferred, linked by number.
+- **What's still blocking** — anything the PR shouldn't merge without, as unchecked TODOs. If there
+  is none, say so; a reader shouldn't have to infer it from an absent section.
 
 Describe the **final state**, not the journey. An approach that was tried and abandoned does not
 belong here (see Step 7).
@@ -164,12 +166,20 @@ Then decide where each surviving item goes:
 
 - **Do it in this PR** when it's a small amount of work, doesn't need testing independent of what's
   already here, and is thematically connected to the rest of the change.
-- **File an issue** otherwise, so it can be picked up in a PR of its own.
-- **Anything needing planning or discussion becomes an issue** — with one exception: if doing it
-  later would substantially change this PR's code, do it *now*. Deferring it just means doing this
-  work twice.
+- If it doesn't fit here, ask whether **this PR ships a defect without it** — behaviour that is
+  wrong under some real circumstance, an error path that loses work or data, or documentation that
+  misdescribes what shipped. If so it **blocks this PR** and stays a `- [ ]` checkbox in the
+  description, called out as blocking. Don't convert it to an issue: an issue lets the PR merge
+  while the defect ships, which is exactly what the checkbox is preventing.
+- **File an issue** for everything else, so it can be picked up in a PR of its own.
+- **Anything needing planning or discussion becomes an issue** — with two exceptions. If deferring
+  would substantially change this PR's code, do it *now*; deferring just means doing the work twice.
+  And if it blocks by the test above, it stays a checkbox whether or not it needs planning.
 
-When it's a close call, ask.
+**Size is not severity.** "Too big to do here" routes an item out of this PR; it never decides the
+PR is finished without it. A blocking checkbox that survives several runs of this skill is worth
+raising directly — either it should be done now, or it wasn't really blocking. When it's a close
+call, ask.
 
 Don't file issues unprompted: list the ones you'd file with a one-line summary each, and wait for
 the user to pick. Once filed, replace the checkbox with a link to the issue so the description
@@ -196,7 +206,8 @@ If you write one of these, it's a file change — commit and push it (Step 2) be
 ## Step 8 — Summary
 
 Short. The new title, what changed in the description, what you moved into or out of the
-`<details>` block, the checkbox decisions (done / dropped / deferred), any issues you're proposing
+`<details>` block, the checkbox decisions (done / dropped / deferred / blocking), any issues you're
+proposing
 to file, and confirmation of the push.
 
 ## Notes

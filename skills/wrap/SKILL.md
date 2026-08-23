@@ -71,6 +71,12 @@ already there, and is thematically connected; file it otherwise. Anything needin
 discussion becomes an issue, unless deferring it would substantially change this work's code — then
 do it now rather than twice. "Somewhat awkward to do here" is not grounds to defer.
 
+**Mark the blockers separately.** An item that doesn't fit the current work can still be one the
+work isn't honestly finished without — behaviour that's wrong under some real circumstance, an error
+path that loses work or data, or documentation that misdescribes what shipped. List those first and
+say plainly that they block, because the rest of this list reads as optional and they are not. Size
+is not severity: too big to do now is a reason to hand it over, never a reason to call it minor.
+
 **Do not file, create, or start any of them.** Offer `gh issue create` for the ones the user wants
 tracked, and wait to be told which. If the user pulls one into the current PR instead, that is new
 work — do it, then run section 3 again.
