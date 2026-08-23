@@ -6,8 +6,17 @@ version = "0"
 requires-python = ">=3.9"
 
 [dependency-groups]
-# Test-only. Everything after pytest is here because the tests import the scripts, which import it.
-dev = ["pytest", "click", "requests", "tqdm"]
+# Tooling and test deps. pytest's companions are here because the tests import the scripts, which
+# import them; rumdl is the Markdown linter CI runs.
+dev = ["pytest", "click", "requests", "tqdm", "rumdl"]
 
 [tool.uv]
 package = false
+
+[tool.rumdl]
+# Prose here wraps at 100, not rumdl's default 80. Frontmatter is exempt already, which is what
+# matters — a SKILL.md `description:` is trigger text for an agent and has to be one line.
+line-length = 100
+# MD041 wants every file to open with an H1. A CLAUDE.md or SKILL.md opens with instructions, not
+# with a title, so the rule never applies here.
+disable = ["MD041"]

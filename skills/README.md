@@ -134,7 +134,7 @@ for the night.
 And the third: it's an explicit signal that the session is about to be wiped. If the agent has a
 warning to raise or something it wants me to do, this is its last chance to say so.
 
-# What earns a skill
+## What earns a skill
 
 Context dependent, and deliberately broad. Two rough patterns so far:
 

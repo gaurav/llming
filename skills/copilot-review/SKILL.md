@@ -255,7 +255,8 @@ the user.
 
 ```bash
 gh api graphql \
-  -f query='mutation($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
+  -f query='mutation($threadId:ID!){
+    resolveReviewThread(input:{threadId:$threadId}){ thread{ id isResolved } } }' \
   -F threadId="$THREAD_ID"
 ```
 
@@ -265,9 +266,9 @@ Report a compact per-comment summary, **threads and suppressed comments in separ
 user can see the suppressed ones were considered at all: for each, whether it was **fixed** (with
 the commit), **moot** (already addressed or outdated — say what covered it), **declined** (with the
 reason), **deferred** (issue link), **blocking** (the TODO you added), or **left open**. Lead with
-the blocking ones — they are the reason the PR isn't ready, and they read as routine in a list. Confirm the push if there was one; if triage
-produced no fixes, say that plainly rather than implying a commit happened. Note any thread you
-couldn't resolve automatically.
+the blocking ones — they are the reason the PR isn't ready, and they read as routine in a list.
+Confirm the push if there was one; if triage produced no fixes, say that plainly rather than
+implying a commit happened. Note any thread you couldn't resolve automatically.
 
 Give the suppressed count explicitly, even when it's zero ("no threads, no suppressed comments") —
 otherwise a silent run is ambiguous between "checked and empty" and "never looked".
