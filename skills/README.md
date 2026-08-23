@@ -74,6 +74,15 @@ parsing it, and it wasn't. `npx prettier --prose-wrap never` does the whole job 
 lesson generalised into `CLAUDE.md`; the skill now says don't wrap in the first place, and reaches
 for prettier only when text has to survive verbatim.
 
+The fix-here-or-file-an-issue bar is stated in full here and in `copilot-review`, and paraphrased in
+`wrap`. That duplication is deliberate, not debt waiting to be factored out. A skill is loaded on
+its own, so a cross-reference to another skill's wording isn't reliable at read time — but the real
+reason is that the three are asking different questions. `wrap` is *we're out of time, write down
+whatever you need to pick this up later*, so it errs toward capturing everything and deciding
+nothing. `update-pr` is *this has to be good enough to review, and if it isn't, say so* — a loose
+end there becomes a TODO in the PR that gets worked rather than an issue that gets filed and
+forgotten. Expect these to drift further apart, and let them.
+
 Where it goes next: the boundary with `wrap` is fuzzy. Both commit and push, both think about
 follow-up issues, and I'll probably end up running them back to back. If that turns out to be the
 normal case, one should call the other rather than both re-deriving the same git survey — the
