@@ -83,10 +83,12 @@ nothing. `update-pr` is *this has to be good enough to review, and if it isn't, 
 end there becomes a TODO in the PR that gets worked rather than an issue that gets filed and
 forgotten. Expect these to drift further apart, and let them.
 
-Where it goes next: the boundary with `wrap` is fuzzy. Both commit and push, both think about
-follow-up issues, and I'll probably end up running them back to back. If that turns out to be the
-normal case, one should call the other rather than both re-deriving the same git survey — the
-overlap worth removing is the git survey, not the judgement calls above.
+The same answer covers the wider overlap, which is worth writing down because it looks like an
+obvious cleanup: `update-pr` and `wrap` both commit, both push, both think about follow-up issues,
+and I'll often run them back to back. Having one call the other would collapse a shared git survey
+and then wedge two different questions into one set of instructions. Not worth it. The duplicated
+mechanics are cheap; the judgement is what differs, and that's the part any factoring-out would
+damage.
 
 ## wrap
 
