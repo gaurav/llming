@@ -106,6 +106,18 @@ and then wedge two different questions into one set of instructions. Not worth i
 mechanics are cheap; the judgement is what differs, and that's the part any factoring-out would
 damage.
 
+What they do have is a boundary, drawn deliberately narrow. `wrap` touches the PR in exactly two
+ways and neither is a rewrite: it says the description looks stale, because pushing is the thing
+that made it stale, and it offers to append its blocking items to the description as checkboxes.
+Both are handoffs rather than couplings — `update-pr` re-decides every checkbox on its next run and
+does not need to know where one came from. Everything else about the description stays `update-pr`'s
+job, including deciding whether a body is *wrong*, which needs the diff read against it and is a
+worse job done hurriedly at the end of a session than left to be done properly.
+
+The blocking half of that is the one that matters. Before it, `wrap` would identify a blocker and
+print it to a terminal that was about to be closed — noticed and then lost, which is worse than
+never having looked. The PR body is the only place at hand that survives the session.
+
 ## wrap
 
 Three jobs at once.

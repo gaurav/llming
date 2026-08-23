@@ -56,6 +56,14 @@ Invoking this skill is authorization to commit and push **the work of this sessi
 - If the user has said not to push unasked, honour that: report each branch and its unpushed commit
   count, and stop.
 
+**If the branch has an open PR, pushing to it is what makes its description stale** — so say so
+before moving on. `gh pr view --json number,url,title,body` and ask only the shallow question: does
+the body still describe what the branch now contains? One line if not, naming the PR and suggesting
+`update-pr`. Do **not** rewrite it, and do not go diff-hunting to decide: judging a description
+against the change is `update-pr`'s Steps 3–5, it is a more careful pass than there is time for
+here, and doing it badly at the end of a session is worse than saying it needs doing. No PR on the
+branch means skip this silently — plenty of work never gets one.
+
 ## 4. Suggest follow-up issues
 
 Loose ends, deferred fixes, things noticed but out of scope. One line each, numbered, so we can
@@ -77,8 +85,15 @@ path that loses work or data, or documentation that misdescribes what shipped. L
 say plainly that they block, because the rest of this list reads as optional and they are not. Size
 is not severity: too big to do now is a reason to hand it over, never a reason to call it minor.
 
+A blocker named only in this summary dies with the session, which is worse than not noticing it —
+it was seen, and then lost. If the work has an open PR, **offer to add the blocking items to its
+description** as `- [ ]` checkboxes; that is where `update-pr` finds them and forces a decision on
+each the next time it runs. Appending means reading the current description and writing the whole
+thing back with `--body-file`, because `gh pr edit` replaces the body and a freshly composed one
+drops whatever a human wrote.
+
 **Do not file, create, or start any of them.** Offer `gh issue create` for the ones the user wants
-tracked, and wait to be told which. If the user pulls one into the current PR instead, that is new
-work — do it, then run section 3 again.
+tracked, and the checkboxes above the same way, and wait to be told which. If the user pulls one
+into the current PR instead, that is new work — do it, then run section 3 again.
 
 Keep the whole output short. Bullets, not prose.
