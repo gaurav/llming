@@ -8,6 +8,25 @@ This repository holds two unrelated kinds of thing, and the conventions below di
 - **Coding agent skills** — everything under `skills/`, kept here so it can be shared across
   machines. These are prose instructions for an agent, not programs.
 
+## Markdown
+
+**Run `rumdl` over any Markdown you are about to commit** — every `.md` file here is linted, and CI
+runs the same check on push and pull request:
+
+```bash
+uv run rumdl check .          # what CI runs
+uv run rumdl check --fix .    # fixes the mechanical ones in place
+```
+
+Config lives in `pyproject.toml` under `[tool.rumdl]`, so the linter and CI agree by construction.
+Two settings are deliberate and worth knowing before you fight them:
+
+- **Prose wraps at 100**, not rumdl's default 80. YAML frontmatter is exempt from the limit
+  already, which is what a `SKILL.md` `description:` needs — it is trigger text for an agent and
+  has to be one line however long it runs.
+- **MD041 is off.** It wants every file to open with a level-1 heading; a `CLAUDE.md` or `SKILL.md`
+  opens with instructions rather than a title, so the rule never applies here.
+
 ## README.md and CLAUDE.md
 
 Both kinds of thing here are documented by a pair of files, and the split between them is the same
