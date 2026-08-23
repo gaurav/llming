@@ -170,11 +170,11 @@ Then decide where each surviving item goes:
   wrong under some real circumstance, an error path that loses work or data, or documentation that
   misdescribes what shipped. If so it **blocks this PR** and stays a `- [ ]` checkbox in the
   description, called out as blocking. Don't convert it to an issue: an issue lets the PR merge
-  while the defect ships, which is exactly what the checkbox is preventing.
+  while the defect ships, which is exactly what the checkbox is preventing. This test takes
+  precedence over the two bullets below — a blocker stays a checkbox however much planning it needs.
 - **File an issue** for everything else, so it can be picked up in a PR of its own.
-- **Anything needing planning or discussion becomes an issue** — with two exceptions. If deferring
-  would substantially change this PR's code, do it *now*; deferring just means doing the work twice.
-  And if it blocks by the test above, it stays a checkbox whether or not it needs planning.
+- **Anything needing planning or discussion becomes an issue** — with one exception: if deferring
+  would substantially change this PR's code, do it *now*. Deferring just means doing the work twice.
 
 **Size is not severity.** "Too big to do here" routes an item out of this PR; it never decides the
 PR is finished without it. A blocking checkbox that survives several runs of this skill is worth
@@ -207,8 +207,7 @@ If you write one of these, it's a file change — commit and push it (Step 2) be
 
 Short. The new title, what changed in the description, what you moved into or out of the
 `<details>` block, the checkbox decisions (done / dropped / deferred / blocking), any issues you're
-proposing
-to file, and confirmation of the push.
+proposing to file, and confirmation of the push.
 
 ## Notes
 
