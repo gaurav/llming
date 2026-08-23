@@ -19,6 +19,12 @@ gh pr view --json number,url,title,body,headRefName,state,isDraft
 
 No PR for this branch? Say so and stop — creating one is a different decision, so ask first.
 
+**If the PR was passed explicitly, check the checkout matches it** before going any further —
+compare `git branch --show-current` against the `headRefName` you just read. Step 2 commits what is
+in the working tree and pushes to the head branch, so running this against a PR you are not checked
+out on sweeps unrelated local work into someone else's branch, and then reads `HEAD` for a diff
+that belongs to neither. On a mismatch, stop and ask: switching branches is the user's call.
+
 ## Step 2 — Commit and push outstanding work
 
 `git status` and `git diff`. Everything that belongs to this PR gets committed, following the
