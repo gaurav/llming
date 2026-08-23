@@ -31,7 +31,8 @@ the run in one of three states:
    rely on your explanation in the coding agent rather than these replies to understand what
    happened -- these are mostly for future users who want to double-check why a comment
    was ignored.
-3. **Tracked** in a follow-up issue.
+3. **Tracked** — in a follow-up issue, or as a `- [ ]` TODO in the PR description when the finding
+   blocks this PR (see *Fix it in the current PR by default* below for which is which).
 
 No comment gets silently dropped, and none is left unresolved without the user knowing why. How you
 reach those states is flexible.
@@ -46,14 +47,31 @@ comment and move on. But when a comment turns on a judgment you can't ground in 
 really applies — raise it and talk it through instead of guessing. A question mid-run is cheaper
 than a wrong fix pushed to the branch.
 
-**Fix it in the current PR by default.** A follow-up issue is a last resort, not a routine escape
-hatch: the expectation is that a Copilot comment gets dealt with in the PR that provoked it. Defer
-only when the comment is either genuinely unrelated to this PR's changes, or would need enough
-design thinking that doing it here would swamp the PR. "Somewhat awkward to do in this diff" does
-not qualify — do it anyway. When in doubt between deferring and asking, ask.
+**Fix it in the current PR by default.** A follow-up issue is not a routine escape hatch: the
+expectation is that a Copilot comment gets dealt with in the PR that provoked it. Where each one
+goes:
+
+- **Fix it here** when it's a small amount of work, doesn't need testing independent of what's
+  already in this PR, and is thematically connected to the rest of the change.
+- If it doesn't fit here, ask whether **this PR ships a defect without it** — behaviour that is
+  wrong under some real circumstance, an error path that loses work or data, or documentation that
+  misdescribes what shipped. If so it **blocks this PR**: add it to the description as a `- [ ]`
+  TODO rather than filing it away (see the Notes on editing the body), so the next `update-pr` run
+  has to decide about it again instead of merging past it. Say so in the summary, and raise it with
+  the user — they may want it done now. This test takes precedence over the two bullets below: a
+  blocker stays a TODO however much planning it needs, because an issue would let the PR merge.
+- **File an issue** for everything else, so it can be picked up in a PR of its own.
+- **Anything needing planning or discussion becomes an issue** — with one exception: if deferring
+  would substantially change this PR's code, do it *now*. Deferring just means doing the work twice.
+
+**Size is not severity.** "Too big to fix here" routes a finding out of this PR; it never decides
+the PR is finished without it. "Somewhat awkward to do in this diff" is not grounds to defer — do it
+anyway. When in doubt between deferring and asking, ask.
 
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
-the summary so the user can pull it back into the PR if they disagree.
+the summary so the user can pull it back into the PR if they disagree. If instead it blocks, add the
+TODO to the PR description, reply saying where it went (`Blocks this PR — added as a TODO in the
+description.`), and lead the summary with it rather than burying it among the routine outcomes.
 
 ## Prerequisites
 
@@ -174,8 +192,7 @@ Read the referenced file and the surrounding code. Classify as:
   stylistic against the repo's established convention, or contradicts a deliberate decision stated
   in the PR body or code comments.
 - **Unclear** — needs a judgment call you can't ground in the code or PR. Ask the user (see
-  *Operating mode*); fall back to a follow-up issue only if it's genuinely out of scope for this PR
-  or needs real design work.
+  *Operating mode*); fall back to a follow-up issue by the bar set there.
 
 Judge a suppressed comment on the same terms as a thread — Copilot's own confidence is not evidence
 either way. Most of them assert a *checkable fact* about the repo (this doc disagrees with that
@@ -247,7 +264,8 @@ gh api graphql \
 Report a compact per-comment summary, **threads and suppressed comments in separate groups** so the
 user can see the suppressed ones were considered at all: for each, whether it was **fixed** (with
 the commit), **moot** (already addressed or outdated — say what covered it), **declined** (with the
-reason), **deferred** (issue link), or **left open**. Confirm the push if there was one; if triage
+reason), **deferred** (issue link), **blocking** (the TODO you added), or **left open**. Lead with
+the blocking ones — they are the reason the PR isn't ready, and they read as routine in a list. Confirm the push if there was one; if triage
 produced no fixes, say that plainly rather than implying a commit happened. Note any thread you
 couldn't resolve automatically.
 
@@ -268,3 +286,7 @@ otherwise a silent run is ambiguous between "checked and empty" and "never looke
   endpoint is the obvious place to look and returns empty, which reads as "nothing there".
 - This skill only touches Copilot's threads. Leave human reviewers' comments alone unless the user
   says otherwise.
+- Adding a blocking TODO means editing the PR body, and `gh pr edit` **replaces** it. Read the
+  current body first (Step 1), append the checkbox to what is already there, and write the whole
+  thing back with `--body-file`. Never compose a fresh `--body`: everything the author wrote is
+  gone, and this skill runs unattended enough that nobody would notice until it was in the history.

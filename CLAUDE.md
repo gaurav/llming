@@ -52,10 +52,20 @@ does and when to use it, so a per-skill README would only restate it. Instead th
 things a `SKILL.md` has no room for because it is written for an agent, not for me. Add a section
 there when adding a skill.
 
+Install a skill onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
+the `SKILL.md` inside it (`ln -s ~/code/llming/skills/update-pr ~/.claude/skills/update-pr`).
+Editing through either path is the same file, so a change made on one machine is live everywhere
+the directory is linked. Symlinking the `SKILL.md` alone appears to work and then fails the moment
+a skill has anything beside it — the prose arrives, the rest of the directory doesn't, and the
+skill's own relative paths resolve to nothing on the machine that needs them.
+
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
-Python helper in `skills/copilot-review/`, and a script that wraps a flag is a script that can
-rot. If a skill does need one:
+Python helper in `skills/copilot-review/`, and `npx prettier --prose-wrap never` replaced a
+110-line Markdown unwrapper in `skills/update-pr/`. A script that wraps a flag is a script that can
+rot, and both of those had already started to: the reimplementation loses on the edge cases the
+real tool handles, which for anything file-shaped means silent corruption rather than a crash.
+Reach for a script only when nothing installed does the job. If a skill does need one:
 
 - Put it in the skill's `scripts/` subdirectory and make it runnable with `uv run`, declaring any
   dependencies in a PEP 723 header. Prefer the standard library so there are none.

@@ -12,6 +12,8 @@ isn't recoverable from the skill itself.
   re-derive them on every PR.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
+- **update-pr** — keeps the PR honest about itself, since its title and description outlive the
+  session that produced them.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped.
 
 ## copilot-review
@@ -45,6 +47,76 @@ Where it goes if it earns it:
 2. A brake on LLM overdocumentation. The same read-everything pass is well placed to notice where
    documentation has become unclear or duplicative, and to suggest compressing, reorganising or
    trimming it.
+
+## update-pr
+
+A PR title becomes a line in my release notes, and a PR description is the only place the *why*
+of a change survives once the session that produced it is gone. Both drift: the title is written
+when the branch is one commit old and the description when I still remember everything, and neither
+gets revisited as the work turns into something else.
+
+So this skill exists to be run repeatedly, not once at the end — every time a round of work lands.
+It rewrites both against the actual diff rather than against the agent's memory of the session,
+which is the specific failure it's guarding against: an agent asked to summarise a PR will happily
+describe the three approaches it tried, when only the last one shipped.
+
+The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
+directions — items ticked off that got reverted later, items never added because they surfaced
+after the description was written — and the skill forces a decision on each one: do it here, drop
+it, or file it.
+
+The hard-wrapping rule is the one an agent breaks by reflex, because every other file it has been
+reading is wrapped at 80 columns and GitHub turns each of those newlines into a line break. It very
+nearly cost this repo a bundled script: I wrote a 110-line unwrapper for bodies that arrive already
+wrapped, and a review found it silently mangling nested lists, indented code blocks, underlined
+headings, `<pre>` content and deliberate line breaks — because unwrapping Markdown correctly means
+parsing it, and it wasn't. `npx prettier --prose-wrap never` does the whole job in a flag. The
+lesson generalised into `CLAUDE.md`; the skill now says don't wrap in the first place, and reaches
+for prettier only when text has to survive verbatim.
+
+The fix-here-or-file-an-issue bar is stated in full here and in `copilot-review`, and paraphrased in
+`wrap`. That duplication is deliberate, not debt waiting to be factored out. A skill is loaded on
+its own, so a cross-reference to another skill's wording isn't reliable at read time — but the real
+reason is that the three are asking different questions. `wrap` is *we're out of time, write down
+whatever you need to pick this up later*, so it errs toward capturing everything and deciding
+nothing. `update-pr` is *this has to be good enough to review, and if it isn't, say so* — a loose
+end there becomes a TODO in the PR that gets worked rather than an issue that gets filed and
+forgotten. Expect these to drift further apart, and let them.
+
+What all three do share is the shape of the decision, and it took a second pass to get right. The
+first version tested only size and scope — small and connected, fix it here; otherwise file an
+issue — which quietly treats "too big for this PR" as though it settled whether the PR was finished.
+It doesn't. A missing error case or a doc paragraph that misdescribes what shipped can be too large
+to fix in the diff and still be a thing the PR shouldn't merge without. So there are two questions
+now: does it fit here, and if not, does the PR ship a defect without it. Only the second one can
+block.
+
+The bar for blocking is deliberately concrete — wrong behaviour under some real circumstance, an
+error path that loses work or data, documentation that misdescribes what shipped — because the
+obvious phrasing ("is this essential?") is one an agent answers yes to almost every time, and a
+blocker list everything lands on is just a slower version of the issue tracker nothing comes back
+out of. The mechanism then differs by skill: `update-pr` and `copilot-review` park a blocker as a
+`- [ ]` in the PR body, where `update-pr`'s checkbox pass has to re-decide it on every run, and
+`wrap` has no PR to write to so it lists them first and says they block.
+
+The same answer covers the wider overlap, which is worth writing down because it looks like an
+obvious cleanup: `update-pr` and `wrap` both commit, both push, both think about follow-up issues,
+and I'll often run them back to back. Having one call the other would collapse a shared git survey
+and then wedge two different questions into one set of instructions. Not worth it. The duplicated
+mechanics are cheap; the judgement is what differs, and that's the part any factoring-out would
+damage.
+
+What they do have is a boundary, drawn deliberately narrow. `wrap` touches the PR in exactly two
+ways and neither is a rewrite: it says the description looks stale, because pushing is the thing
+that made it stale, and it offers to append its blocking items to the description as checkboxes.
+Both are handoffs rather than couplings — `update-pr` re-decides every checkbox on its next run and
+does not need to know where one came from. Everything else about the description stays `update-pr`'s
+job, including deciding whether a body is *wrong*, which needs the diff read against it and is a
+worse job done hurriedly at the end of a session than left to be done properly.
+
+The blocking half of that is the one that matters. Before it, `wrap` would identify a blocker and
+print it to a terminal that was about to be closed — noticed and then lost, which is worse than
+never having looked. The PR body is the only place at hand that survives the session.
 
 ## wrap
 
