@@ -65,15 +65,19 @@ directions — items ticked off that got reverted later, items never added becau
 after the description was written — and the skill forces a decision on each one: do it here, drop
 it, or file it.
 
-It carries the repo's first bundled script, `reflow.py`, for a reason worth stating: the rule it
-supports (don't hard-wrap a PR body, because GitHub turns those newlines into line breaks) is one an
-agent breaks by pattern-matching the wrapped prose in every other file it has been reading. The
-prose rule handles the body being written; the script handles the ones already wrapped, which is the
-case this skill meets most often.
+The hard-wrapping rule is the one an agent breaks by reflex, because every other file it has been
+reading is wrapped at 80 columns and GitHub turns each of those newlines into a line break. It very
+nearly cost this repo a bundled script: I wrote a 110-line unwrapper for bodies that arrive already
+wrapped, and a review found it silently mangling nested lists, indented code blocks, underlined
+headings, `<pre>` content and deliberate line breaks — because unwrapping Markdown correctly means
+parsing it, and it wasn't. `npx prettier --prose-wrap never` does the whole job in a flag. The
+lesson generalised into `CLAUDE.md`; the skill now says don't wrap in the first place, and reaches
+for prettier only when text has to survive verbatim.
 
 Where it goes next: the boundary with `wrap` is fuzzy. Both commit and push, both think about
 follow-up issues, and I'll probably end up running them back to back. If that turns out to be the
-normal case, one should call the other rather than both re-deriving the same git survey.
+normal case, one should call the other rather than both re-deriving the same git survey — the
+overlap worth removing is the git survey, not the judgement calls above.
 
 ## wrap
 

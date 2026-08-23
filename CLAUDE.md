@@ -54,8 +54,11 @@ there when adding a skill.
 
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
-Python helper in `skills/copilot-review/`, and a script that wraps a flag is a script that can
-rot. If a skill does need one:
+Python helper in `skills/copilot-review/`, and `npx prettier --prose-wrap never` replaced a
+110-line Markdown unwrapper in `skills/update-pr/`. A script that wraps a flag is a script that can
+rot, and both of those had already started to: the reimplementation loses on the edge cases the
+real tool handles, which for anything file-shaped means silent corruption rather than a crash.
+Reach for a script only when nothing installed does the job. If a skill does need one:
 
 - Put it in the skill's `scripts/` subdirectory and make it runnable with `uv run`, declaring any
   dependencies in a PEP 723 header. Prefer the standard library so there are none.

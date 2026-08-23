@@ -129,10 +129,20 @@ quoting, and a file leaves something to re-read if the edit fails.
 so a wrapped paragraph keeps your wrap points instead of reflowing to the reader's width. Write
 each paragraph and each bullet as one continuous line, however long. (Wrapping is the habit
 everything else in a repo teaches, which is why this one persists — the file you are writing is
-the exception.) When an *existing* body arrives wrapped, this skill's `scripts/reflow.py` unwraps
-it in place, leaving code fences, headings, blockquotes and list structure alone. That path is
-relative to **this skill's directory**, not the repo you're working in, so run it as
-`uv run <skill dir>/scripts/reflow.py <path>`.
+the exception.) You are rewriting the body anyway, so the usual answer is simply to not wrap it —
+including any text you carry over from the old one.
+
+When a body has to be unwrapped *verbatim* — a long `<details>` block of history you'd rather not
+retype — let a Markdown formatter do it:
+
+```bash
+npx --yes prettier@3 --prose-wrap never --parser markdown --write <path>
+```
+
+Don't hand-roll this. Unwrapping Markdown correctly means parsing it, and the constructs that break
+a naive line-joiner are exactly the ones that fail silently in a file rewritten in place: nested
+list indentation, indented code blocks, underlined headings, raw HTML such as `<pre>`, and the two
+trailing spaces that mark a deliberate line break.
 
 ## Step 6 — Work the TODO checkboxes
 
