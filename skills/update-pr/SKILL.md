@@ -14,10 +14,24 @@ again after a round of work.
 If the user passed a PR URL or number, use it. Otherwise take the PR for the current branch:
 
 ```bash
-gh pr view --json number,url,title,body,headRefName,state,isDraft
+git fetch --quiet
+gh pr view --json number,url,title,body,headRefName,baseRefName,state,isDraft,mergeable,mergeStateStatus,reviewDecision
 ```
 
 No PR for this branch? Say so and stop — creating one is a different decision, so ask first.
+
+**Fetch first, and note what moved under you** — commits on the remote head branch you don't
+have, a base branch that has advanced, a conflicted `mergeStateStatus`, review activity since
+last time. All of it changes what the description should say, and catching a diverged head here
+turns Step 2's *late* non-fast-forward push failure into an early, explainable one. If the fetch
+fails, say "remote state not checked" and carry on.
+
+**A clean tree is not evidence there is nothing to do here.** Unlike `wrap`, this skill has no
+"nothing changed, stop" gate, and adding one would be a mistake: the most common way a
+description goes stale is a previous `/wrap` pushing — that skill says so itself — which leaves
+the tree clean, nothing unpushed, and the description describing a branch that has moved on.
+Steps 3–6 are driven by the diff against the base branch, not by uncommitted work, so run them
+regardless of what the sync finds.
 
 **If the PR was passed explicitly, check the checkout matches it** before going any further —
 compare `git branch --show-current` against the `headRefName` you just read. Step 2 commits what is
