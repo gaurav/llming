@@ -25,6 +25,12 @@ check the suppressed comments too, expect some comments to be stale (a Claude re
 first and has already fixed things), and close out every thread so the PR is clear for human review
 unless something genuinely needs a person to look again.
 
+No repeat-run check here, and unlike `update-pr` that isn't a decision I had to make — a previous
+run leaves its record on the PR itself. Threads it handled are resolved, and the ones it declined
+carry the reply saying why. So a human can see whether another run is wanted before starting one,
+and an agent that starts one anyway finds most threads already resolved and does almost nothing.
+The state the other two skills have to derive from git is, for this skill, just visible.
+
 ## sync-docs
 
 My first attempt at a broad *use-your-judgement* skill rather than a fixed procedure. The bet: in
