@@ -148,6 +148,17 @@ evidence rather than a verdict, because a clean tree genuinely doesn't prove not
 work may have been committed by hand, or by an earlier run that recorded no lesson. I'd rather be
 told "clean tree, nothing unpushed" and make that call myself.
 
+## Writing these
+
+One failure mode has now shown up twice, in both skills, and is worth naming: a step whose prose
+describes a check the commands underneath it don't perform, or perform and then walk past. `wrap`'s
+step 0 promised a `[origin/x: gone]` marker a plain `git fetch` cannot produce; `update-pr`'s step 1
+promised to catch a diverged head, first with commands that compared nothing and then, once they
+did, with no instruction to stop. Prose reads as true because it describes an intention, and an
+agent following it will narrate the check it was told about rather than the one it ran. When adding
+a check to a skill, read the block as if the surrounding sentences weren't there — what would this
+actually tell me, and what does the skill do differently on each answer?
+
 # What earns a skill
 
 Context dependent, and deliberately broad. Two rough patterns so far:
