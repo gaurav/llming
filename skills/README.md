@@ -165,7 +165,7 @@ agent following it will narrate the check it was told about rather than the one 
 a check to a skill, read the block as if the surrounding sentences weren't there — what would this
 actually tell me, and what does the skill do differently on each answer?
 
-# What earns a skill
+## What earns a skill
 
 Context dependent, and deliberately broad. Two rough patterns so far:
 
