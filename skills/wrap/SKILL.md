@@ -14,8 +14,9 @@ work that a *previous* run produced. Sections 1 and 2 are the expensive part of 
 find out before paying for them.
 
 ```bash
-git fetch --quiet            # ahead/behind counts are only as fresh as the last fetch, and a
-                             # branch whose remote is gone shows [origin/x: gone] only after one
+git fetch --prune --quiet    # ahead/behind counts are only as fresh as the last fetch, and a
+                             # branch whose remote is gone shows [origin/x: gone] only after a
+                             # fetch that prunes — a plain fetch leaves the stale ref in place
 git status --porcelain
 git branch -vv
 git log --oneline @{u}..     # only on a branch that has an upstream
@@ -25,13 +26,18 @@ git log --oneline @{u}..     # only on a branch that has an upstream
 showing no `[origin/...]` marker simply has no upstream, and asking such a branch for unpushed
 commits exits 128 with `fatal: no upstream configured`.
 
-**Report the evidence, not a verdict.** "Working tree clean, nothing unpushed on `<branch>`,
+**Report the evidence, not a verdict.** "Working tree clean, no branch ahead of its upstream,
 remote unchanged since the last fetch" is three facts the user can correct. "There is nothing to
 do" is a claim this check cannot actually support — see below.
 
-**When all three hold, say so, note that a previous run has likely already covered this, and
-stop** — do not run sections 1–3. Offer to go ahead anyway in one line, and if the user asks,
-run it: they know what they did outside this session, and you do not.
+The middle fact is about **every** branch in `git branch -vv`, not just the one you are on:
+section 3 pushes any local branch that is ahead, so a clean `main` says nothing about the feature
+branch sitting three commits ahead of its upstream.
+
+**When all three hold, say so, note that a previous run has likely already covered this, and skip
+sections 1–3** — but still run section 4, and do not treat this as the end of the skill. Offer to
+go ahead with 1–3 anyway in one line, and if the user asks, run them: they know what they did
+outside this session, and you do not.
 
 A clean tree does **not** prove there is nothing owed, so do not over-apply this:
 
@@ -81,8 +87,9 @@ to do, not a list to propose. Run them.
 
 Do this **after** sections 1 and 2, so the lessons and tests they wrote are included.
 
-You already have the survey from step 0, including which branches have an upstream — don't
-re-run it.
+Re-run `git status` here: sections 1 and 2 have written files since step 0 looked, and those
+files are the ones this section exists to commit. The rest of the step 0 survey — which branches
+exist, which have an upstream, how far ahead they are — still holds; don't re-run that.
 
 Invoking this skill is authorization to commit and push **the work of this session**:
 
