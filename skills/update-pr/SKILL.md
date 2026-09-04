@@ -15,26 +15,44 @@ If the user passed a PR URL or number, use it. Otherwise take the PR for the cur
 
 ```bash
 git fetch --prune --quiet
-gh pr view --json number,url,title,body,headRefName,baseRefName,state,isDraft,mergeable,mergeStateStatus,reviewDecision
-git log --oneline HEAD..@{u}                  # remote head commits you don't have
-git log --oneline HEAD..origin/<baseRefName>  # how far the base has moved under you
+gh pr view --json number,url,title,body,headRefName,baseRefName,headRepositoryOwner,state,isDraft,mergeable,mergeStateStatus,reviewDecision
+git log --oneline HEAD..@{u}                       # remote head commits you don't have
+git log --oneline HEAD..<base-remote>/<baseRefName>  # how far the base has moved under you
 ```
 
 No PR for this branch? Say so and stop — creating one is a different decision, so ask first.
 
 **Fetch first, and note what moved under you** — the two `git log` lines above say whether the
 remote head branch has commits you don't have and how far the base has advanced; `gh pr view`
-adds a conflicted `mergeStateStatus` and review activity since last time. A non-empty
-`HEAD..@{u}` is the answer up front. All of it changes what the description should say, and catching a diverged head here
-turns Step 2's *late* non-fast-forward push failure into an early, explainable one. If the fetch
-fails, say "remote state not checked" and carry on.
+adds a conflicted `mergeStateStatus` and review activity since last time. All of it changes what
+the description should say. If the fetch fails, say "remote state not checked" and carry on.
+
+**A non-empty `HEAD..@{u}` stops the run here**, before Step 2. Detecting a diverged head and then
+committing on top of it just moves the non-fast-forward failure to the push, which is the *late*
+failure this check exists to replace — and Step 3's `git log` would read a history missing the
+remote commits either way. Report what is on the remote that you don't have and ask how to
+reconcile it (rebase, pull, or leave it); resume from Step 2 once the branch is caught up. The
+no-clean-tree-gate rule below still applies after that.
+
+**`@{u}` only exists if the branch has an upstream** — a branch can have an open PR with no local
+tracking config, and `@{u}` then exits 128 with `fatal: no upstream configured` rather than
+printing nothing. Guard it the way `wrap` does: read the upstream from `git branch -vv` first,
+and if there is none, report that as the finding and skip the comparison rather than letting the
+error stand in for "nothing on the remote".
+
+**`origin` is not always the PR's base repo.** On a fork checkout — `headRepositoryOwner` differs
+from the owner of the repo the PR targets — `origin` is the fork, so `origin/<baseRefName>` is the
+fork's stale copy of the base branch and a no-argument `git fetch` may never touch the base repo at
+all. Find the remote pointing at the base repo in `git remote -v`, fetch that one explicitly, and
+read its ref wherever `<base-remote>/<baseRefName>` appears here and in Step 3.
 
 **A clean tree is not evidence there is nothing to do here.** Unlike `wrap`, this skill has no
 "nothing changed, stop" gate, and adding one would be a mistake: the most common way a
 description goes stale is a previous `/wrap` pushing — that skill says so itself — which leaves
 the tree clean, nothing unpushed, and the description describing a branch that has moved on.
-Steps 3–6 are driven by the diff against the base branch, not by uncommitted work, so run them
-regardless of what the sync finds.
+Steps 3–6 are driven by the diff against the base branch, not by uncommitted work, so a clean
+tree is no reason to skip them — the one thing that does pause the run is the diverged head above,
+and only until it is reconciled.
 
 **If the PR was passed explicitly, check the checkout matches it** before going any further —
 compare `git branch --show-current` against the `headRefName` you just read. Step 2 commits what is
@@ -60,7 +78,7 @@ Before writing a word of the description, read the change:
 
 ```bash
 gh pr diff --name-only                        # what's touched
-git log --oneline origin/<baseRefName>..HEAD  # the base ref you fetched, not the local one
+git log --oneline <base-remote>/<baseRefName>..HEAD  # the base ref you fetched, not the local one
 ```
 
 Read the existing title and body from Step 1, and the linked issues. Base the rewrite on the diff,
