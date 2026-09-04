@@ -14,15 +14,18 @@ again after a round of work.
 If the user passed a PR URL or number, use it. Otherwise take the PR for the current branch:
 
 ```bash
-git fetch --quiet
+git fetch --prune --quiet
 gh pr view --json number,url,title,body,headRefName,baseRefName,state,isDraft,mergeable,mergeStateStatus,reviewDecision
+git log --oneline HEAD..@{u}                  # remote head commits you don't have
+git log --oneline HEAD..origin/<baseRefName>  # how far the base has moved under you
 ```
 
 No PR for this branch? Say so and stop — creating one is a different decision, so ask first.
 
-**Fetch first, and note what moved under you** — commits on the remote head branch you don't
-have, a base branch that has advanced, a conflicted `mergeStateStatus`, review activity since
-last time. All of it changes what the description should say, and catching a diverged head here
+**Fetch first, and note what moved under you** — the two `git log` lines above say whether the
+remote head branch has commits you don't have and how far the base has advanced; `gh pr view`
+adds a conflicted `mergeStateStatus` and review activity since last time. A non-empty
+`HEAD..@{u}` is the answer up front. All of it changes what the description should say, and catching a diverged head here
 turns Step 2's *late* non-fast-forward push failure into an early, explainable one. If the fetch
 fails, say "remote state not checked" and carry on.
 
@@ -56,8 +59,8 @@ force-push without asking.
 Before writing a word of the description, read the change:
 
 ```bash
-gh pr diff --name-only        # what's touched
-git log --oneline main..HEAD  # (or the repo's default branch)
+gh pr diff --name-only                        # what's touched
+git log --oneline origin/<baseRefName>..HEAD  # the base ref you fetched, not the local one
 ```
 
 Read the existing title and body from Step 1, and the linked issues. Base the rewrite on the diff,
