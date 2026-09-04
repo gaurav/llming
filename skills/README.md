@@ -14,7 +14,8 @@ isn't recoverable from the skill itself.
   the code.
 - **update-pr** — keeps the PR honest about itself, since its title and description outlive the
   session that produced them.
-- **wrap** — gets what the agent has worked out into the repo before the session is wiped.
+- **wrap** — gets what the agent has worked out into the repo before the session is wiped, and
+  checks first whether a previous run already did.
 
 ## copilot-review
 
@@ -59,6 +60,11 @@ So this skill exists to be run repeatedly, not once at the end — every time a 
 It rewrites both against the actual diff rather than against the agent's memory of the session,
 which is the specific failure it's guarding against: an agent asked to summarise a PR will happily
 describe the three approaches it tried, when only the last one shipped.
+
+Deliberately *no* equivalent of `wrap`'s step-0 gate here, which took a round of getting wrong to
+see: the commonest way a description goes stale is a previous `/wrap` having committed and pushed,
+which leaves exactly the clean tree such a gate would stop on. The staleness this skill fixes lives
+in the diff against the base branch, not in uncommitted work.
 
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced
@@ -133,6 +139,14 @@ for the night.
 
 And the third: it's an explicit signal that the session is about to be wiped. If the agent has a
 warning to raise or something it wants me to do, this is its last chance to say so.
+
+The step-0 gate came later, from running this across several PRs in a row and watching it re-do
+work a previous run had already done — recording a lesson that was already recorded, hunting for
+tests on a diff that was already committed and pushed. Those two sections are the expensive part,
+so the skill now looks at the tree and the branches first and says what it found. It reports the
+evidence rather than a verdict, because a clean tree genuinely doesn't prove nothing is owed: the
+work may have been committed by hand, or by an earlier run that recorded no lesson. I'd rather be
+told "clean tree, nothing unpushed" and make that call myself.
 
 # What earns a skill
 
