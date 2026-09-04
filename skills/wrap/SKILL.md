@@ -45,6 +45,12 @@ sections 1–3** — but still run section 4, and do not treat this as the end o
 go ahead with 1–3 anyway in one line, and if the user asks, run them: they know what they did
 outside this session, and you do not.
 
+**Section 3's open-PR check survives the skip.** Everything else in that section is about work you
+are doing now, and on this path there is none — but a description goes stale when a push happens,
+and the push that got the branch into this state was the *previous* run's. That is the case with
+nobody left to notice it: this run has nothing to make stale, so it says nothing, and the run that
+did make it stale has ended. Ask the shallow question anyway before section 4.
+
 A clean tree does **not** prove there is nothing owed, so do not over-apply this:
 
 - A lesson or a test can still be missing from work that was already committed — by hand, or by
