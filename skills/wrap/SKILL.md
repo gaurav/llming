@@ -26,13 +26,19 @@ git log --oneline @{u}..     # only on a branch that has an upstream
 showing no `[origin/...]` marker simply has no upstream, and asking such a branch for unpushed
 commits exits 128 with `fatal: no upstream configured`.
 
-**Report the evidence, not a verdict.** "Working tree clean, no branch ahead of its upstream,
-remote unchanged since the last fetch" is three facts the user can correct. "There is nothing to
-do" is a claim this check cannot actually support — see below.
+**Report the evidence, not a verdict.** "Working tree clean, every local branch tracking a live
+upstream and none ahead of it, none behind after a fresh fetch" is three facts the user can
+correct. "There is nothing to do" is a claim this check cannot actually support — see below.
 
 The middle fact is about **every** branch in `git branch -vv`, not just the one you are on:
 section 3 pushes any local branch that is ahead, so a clean `main` says nothing about the feature
-branch sitting three commits ahead of its upstream.
+branch sitting three commits ahead of its upstream. It is also about *having* an upstream, not
+just being level with one: a branch that has never been pushed is not ahead of anything, and
+section 3's rule about asking before creating an upstream is precisely the work a gate reading
+"nothing is ahead" would skip. A branch with no `[origin/...]` marker fails this fact.
+
+The third fact comes from the behind counts in `git branch -vv` *after* the fetch above, which is
+what the gate actually needs; `--quiet` hiding which refs that fetch moved doesn't affect it.
 
 **When all three hold, say so, note that a previous run has likely already covered this, and skip
 sections 1–3** — but still run section 4, and do not treat this as the end of the skill. Offer to
@@ -88,8 +94,10 @@ to do, not a list to propose. Run them.
 Do this **after** sections 1 and 2, so the lessons and tests they wrote are included.
 
 Re-run `git status` here: sections 1 and 2 have written files since step 0 looked, and those
-files are the ones this section exists to commit. The rest of the step 0 survey — which branches
-exist, which have an upstream, how far ahead they are — still holds; don't re-run that.
+files are the ones this section exists to commit. Which branches exist and which have an upstream
+still holds from step 0; don't re-run that. **Ahead counts do not hold** — the commit you are
+about to make moves the checked-out branch past what step 0 counted, so re-read `git branch -vv`
+after committing before reporting any unpushed count below.
 
 Invoking this skill is authorization to commit and push **the work of this session**:
 
