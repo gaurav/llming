@@ -13,7 +13,8 @@ isn't recoverable from the skill itself.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
 - **update-pr** — keeps the PR honest about itself, since its title and description outlive the
-  session that produced them.
+  session that produced them, and stops a description that is rewritten every round from silently
+  accreting instead.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped, and
   checks first whether a previous run already did.
 
@@ -71,6 +72,31 @@ Deliberately *no* equivalent of `wrap`'s step-0 gate here, which took a round of
 see: the commonest way a description goes stale is a previous `/wrap` having committed and pushed,
 which leaves exactly the clean tree such a gate would stop on. The staleness this skill fixes lives
 in the diff against the base branch, not in uncommitted work.
+
+Running it repeatedly turned out to have a failure mode of its own, and it took a very long PR to
+see it. Each run reads the existing body, keeps what still looks true, and adds this round's news —
+and no single one of those edits is unreasonable. After five rounds the description said the same
+test count in four places, explained the project's premise back to the maintainer who maintains it,
+and had started narrating its own revision history: *the figure above is now superseded*, *an
+earlier version of this paragraph said something else*. The skill's churn rule was already there
+and was no help, because none of that is churn about the PR — it is churn about the document. So
+the skill now says rewrite rather than append, each fact exactly once, and treats a fact repeated
+across two sections as the signal to go back and merge instead of patching.
+
+The audience line was wrong in a way that reads as right. "Write for someone with no context"
+produces paragraphs arguing for a premise the reviewer already holds — on a PR to an upstream
+maintainer, their own project explained back to them. They have no context on *this change*; they
+have plenty on everything around it. Cheap to state, and it recovers a surprising amount of room.
+
+The other half of that room came from numbers. Anything a reader could recount from the diff —
+files, commits, call sites — gets approximated, because the precision is noise that then has to be
+maintained. Precision is for the numbers that *are* the claim and cost a re-run to check: test
+results, benchmarks, versions. Those also have to say where they came from and at which commit,
+which is what lets the *next* run notice that the measurement now predates three commits. That last
+part matters more than it sounds: a skill designed to run repeatedly will otherwise re-assert a
+stale figure forever, with each run's confidence borrowed from the one before. Cross-references
+rot the same way, so the skill re-checks every `#N` the old body cites — a paragraph explaining how
+two other PRs relate to this one survived several rounds after both had merged.
 
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced
