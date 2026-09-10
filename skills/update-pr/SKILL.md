@@ -88,18 +88,38 @@ not on your memory of the session — the session includes work that never lande
 and then quietly stops being true, and nothing in the diff reveals it — you have to ask:
 
 ```bash
-grep -o '#[0-9]\+' <old-body> | sort -u    # then, per number:
-gh pr view <N> --json number,state,isDraft,mergedAt || gh issue view <N> --json number,state,title
+gh pr view "$PR" --json body -q .body \
+  | grep -oE '([-._[:alnum:]]+(/[-._[:alnum:]]+)?)?#[0-9]+' | sort -u   # then, per reference:
+gh pr view <N> --repo <repo> --json number,state,isDraft,mergedAt,mergeCommit \
+  || gh issue view <N> --repo <repo> --json number,state,title
 ```
 
-For one that has since merged, also check whether this branch already contains it
-(`git rev-list --count HEAD..<base-remote>/<baseRefName>`) — "merged upstream" and "already here"
-are different sentences, and only the second lets you drop the paragraph rather than rewrite it.
+**Both halves of that need the repo spelled out.** A bare `#N` in a body resolves against the PR's
+base repo; `gh` without `--repo` resolves against the clone's default, which on a fork checkout is
+the fork (Step 1). Unqualified, the lookup either errors — and you report "cannot check" for a
+perfectly live reference — or silently returns a different PR that happens to share the number, and
+you rewrite the body around it. Pass the base repo you identified in Step 1, and for a reference
+that carries its own qualifier — `owner/repo#N` or `repo#N`, which the pattern above keeps because
+it changes the answer — pass that repo instead.
+
+For one that has since merged, "merged upstream" and "already here" are different sentences, and
+only the second lets you drop the paragraph rather than rewrite it. Ask it per PR:
+
+```bash
+git merge-base --is-ancestor <the mergeCommit oid from above> HEAD   # exit 0 = this branch has it
+```
+
+Counting commits between the branch and the base ref answers a different question — how far the
+base has moved — and is wrong in both directions here: it is non-zero whenever the base has
+advanced for any unrelated reason, and zero only when the branch happens to be fully up to date.
 
 **A measured claim carried over from a previous run may now predate commits.** This skill runs
-repeatedly by design, so any count or benchmark in the old body was measured at some commit. Check
-that commit against `HEAD`. If it is behind, either re-measure or say plainly what has landed since
-and what was re-checked on top of it. Do not silently re-assert it in the new body.
+repeatedly by design, so any count or benchmark in the old body was measured at some commit. Where
+it names that commit, check it against `HEAD`; if it is behind, either re-measure or say plainly
+what has landed since and what was re-checked on top of it. **A figure naming no commit is the
+common case, not the exception** — the provenance rule in Step 5 is newer than most bodies this
+skill will meet — and it is unverifiable rather than current: re-measure it, or replace it with the
+approximation Step 5 would have taken instead. Either way, do not silently re-assert it.
 
 ## Step 4 — Fix the title
 
