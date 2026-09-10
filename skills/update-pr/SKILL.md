@@ -84,6 +84,23 @@ git log --oneline <base-remote>/<baseRefName>..HEAD  # the base ref you fetched,
 Read the existing title and body from Step 1, and the linked issues. Base the rewrite on the diff,
 not on your memory of the session — the session includes work that never landed.
 
+**Re-check every `#N` the old body cites.** A claim about another PR or issue is true when written
+and then quietly stops being true, and nothing in the diff reveals it — you have to ask:
+
+```bash
+grep -o '#[0-9]\+' <old-body> | sort -u    # then, per number:
+gh pr view <N> --json number,state,isDraft,mergedAt || gh issue view <N> --json number,state,title
+```
+
+For one that has since merged, also check whether this branch already contains it
+(`git rev-list --count HEAD..<base-remote>/<baseRefName>`) — "merged upstream" and "already here"
+are different sentences, and only the second lets you drop the paragraph rather than rewrite it.
+
+**A measured claim carried over from a previous run may now predate commits.** This skill runs
+repeatedly by design, so any count or benchmark in the old body was measured at some commit. Check
+that commit against `HEAD`. If it is behind, either re-measure or say plainly what has landed since
+and what was re-checked on top of it. Do not silently re-assert it in the new body.
+
 ## Step 4 — Fix the title
 
 The title is a **changelog line**: it says what the change does and what effect it has, in the
@@ -100,8 +117,13 @@ gh pr edit "$PR" --title "..."
 
 ## Step 5 — Rewrite the description
 
-Write for a reader who arrives later with no context. Cover, in whatever structure suits the
-change:
+Write for a reader who arrives later with no context **on this change**. That is not the same as no
+context at all: they know the project, its domain, and why it exists, usually better than you do.
+Conflating the two is what fills a description with background the reviewer could have written
+themselves — and on a PR to an upstream maintainer it reads as explaining their own project back to
+them. Don't argue for a premise the reviewer already accepts. Spend that space on the decisions.
+
+Cover, in whatever structure suits the change:
 
 - **What changed** — a high-level account of what shipped, not a file-by-file tour of the diff.
 - **Why** — the problem it solves, and the decisions taken along the way that a reader would
@@ -115,6 +137,36 @@ change:
 Describe the **final state**, not the journey. An approach that was tried and abandoned does not
 belong here (see Step 7).
 
+### Approximate the numbers, except where the number is the claim
+
+Precise counts of things a reader could count themselves — files touched, lines added, commits,
+functions renamed — are noise that has to be maintained. "Adds over a hundred tests", "removes
+several files", "about forty call sites" says the same thing and cannot go stale. An agent reading
+the PR later can recount them exactly in one command if it ever matters.
+
+Be precise where the number *is* the claim and recounting it means re-running something: test
+passes and failures, a benchmark, a measured size or duration, a version. Those earn their
+precision — and they pay for it, because a precise number carries a provenance obligation: say
+where it came from and at which commit (`3419 tests, 0 failures — measured end to end on fee66028`)
+so the next run of this skill can tell whether it still holds. That is the check Step 3 performs. A
+number you would not bother sourcing is a number to approximate instead.
+
+### Rewrite, don't append
+
+`gh pr edit` replaces the whole body, so the temptation on every run after the first is to keep
+what is there and add to it. Don't. A body assembled that way says the same thing in three places
+and eventually contradicts itself, and no single edit ever looks unreasonable. **Each fact appears
+exactly once, in the section where it belongs**, and text carried over from the old body gets
+re-integrated rather than stacked on top of.
+
+Two tells, both of which mean go back and merge rather than patch:
+
+- the same number or finding stated in more than one section
+- a paragraph that ends by superseding an earlier one instead of replacing it
+
+This does not license dropping things: the rule at the end of this file still holds — read the
+current body first so nothing a human wrote gets lost. Re-integrating it is the work.
+
 ### Churn goes in a `<details>` block, or goes away
 
 The body above the fold is for **what the PR changes, what that produced, and what is still open**.
@@ -127,9 +179,17 @@ reader arriving in six months does not want it first:
 - merges from the base branch, and which side won a conflict
 - work that moved to another branch or landed upstream while this PR was open
 - rebases, force-pushes, renamed commits
+- **the description's own edit history** — "the figure above is now superseded", "an earlier
+  revision of this paragraph said X", "this description used to call it a pre-existing failure".
+  Churn about a document nobody is reading the history of, and the accretion tell from *Rewrite,
+  don't append* in its most literal form.
 
 Churn is not worthless — it is how someone traces why a particular line looks the way it does — so
-**move it into a collapsed `<details>` block at the end** rather than deleting it:
+**move it into a collapsed `<details>` block at the end** rather than deleting it. The same tool
+has a second use worth knowing, since a big change usually needs both: a `<details>` block placed
+*under a claim* holds the working behind it. The visible line says what was decided; the collapsed
+block holds the evidence, the per-item reasoning, the reproduction steps. That is what lets a
+decision stay defensible without the defence being the first thing a reader hits.
 
 ```markdown
 <details>
@@ -157,9 +217,22 @@ Two consequences worth stating, because both are easy to get wrong:
   it goes in a code comment or the repo's docs. Put it there *and* leave the story in the details
   block; do not let the details block be the only copy.
 
+### Put the judgement calls before the mechanical ones
+
+Most of a diff is forced: an API changed, a signature moved, the code follows. It needs describing,
+but it does not need defending, and a reviewer who reads it first has spent their attention on the
+part where there was nothing to decide. The places you *chose* — where a plausible alternative
+existed and you rejected it — are where review actually pays. Separate the two and lead with the
+former: name the call, say what you picked and what you passed over, and make it easy to overrule.
+
+Size this to the change. On a large PR it is a section of its own; on a three-file PR it is one
+sentence in the lead paragraph, or nothing at all if the change had no forks in it. It is a sorting
+principle, not a heading you owe anyone.
+
 A useful shape, adapted per PR: lead paragraph (problem, and what this does about it) → `Closes #N`
 → **What's here** → **What it produces** → **What it deliberately does not do** → **Before merging,
-or before the next run** → `<details>` review history.
+or before the next run** → `<details>` review history. For a large change, the decisions section
+goes in immediately after the lead, ahead of **What's here**.
 
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
