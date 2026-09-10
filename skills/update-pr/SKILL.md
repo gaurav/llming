@@ -202,7 +202,8 @@ reader arriving in six months does not want it first:
 - **the description's own edit history** — "the figure above is now superseded", "an earlier
   revision of this paragraph said X", "this description used to call it a pre-existing failure".
   Churn about a document nobody is reading the history of, and the accretion tell from *Rewrite,
-  don't append* in its most literal form.
+  don't append* in its most literal form. This is the one kind that gets deleted rather than
+  collapsed — see below.
 
 Churn is not worthless — it is how someone traces why a particular line looks the way it does — so
 **move it into a collapsed `<details>` block at the end** rather than deleting it. The same tool
@@ -221,8 +222,11 @@ above.</summary>
 </details>
 ```
 
-Delete it outright only when it says nothing a reader could ever want — a typo fix, a reverted
-commit that left no trace.
+Delete it outright when it says nothing a reader could ever want — a typo fix, a reverted commit
+that left no trace — and **always for the description's own edit history**. Collapsing that would
+only move the accretion below the fold, where it keeps growing a run at a time and *Rewrite, don't
+append* never bites. Nothing is lost: GitHub keeps the body's own revision history, and it is one
+click from the description.
 
 **The test: could this sentence have been written by someone who only read the final diff?** If
 yes, it belongs above the fold. If it needs the commit log to make sense, it is churn.
