@@ -121,6 +121,13 @@ common case, not the exception** — the provenance rule in Step 5 is newer than
 skill will meet — and it is unverifiable rather than current: re-measure it, or replace it with the
 approximation Step 5 would have taken instead. Either way, do not silently re-assert it.
 
+**A claim about what the code now does is checkable too, and it is the one that bites.** "The check
+runs on every file", "every call site was migrated", "the new path handles both formats" — each was
+written from intent rather than from the diff, and a review finding or a later commit can falsify it
+without touching a line the sentence names. Pull the load-bearing claims out of the old body and
+confirm each against the code as it stands, the way you would a `#N` reference. One you cannot
+confirm gets rewritten down to what you can confirm, never carried over intact.
+
 ## Step 4 — Fix the title
 
 The title is a **changelog line**: it says what the change does and what effect it has, in the
@@ -128,6 +135,8 @@ imperative, understandable to someone who wasn't in the conversation.
 
 - Rewrite it whenever the PR's scope has moved past it. That's the common case after a round of
   work, not the exception.
+- A title that still describes the change is a fine outcome: leave it, and say so in Step 8, so
+  the user can tell it was considered rather than skipped.
 - Never leave a placeholder — "Initial implementation of X", "WIP", "Fixes for review comments",
   or anything naming the branch or the stage of work rather than the change.
 

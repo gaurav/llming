@@ -108,6 +108,15 @@ stale figure forever, with each run's confidence borrowed from the one before. C
 rot the same way, so the skill re-checks every `#N` the old body cites — a paragraph explaining how
 two other PRs relate to this one survived several rounds after both had merged.
 
+The third thing that rots is the one I hadn't thought to check: a claim about what the code does.
+A description saying a validator "now runs on every `.base` file" was written from what the change
+was meant to do, and a review then found it walking only half of them. Nothing in the diff flags
+that sentence — it names no line, and it had been true-in-intent since the round it was written in.
+So the skill now treats the load-bearing claims in the old body the way it treats a `#N`: confirm
+each against the code as it currently stands, and rewrite the ones you cannot confirm down to what
+you can. This is the failure the whole skill is about, arriving in the one form that looks like
+prose rather than like data.
+
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced
 after the description was written — and the skill forces a decision on each one: do it here, drop
