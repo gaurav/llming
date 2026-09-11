@@ -88,6 +88,16 @@ produces paragraphs arguing for a premise the reviewer already holds — on a PR
 maintainer, their own project explained back to them. They have no context on *this change*; they
 have plenty on everything around it. Cheap to state, and it recovers a surprising amount of room.
 
+The description now has to open with an abstract: a paragraph or three on what is in the PR and
+why it matters, above every heading, ending in the `Closes #N` lines. The stated reason is that it
+should be quick to tell what a PR is for, which is true and would be reason enough. The actual
+reason is that I read PRs in a tool that renders every section collapsed, so a description whose
+first line is a heading opens as a wall of folded triangles and tells me nothing. That makes the
+abstract the one part guaranteed to be read, and the rest of the rule falls out of that guarantee
+rather than out of taste: it cannot live inside a `<details>`, it cannot say "as described below",
+and it cannot cite a figure whose provenance is three sections down. Worth knowing that this is a
+property of *my* reader and not of GitHub, in case the tool changes and the rule looks arbitrary.
+
 The other half of that room came from numbers. Anything a reader could recount from the diff —
 files, commits, call sites — gets approximated, because the precision is noise that then has to be
 maintained. Precision is for the numbers that *are* the claim and cost a re-run to check: test

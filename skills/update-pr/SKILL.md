@@ -143,13 +143,37 @@ Conflating the two is what fills a description with background the reviewer coul
 themselves — and on a PR to an upstream maintainer it reads as explaining their own project back to
 them. Don't argue for a premise the reviewer already accepts. Spend that space on the decisions.
 
-Cover, in whatever structure suits the change:
+### Open with an abstract, and never fold it
+
+The body **starts with one to three short paragraphs saying what is in this PR and why it matters**,
+before any heading, and ends that run with the `Closes #N` / `Fixes #N` lines. That is the abstract,
+and it is the one part of the description a reader is guaranteed to see: everything below it sits in
+a section that someone may have collapsed, by hand or because their review tool renders every
+section folded by default. Write it so a reader who expands nothing still knows what this PR is for
+and whether it is theirs to review.
+
+What follows from it being the always-visible part:
+
+- **It goes above every heading, and never inside a `<details>` block.** A `<details>` at the very
+  top of the body is the one arrangement that defeats the whole point.
+- **It has to stand alone.** No "as described below", no pointer to a section that may be folded, no
+  figure whose provenance is only given further down.
+- **It is not a summary of the diff.** What changed is what *What's here* is for; the abstract says
+  what problem this solves and what is different once it merges — the paragraph someone would quote
+  when asking a colleague to review it.
+- **Keep it short.** Three paragraphs is a large change; one is the common case. When it grows past
+  that, the extra material belongs in a section rather than here.
+- **End it with the `Closes #N` / `Fixes #N` lines**, one per line, so GitHub links them and the
+  scope is visible without expanding anything. A PR that closes no issue just ends without them —
+  don't invent a reference to fill the slot.
+
+Cover, in the sections below it, in whatever structure suits the change:
 
 - **What changed** — a high-level account of what shipped, not a file-by-file tour of the diff.
 - **Why** — the problem it solves, and the decisions taken along the way that a reader would
   otherwise have to reverse-engineer.
 - **Outcomes** — what the change achieves, and anything it deliberately doesn't.
-- **Issues closed** — with `Closes #N` / `Fixes #N` so GitHub links them.
+- **Issues closed** — in the abstract, per above, not repeated in a section of their own.
 - **Follow-on work** — issues opened for what was deferred, linked by number.
 - **What's still blocking** — anything the PR shouldn't merge without, as unchecked TODOs. If there
   is none, say so; a reader shouldn't have to infer it from an absent section.
@@ -253,10 +277,10 @@ Size this to the change. On a large PR it is a section of its own; on a three-fi
 sentence in the lead paragraph, or nothing at all if the change had no forks in it. It is a sorting
 principle, not a heading you owe anyone.
 
-A useful shape, adapted per PR: lead paragraph (problem, and what this does about it) → `Closes #N`
-→ **What's here** → **What it produces** → **What it deliberately does not do** → **Before merging,
-or before the next run** → `<details>` review history. For a large change, the decisions section
-goes in immediately after the lead, ahead of **What's here**.
+A useful shape, adapted per PR: abstract (problem, what this does about it, `Closes #N`) →
+**What's here** → **What it produces** → **What it deliberately does not do** → **Before merging, or
+before the next run** → `<details>` review history. For a large change, the decisions section goes
+in immediately after the abstract, ahead of **What's here**.
 
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
