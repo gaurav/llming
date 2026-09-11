@@ -5,9 +5,13 @@ description: Bring a pull request up to date with the work — commit and push o
 
 # update-pr
 
-The PR is the record of this work. Its **title becomes a changelog line** and its **description is
-what someone reads in six months** to understand what changed and why. This skill makes both true
-again after a round of work.
+The title becomes a changelog line. The description gets read twice: during review, and later by
+whoever writes the changelog entry. Nothing else reads it. So anything a person or an agent will
+need to know at any *other* time has to be in the repo — `docs/`, a code comment,
+`CLAUDE.md`/`AGENTS.md` — and the description links to it rather than containing it. A description
+that is the only copy of something is a description that has taken on a job it cannot do.
+
+This skill makes the title, the description and the repo all true again after a round of work.
 
 ## Step 1 — Identify the PR
 
@@ -117,9 +121,9 @@ advanced for any unrelated reason, and zero only when the branch happens to be f
 repeatedly by design, so any count or benchmark in the old body was measured at some commit. Where
 it names that commit, check it against `HEAD`; if it is behind, either re-measure or say plainly
 what has landed since and what was re-checked on top of it. **A figure naming no commit is the
-common case, not the exception** — the provenance rule in Step 5 is newer than most bodies this
+common case, not the exception** — the provenance rule in Step 6 is newer than most bodies this
 skill will meet — and it is unverifiable rather than current: re-measure it, or replace it with the
-approximation Step 5 would have taken instead. Either way, do not silently re-assert it.
+approximation Step 6 would have taken instead. Either way, do not silently re-assert it.
 
 **A claim about what the code now does is checkable too, and it is the one that bites.** "The check
 runs on every file", "every call site was migrated", "the new path handles both formats" — each was
@@ -144,13 +148,65 @@ imperative, understandable to someone who wasn't in the conversation.
 gh pr edit "$PR" --title "..."
 ```
 
-## Step 5 — Rewrite the description
+## Step 5 — Put the durable material in the repo
+
+This comes before the description because you cannot link to a doc you have not written.
+
+**First, read what the repo already says.** The README, `docs/`, the agent files, and the comments
+next to the files `gh pr diff --name-only` listed in Step 3. Anything the repo already documents
+does not get restated in the description: link to it — a path, or a heading anchor — and spend the
+space on what the repo does not say. This is not a formality. A description that explained a
+feature at length once turned out to be the *third* copy of material already in that repo's README
+and its code comments, and no one had noticed because each copy was written by someone reading the
+diff rather than the repo.
+
+No command for this one: every repo lays its docs out differently, and a grep that finds nothing
+reads exactly like a repo that documents nothing. Open the files.
+
+**Then write down what is durable and missing.** A thing is durable if it will still be true after
+this merges and someone would need it then — how the thing works, a gotcha, a convention, a
+non-goal, a procedure someone will repeat, or an approach that was tried and rejected where a
+future developer would try it again. Record it where they'll hit it:
+
+1. A **code comment** next to the code that makes it tempting or confusing. The strongest form:
+   it's unmissable.
+2. A **`docs/` file** for the subsystem, referenced from an agent file if it isn't already. Create
+   `docs/` if the repo has none.
+3. The nearest **`CLAUDE.md` / `AGENTS.md`**, for a repo-wide rule.
+
+If you write one of these, it's a file change — commit and push it (Step 2) before Step 6, so the
+description can link to something that exists on the base repo.
+
+If nothing durable came out of this round, say so and move on. Do not invent documentation to have
+something to link to.
+
+## Step 6 — Rewrite the description
 
 Write for a reader who arrives later with no context **on this change**. That is not the same as no
 context at all: they know the project, its domain, and why it exists, usually better than you do.
 Conflating the two is what fills a description with background the reviewer could have written
 themselves — and on a PR to an upstream maintainer it reads as explaining their own project back to
 them. Don't argue for a premise the reviewer already accepts. Spend that space on the decisions.
+
+### The body has a budget
+
+**About 4,000 characters for the whole body** — abstract, every heading, and every `<details>`
+block included. That is a reviewer's first screen and a little more.
+
+**Folding is not compression.** A `<details>` block costs the same characters as an open one; it
+only costs the reader less to skip. Collapsed text counts against the budget exactly like visible
+text, and a body that meets the budget by folding has met nothing.
+
+When you are over, the overflow is almost always one of three things, and each has somewhere to go:
+
+- an explanation of how the thing works → the repo, and link to it (Step 5);
+- an enumeration of issues → a milestone or a search link (Step 7);
+- an account of the PR's own history → delete it.
+
+Cut by relocating, never by dropping a fact the reader needs — the budget is not a truncation
+instruction. Some changes genuinely need more room, and going over is a signal to re-read this
+step rather than a rule to break quietly: when you do, say in the summary how long the body is and
+what the extra length is buying.
 
 ### Open with an abstract, and never fold it
 
@@ -163,32 +219,33 @@ and whether it is theirs to review.
 
 What follows from it being the always-visible part:
 
-- **It goes above every heading, and never inside a `<details>` block.** A `<details>` at the very
-  top of the body is the one arrangement that defeats the whole point.
-- **It has to stand alone.** No "as described below", no pointer to a section that may be folded, no
-  figure whose provenance is only given further down.
-- **It is not a summary of the diff.** What changed is what *What's here* is for; the abstract says
-  what problem this solves and what is different once it merges — the paragraph someone would quote
-  when asking a colleague to review it.
-- **Keep it short.** Three paragraphs is a large change; one is the common case. When it grows past
-  that, the extra material belongs in a section rather than here.
+- **It goes above every heading, never inside a `<details>` block, and it stands alone.** No "as
+  described below", no pointer to a section that may be folded, no figure whose provenance is only
+  given further down.
+- **It is not a summary of the diff.** It says what problem this solves and what is different once
+  it merges — the paragraph someone would quote when asking a colleague to review it.
+- **Keep it short.** Three paragraphs is a large change; one is the common case.
 - **End it with the `Closes #N` / `Fixes #N` lines**, one per line, so GitHub links them and the
   scope is visible without expanding anything. A PR that closes no issue just ends without them —
   don't invent a reference to fill the slot.
 
 Cover, in the sections below it, in whatever structure suits the change:
 
-- **What changed** — a high-level account of what shipped, not a file-by-file tour of the diff.
+- **What changed** — a high-level account of what shipped: not a file-by-file tour of the diff, and
+  not an explanation of the feature itself, which belongs in the repo (Step 5).
 - **Why** — the problem it solves, and the decisions taken along the way that a reader would
   otherwise have to reverse-engineer.
 - **Outcomes** — what the change achieves, and anything it deliberately doesn't.
-- **Issues closed** — in the abstract, per above, not repeated in a section of their own.
-- **Follow-on work** — issues opened for what was deferred, linked by number.
-- **What's still blocking** — anything the PR shouldn't merge without, as unchecked TODOs. If there
-  is none, say so; a reader shouldn't have to infer it from an absent section.
+- **How it was verified** — one line, not an account. What you ran and what it said, with the
+  provenance the numbers rule below requires. The test suite is where verification lives, and a
+  reviewer who wants the detail reads CI. If verifying it needed a procedure someone will repeat,
+  that procedure is a repo file (Step 5), not a PR section.
+- **What's still blocking, and what was deferred** — anything the PR shouldn't merge without, as
+  unchecked TODOs, and what went to issues instead, linked per Step 7. If there is none, say so; a
+  reader shouldn't have to infer it from an absent section.
 
 Describe the **final state**, not the journey. An approach that was tried and abandoned does not
-belong here (see Step 7).
+belong here (see Step 5).
 
 ### Approximate the numbers, except where the number is the claim
 
@@ -201,8 +258,9 @@ Be precise where the number *is* the claim and recounting it means re-running so
 passes and failures, a benchmark, a measured size or duration, a version. Those earn their
 precision — and they pay for it, because a precise number carries a provenance obligation: say
 where it came from and at which commit (`3419 tests, 0 failures — measured end to end on fee66028`)
-so the next run of this skill can tell whether it still holds. That is the check Step 3 performs. A
-number you would not bother sourcing is a number to approximate instead.
+so the next run of this skill can tell whether it still holds. A number you would not bother
+sourcing is a number to approximate instead — or to leave out. Under the budget a figure has to
+earn both its precision and its line.
 
 ### Rewrite, don't append
 
@@ -212,87 +270,62 @@ and eventually contradicts itself, and no single edit ever looks unreasonable. *
 exactly once, in the section where it belongs**, and text carried over from the old body gets
 re-integrated rather than stacked on top of.
 
-Two tells, both of which mean go back and merge rather than patch:
+The budget above is what makes this enforceable: you cannot append inside a fixed one. Two tells
+mean go back and merge rather than patch — the same number or finding stated in more than one
+section, and a paragraph that ends by superseding an earlier one instead of replacing it.
 
-- the same number or finding stated in more than one section
-- a paragraph that ends by superseding an earlier one instead of replacing it
+This does not license dropping things: read the current body first so nothing a human wrote gets
+lost. Re-integrating it is the work.
 
-This does not license dropping things: the rule at the end of this file still holds — read the
-current body first so nothing a human wrote gets lost. Re-integrating it is the work.
+### Churn gets deleted
 
-### Churn goes in a `<details>` block, or goes away
-
-The body above the fold is for **what the PR changes, what that produced, and what is still open**.
-Everything that is a fact about the PR's own history rather than about the code is churn, and a
-reader arriving in six months does not want it first:
-
-- review rounds, and which round found what
-- "the first pass at this was narrower than its commit message claimed"
-- a fix that later got corrected by a second fix — the description states the final behaviour once
-- merges from the base branch, and which side won a conflict
-- work that moved to another branch or landed upstream while this PR was open
-- rebases, force-pushes, renamed commits
-- **the description's own edit history** — "the figure above is now superseded", "an earlier
-  revision of this paragraph said X", "this description used to call it a pre-existing failure".
-  Churn about a document nobody is reading the history of, and the accretion tell from *Rewrite,
-  don't append* in its most literal form. This is the one kind that gets deleted rather than
-  collapsed — see below.
-
-Churn is not worthless — it is how someone traces why a particular line looks the way it does — so
-**move it into a collapsed `<details>` block at the end** rather than deleting it. The same tool
-has a second use worth knowing, since a big change usually needs both: a `<details>` block placed
-*under a claim* holds the working behind it. The visible line says what was decided; the collapsed
-block holds the evidence, the per-item reasoning, the reproduction steps. That is what lets a
-decision stay defensible without the defence being the first thing a reader hits.
-
-```markdown
-<details>
-<summary><b>Review history</b> — N rounds, one commit per finding. Kept for anyone tracing why a
-particular line looks the way it does; the durable conclusions are in the code comments and docs
-above.</summary>
-
-...
-</details>
-```
-
-Delete it outright when it says nothing a reader could ever want — a typo fix, a reverted commit
-that left no trace — and **always for the description's own edit history**. Collapsing that would
-only move the accretion below the fold, where it keeps growing a run at a time and *Rewrite, don't
-append* never bites. Nothing is lost: GitHub keeps the body's own revision history, and it is one
-click from the description.
+The body is for **what the PR changes, what that produced, and what is still open**. Anything that
+is a fact about the PR's own history rather than about the code is churn: review rounds and which
+one found what, a first pass narrower than its commit message claimed, a fix later corrected by a
+second fix, merges from the base branch and which side won, work that moved elsewhere while the PR
+was open, rebases and force-pushes, and the description's own edit history.
 
 **The test: could this sentence have been written by someone who only read the final diff?** If
-yes, it belongs above the fold. If it needs the commit log to make sense, it is churn.
+yes, it belongs in the body. If it needs the commit log to make sense, it is churn.
 
-Two consequences worth stating, because both are easy to get wrong:
+Nothing is lost by deleting it: the commit log, the review threads and the body's own revision
+history are each one click from the PR, and they are the real record. A description that retells
+them is a worse copy that has to be maintained.
 
-- **A fix and its later correction are one row, not two.** "We sorted the statements / …and that
-  sort tied on the only case it had" is churn twice over. Above the fold, the code sorts
-  deterministically; how many attempts that took belongs in the details block.
-- **Durable lessons escape the details block.** If a false path or a review finding produced
-  something a future developer needs — a gotcha, a convention, a "don't use X here" — Step 7 says
-  it goes in a code comment or the repo's docs. Put it there *and* leave the story in the details
-  block; do not let the details block be the only copy.
+At most **one** `<details>` block survives, and only where a reviewer would genuinely want the
+breadcrumb: the merged remainder of everything above, a few lines, at the end, under a summary line
+saying what it is. Not one per topic — if you are writing a second, the first was not worth keeping
+either. It counts against the budget like everything else.
+
+The description's own edit history is the one kind that is **always** deleted, never collapsed.
+Collapsing it only moves the accretion below the fold, where it grows a run at a time and *Rewrite,
+don't append* never bites.
+
+A fix and its later correction are one row, not two. "We sorted the statements / …and that sort
+tied on the only case it had" is churn twice over: above the fold, the code sorts deterministically,
+and how many attempts that took is not part of the change.
 
 ### Put the judgement calls before the mechanical ones
 
-Most of a diff is forced: an API changed, a signature moved, the code follows. It needs describing,
-but it does not need defending, and a reviewer who reads it first has spent their attention on the
-part where there was nothing to decide. The places you *chose* — where a plausible alternative
-existed and you rejected it — are where review actually pays. Separate the two and lead with the
-former: name the call, say what you picked and what you passed over, and make it easy to overrule.
+Most of a diff is forced: an API changed, a signature moved, the code follows. It rarely needs more
+than a sentence and never needs defending — the diff describes itself, and a reviewer who reads it
+first has spent their attention on the part where there was nothing to decide. The places you
+*chose* — where a plausible alternative existed and you rejected it — are where review actually
+pays. Separate the two and lead with the former: name the call, say what you picked and what you
+passed over, and make it easy to overrule.
 
-Size this to the change. On a large PR it is a section of its own; on a three-file PR it is one
-sentence in the lead paragraph, or nothing at all if the change had no forks in it. It is a sorting
-principle, not a heading you owe anyone.
+Size this to the change: a section of its own on a large PR, one sentence in the lead paragraph on
+a three-file one, nothing at all if the change had no forks in it. It is a sorting principle, not a
+heading you owe anyone.
 
-A useful shape, adapted per PR: abstract (problem, what this does about it, `Closes #N`) →
-**What's here** → **What it produces** → **What it deliberately does not do** → **Before merging, or
-before the next run** → `<details>` review history. For a large change, the decisions section goes
-in immediately after the abstract, ahead of **What's here**.
+A useful shape, adapted per PR: abstract (problem, what this does about it, `Closes #N`) → **the
+calls worth overruling** → **what's here** → **what it deliberately does not do** → **before
+merging**. Four sections is a large PR; two is common. Nothing below the abstract is owed to
+anyone, and no shape includes a review history by default.
 
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
+wc -m <path>                          # characters — `wc -c` counts bytes and overcounts every em dash
 ```
 
 Write the body to a scratch file rather than passing `--body` inline; long markdown gets mangled by
@@ -317,7 +350,7 @@ a naive line-joiner are exactly the ones that fail silently in a file rewritten 
 list indentation, indented code blocks, underlined headings, raw HTML such as `<pre>`, and the two
 trailing spaces that mark a deliberate line break.
 
-## Step 6 — Work the TODO checkboxes
+## Step 7 — Work the TODO checkboxes
 
 The description's `- [ ]` / `- [x]` items are a live list, not decoration. Go through all of them:
 
@@ -347,32 +380,22 @@ raising directly — either it should be done now, or it wasn't really blocking.
 call, ask.
 
 Don't file issues unprompted: list the ones you'd file with a one-line summary each, and wait for
-the user to pick. Once filed, replace the checkbox with a link to the issue so the description
-stays a complete account of what's outstanding.
+the user to pick. That listing goes to the user in chat, not into the body. Once filed, replace the
+checkbox with a link to the issue so the description stays a complete account of what's outstanding.
 
-If pulling an item into this PR means new code, that's new work — do it, then run Steps 2–5 again.
+**A list of issues in the body is a link, not a list.** Past three or four, link the milestone or an
+issue search and name only the two or three a reviewer actually needs to know about. Summarising
+each one restates a title GitHub already renders, and goes stale the moment one is closed or
+retitled. A milestone link *is* a complete account.
 
-## Step 7 — Where the false paths go
-
-Approaches that were tried and rejected are **not** PR-description material above the fold. A
-one-line mention is enough where a reader would otherwise wonder why the obvious thing wasn't done;
-the fuller story goes in Step 5's `<details>` block.
-
-They matter in one case: a future developer is likely to try the same thing again. Then record it
-where they'll hit it —
-
-1. A **code comment** next to the code that makes it tempting, saying what was tried and why it
-   failed. This is the strongest form: it's unmissable.
-2. The repo's `CLAUDE.md` / `AGENTS.md` or `docs/`, when it's a repo-wide gotcha rather than a
-   property of one function.
-
-If you write one of these, it's a file change — commit and push it (Step 2) before finishing.
+If pulling an item into this PR means new code, that's new work — do it, then run Steps 2–6 again.
 
 ## Step 8 — Summary
 
-Short. The new title, what changed in the description, what you moved into or out of the
-`<details>` block, the checkbox decisions (done / dropped / deferred / blocking), any issues you're
-proposing to file, and confirmation of the push.
+Short. The new title, what changed in the description, **what you put into the repo and where**,
+the body's character count, the checkbox decisions (done / dropped / deferred / blocking), any
+issues you're proposing to file, and confirmation of the push. If the body is over budget, say what
+the extra length is buying — a budget nobody reports is a budget nobody keeps.
 
 ## Notes
 

@@ -12,9 +12,9 @@ isn't recoverable from the skill itself.
   re-derive them on every PR.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
-- **update-pr** — keeps the PR honest about itself, since its title and description outlive the
-  session that produced them, and stops a description that is rewritten every round from silently
-  accreting instead.
+- **update-pr** — keeps the PR honest about itself and about its own size: the description is read
+  at review and at changelog time and never again, so everything durable goes into the repo and the
+  description links to it, and what is left is rewritten each round rather than accreted.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped, and
   checks first whether a previous run already did.
 
@@ -58,10 +58,11 @@ Where it goes if it earns it:
 
 ## update-pr
 
-A PR title becomes a line in my release notes, and a PR description is the only place the *why*
-of a change survives once the session that produced it is gone. Both drift: the title is written
-when the branch is one commit old and the description when I still remember everything, and neither
-gets revisited as the work turns into something else.
+A PR title becomes a line in my release notes. The description gets read during review and again
+when I write that line, and then never — so it is the *worst* place for the *why* of a change to
+survive, and the repo is the right one. Both drift: the title is written when the branch is one
+commit old and the description when I still remember everything, and neither gets revisited as the
+work turns into something else.
 
 So this skill exists to be run repeatedly, not once at the end — every time a round of work lands.
 It rewrites both against the actual diff rather than against the agent's memory of the session,
@@ -82,6 +83,26 @@ earlier version of this paragraph said something else*. The skill's churn rule w
 and was no help, because none of that is churn about the PR — it is churn about the document. So
 the skill now says rewrite rather than append, each fact exactly once, and treats a fact repeated
 across two sections as the signal to go back and merge instead of patching.
+
+Then the same failure arrived at a scale the accretion rule could not touch. A description came in
+at 58,000 characters — around 9,000 words — and every part of it was well written. Thirty per cent
+was collapsed history, twenty per cent an account of how the change had been tested, seventeen per
+cent product documentation that turned out to be the *third* copy of material already in that
+repo's README and its code comments, and twelve per cent an inline list of some thirty issues, each
+summarising a title GitHub already renders. The fix is not better prose, it is a different
+location: nobody reads a PR description except during review and when writing a changelog line, so
+anything needed at any other time has to be in the repo. Step 7 already said exactly that for the
+one case of a rejected approach — code comment, or `CLAUDE.md`/docs, and it is a file change to
+commit — so it was widened to cover everything durable and moved ahead of the description, because
+you cannot link to a doc you have not written.
+
+The budget that came with it is about 4,000 characters, with an escape hatch rather than a hard
+cap: a cap gets gamed or broken silently, and a bare principle gets agreed with and ignored. Its
+real job is to make the model notice the moment it is about to write a doc into the wrong file.
+And it has to say that collapsed text counts, because the previous rule said churn *goes in a
+`<details>` block* and the model complied — 17,000 characters of compliant collapsed text. The rule
+meant to bound the body had become the mechanism for growing it, which is worth remembering the
+next time a rule gives an agent somewhere to put things.
 
 The audience line was wrong in a way that reads as right. "Write for someone with no context"
 produces paragraphs arguing for a premise the reviewer already holds — on a PR to an upstream
