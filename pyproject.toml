@@ -8,7 +8,7 @@ requires-python = ">=3.9"
 [dependency-groups]
 # Tooling and test deps. pytest's companions are here because the tests import the scripts, which
 # import them; rumdl is the Markdown linter CI runs.
-dev = ["pytest", "click", "requests", "tqdm", "rumdl"]
+dev = ["pytest", "click", "requests", "tqdm", "pillow", "rumdl"]
 
 [tool.uv]
 package = false
