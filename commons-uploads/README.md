@@ -33,7 +33,51 @@ Then upload `data/to-upload/` with the [Upload Wizard](https://commons.wikimedia
 everything as `on-commons`.
 
 Drop `--flickr-album` and `--flickr-user` to skip Flickr entirely. `--uploader Gaurav` restricts
-the Commons side to one user's files, which matters in a shared category.
+the Commons side to one user's files, which matters in a shared category. `--output` moves the
+CSV somewhere other than `data/reconcile.csv`.
+
+### Doing this again for a new batch
+
+1. **Export the photos from Apple Photos as JPEG** into a new folder under `data/`. Either
+   export mode works for matching, because only the EXIF capture time is used. "Export
+   Unmodified Original" is still the better choice: it keeps the bytes identical, so Commons'
+   own SHA-1 duplicate check will also work for anything already uploaded from the same file.
+   HEIC originals must be exported as JPEG; the script only reads `.jpg`/`.jpeg`.
+2. **Find the Commons category** the earlier uploads went into. It is the part after
+   `Category:` in the URL, with underscores or spaces, and is the category the *files* sit in,
+   not a parent. If uploads were scattered across categories, run once per category, or run
+   against a parent and accept that `gcmtype=file` does not recurse into subcategories.
+3. **Find the Flickr album ID and your NSID.** The album ID is the number at the end of the
+   album URL (`.../albums/72177720316118411`). The NSID (`83524507@N00`) is the same for every
+   album you own; it is in the album page source, or from
+   `flickr.people.findByUsername` on the [API explorer](https://www.flickr.com/services/api/explore/flickr.people.findByUsername).
+4. **Dry-run first, read the warnings, then `--move`.** The dry run costs nothing and the
+   warnings are where the surprises show up: dimension mismatches, burst pairs, Commons files
+   that match nothing local (which usually means the export is incomplete).
+5. **Upload `data/to-upload/`**, 50 at a time, and resolve `data/needs-review/` by hand: the
+   CSV row for each lists every Commons file at the same capture time, so open those and compare.
+6. **Re-run without `--move`** once the uploads are done. Everything left in the input folder
+   should be `on-commons`, and the Flickr line should show every photo you meant to upload.
+
+There is no state file. If a move was wrong, drag the files back into the input folder and
+re-run; the split is recomputed from scratch each time.
+
+### What `reconcile.csv` contains
+
+One row per JPEG in the input folder, in filename order.
+
+| Column | Meaning |
+| --- | --- |
+| `file` | Filename in the input folder |
+| `taken` | EXIF `DateTimeOriginal`, `YYYY:MM:DD HH:MM:SS`; empty if the file has none |
+| `width`, `height` | Pixel size of the local file |
+| `commons_title`, `commons_url` | Every Commons file with the same capture time, `; `-separated if more than one |
+| `flickr_id`, `flickr_url` | Every Flickr photo with the same capture time, likewise |
+| `status` | `on-commons` (one local file, one Commons file), `to-upload` (no Commons file), or `needs-review` |
+| `note` | Why it needs review, and any dimension mismatch against the Commons copy |
+
+`needs-review` is set when the capture time is shared by more than one local file, by more than
+one Commons file, or is missing. Those files are never moved to `to-upload/`.
 
 ## Known issues and limitations
 
@@ -63,6 +107,37 @@ the Commons side to one user's files, which matters in a shared category.
   carry the Flickr photo ID in structured data (P12120) and the URL as source (P7482).
 - **Match by SHA-1 as a fast path** when the local files are unmodified originals
   (`list=allimages&aisha1=` is public and instant), before falling back to capture time.
+
+## Extending it
+
+`reconcile.py` is one file with one command and no shared state. The pieces:
+
+- `fetch_commons`, `fetch_flickr`, `scan_local` each produce the same shape: a dict from capture
+  time to a list of entries (local is a flat list, keyed inside `reconcile`). A new source, say a
+  second Commons category or an Apple Photos library read directly, is one more function
+  returning that shape.
+- `reconcile(local, commons, flickr)` is the pure join. All the status and note logic lives
+  there, it takes no network or filesystem, and `tests/test_reconcile.py` covers it with
+  hand-built dicts. Change matching rules here and extend that test; run it with
+  `uv run pytest commons-uploads` from the repo root.
+- `move_files` is the only thing that touches the filesystem beyond writing the CSV.
+- `main` is the click wiring. Options map one-to-one onto the fetchers.
+
+Likely extensions, in the order they are most likely to be needed:
+
+- **A SHA-1 fast path**: hash each local file, query `list=allimages&aisha1=` (public, no key,
+  batchable), and mark exact hits `on-commons` before the capture-time join. Only pays off for
+  unmodified originals.
+- **Perceptual verification**: `imagehash` on the local file against the Commons thumbnail
+  (`iiprop=url` gives `thumburl`; ask for `iiurlwidth=1024`) to confirm a match or break a burst
+  tie. That adds Pillow-based hashing and a download per match, so keep it behind a flag.
+- **A metadata drafter** for the `to-upload/` folder: titles, descriptions, categories,
+  captions, structured data, written as a Pattypan spreadsheet. That is a separate script; this
+  one should stay a reconciler.
+
+Dependencies are declared in the PEP 723 header at the top of the script (`click`, `pillow`,
+`requests`, `tqdm`), so `uv run` installs them; the repo root `dev` group repeats them only so
+the tests can import the script.
 
 ## Prior art
 

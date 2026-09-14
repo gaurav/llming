@@ -35,6 +35,19 @@ Formats differ: EXIF and Commons write `2024:04:08 12:59:46`, Flickr writes
 - Flickr only issues API keys to Pro accounts as of 2025. Keys are in `.env` (gitignored), names
   in `env.default`. The script loads `.env` itself; in an agent session, never read `.env`
   directly, or the key ends up in the transcript.
+- `FLICKR_API_SECRET` is loaded but unused. Public album reads only need the key; the secret is
+  for signing OAuth calls, which would only matter for private photos or writes.
+- `load_env` is a deliberate five-line stand-in for python-dotenv: `KEY=VALUE`, `#` comments,
+  no quoting, never overrides a variable already in the environment.
+
+## Local scan
+
+- Capture time comes from Pillow: `img.getexif().get_ifd(0x8769)[0x9003]`. The plain
+  `getexif()` dict holds only IFD0 tags (`DateTime`, which is the *modification* time); the EXIF
+  sub-IFD is where `DateTimeOriginal` lives.
+- Only `.jpg`/`.jpeg` are scanned. HEIC would need `pillow-heif`; PNG and screenshots have no
+  `DateTimeOriginal` and land in `needs-review`.
+- `sips -g creation` on macOS reads the same tag and was used to cross-check during development.
 
 ## Facts about this batch
 
