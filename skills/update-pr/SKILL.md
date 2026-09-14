@@ -211,7 +211,7 @@ what the extra length is buying.
 ### Open with an abstract, and never fold it
 
 The body **starts with one to three short paragraphs saying what is in this PR and why it matters**,
-before any heading, and ends that run with the `Closes #N` / `Fixes #N` lines. That is the abstract,
+before any heading, naming the issues it closes. That is the abstract,
 and it is the one part of the description a reader is guaranteed to see: everything below it sits in
 a section that someone may have collapsed, by hand or because their review tool renders every
 section folded by default. Write it so a reader who expands nothing still knows what this PR is for
@@ -225,9 +225,14 @@ What follows from it being the always-visible part:
 - **It is not a summary of the diff.** It says what problem this solves and what is different once
   it merges — the paragraph someone would quote when asking a colleague to review it.
 - **Keep it short.** Three paragraphs is a large change; one is the common case.
-- **End it with the `Closes #N` / `Fixes #N` lines**, one per line, so GitHub links them and the
-  scope is visible without expanding anything. A PR that closes no issue just ends without them —
-  don't invent a reference to fill the slot.
+- **Name the issues it closes inside the abstract, not as a list after it**, so GitHub links them
+  and the scope is visible without expanding anything. Work the closing keyword into the sentence
+  that says what the PR does — "This PR fixes #12 by …", "This PR makes the queue move items one
+  way instead of mirroring them (closes #27) by …". When no single sentence fits, put them all on
+  one line at the end of the relevant paragraph: "This PR gathers several fixes to the queue pane.
+  Closes #12. Closes #14." Repeat the keyword for every issue — GitHub only closes the issue
+  directly after `Closes` / `Fixes` / `Resolves`, so "Closes #12, #14" leaves #14 open. A PR that
+  closes no issue just doesn't mention one — don't invent a reference to fill the slot.
 
 Cover, in the sections below it, in whatever structure suits the change:
 
@@ -318,10 +323,10 @@ Size this to the change: a section of its own on a large PR, one sentence in the
 a three-file one, nothing at all if the change had no forks in it. It is a sorting principle, not a
 heading you owe anyone.
 
-A useful shape, adapted per PR: abstract (problem, what this does about it, `Closes #N`) → **the
-calls worth overruling** → **what's here** → **what it deliberately does not do** → **before
-merging**. Four sections is a large PR; two is common. Nothing below the abstract is owed to
-anyone, and no shape includes a review history by default.
+A useful shape, adapted per PR: abstract (problem, what this does about it, and the issues it
+closes) → **the calls worth overruling** → **what's here** → **what it deliberately does not do**
+→ **before merging**. Four sections is a large PR; two is common. Nothing below the abstract is
+owed to anyone, and no shape includes a review history by default.
 
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
