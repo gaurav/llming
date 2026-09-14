@@ -15,7 +15,7 @@ runs the same check on push and pull request:
 
 ```bash
 uv run rumdl check .          # what CI runs
-uv run rumdl check --fix .    # fixes the mechanical ones in place
+uv run rumdl check --fix .    # fixes the mechanical ones in place, rewrapping over-long lines
 ```
 
 Config lives in `pyproject.toml` under `[tool.rumdl]`, so the linter and CI agree by construction.
