@@ -48,3 +48,54 @@ def test_reconcile_statuses_and_notes():
     assert by_file["noexif.jpeg"]["status"] == "needs-review"
     assert [h["title"] for h in unmatched_commons] == ["File:Orphan.jpg"]
     assert [h["id"] for h in unmatched_flickr] == ["9"]
+
+
+def test_move_files_sorts_by_status_and_leaves_on_commons(tmp_path):
+    from reconcile import move_files
+
+    src = tmp_path / "export"
+    src.mkdir()
+    for name in ("keep.jpeg", "new.jpeg", "burst.jpeg"):
+        (src / name).write_bytes(b"x")
+    rows = [
+        {"file": "keep.jpeg", "status": "on-commons"},
+        {"file": "new.jpeg", "status": "to-upload"},
+        {"file": "burst.jpeg", "status": "needs-review"},
+    ]
+    move_files(rows, src, tmp_path / "to-upload", tmp_path / "needs-review")
+    assert sorted(p.name for p in src.iterdir()) == ["keep.jpeg"]
+    assert (tmp_path / "to-upload" / "new.jpeg").exists()
+    assert (tmp_path / "needs-review" / "burst.jpeg").exists()
+
+
+def test_move_files_refuses_to_overwrite_and_moves_nothing(tmp_path):
+    import click
+    import pytest
+    from reconcile import move_files
+
+    src = tmp_path / "export"
+    src.mkdir()
+    (src / "a.jpeg").write_bytes(b"new a")
+    (src / "b.jpeg").write_bytes(b"b")
+    dest = tmp_path / "to-upload"
+    dest.mkdir()
+    (dest / "a.jpeg").write_bytes(b"old a")
+    rows = [{"file": "a.jpeg", "status": "to-upload"}, {"file": "b.jpeg", "status": "to-upload"}]
+    with pytest.raises(click.ClickException):
+        move_files(rows, src, dest, tmp_path / "needs-review")
+    assert (dest / "a.jpeg").read_bytes() == b"old a"
+    assert (src / "b.jpeg").exists()
+
+
+def test_load_env_sets_only_unset_keys(tmp_path, monkeypatch):
+    from reconcile import load_env
+
+    env = tmp_path / ".env"
+    env.write_text("# comment\n\nFLICKR_API_KEY=abc\nFLICKR_API_SECRET = s=1\nBROKEN LINE\n")
+    monkeypatch.delenv("FLICKR_API_KEY", raising=False)
+    monkeypatch.setenv("FLICKR_API_SECRET", "already")
+    load_env(env)
+    import os
+    assert os.environ["FLICKR_API_KEY"] == "abc"
+    assert os.environ["FLICKR_API_SECRET"] == "already"
+    load_env(tmp_path / "missing.env")  # no file is fine
