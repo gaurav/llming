@@ -83,7 +83,8 @@ description.`), and lead the summary with it rather than burying it among the ro
 
 - If the user passed a PR URL or number, use it. Otherwise use the PR for the current branch:
   `gh pr view --json number,url,headRefName,title,body`.
-- Derive `OWNER` and `REPO` from the URL, or `gh repo view --json owner,name -q '.owner.login, .name'`.
+- Derive `OWNER` and `REPO` from the URL, or
+  `gh repo view --json owner,name -q '.owner.login, .name'`.
 - Read the PR **title and body** now. They record the author's intent and deliberate design
   decisions — a Copilot comment that contradicts a stated decision may be a won't-fix or
   may reveal that the decision wasn't fully thought through.
