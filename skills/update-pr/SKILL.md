@@ -323,10 +323,10 @@ Size this to the change: a section of its own on a large PR, one sentence in the
 a three-file one, nothing at all if the change had no forks in it. It is a sorting principle, not a
 heading you owe anyone.
 
-A useful shape, adapted per PR: abstract (problem, what this does about it, and the issues it closes) → **the
-calls worth overruling** → **what's here** → **what it deliberately does not do** → **before
-merging**. Four sections is a large PR; two is common. Nothing below the abstract is owed to
-anyone, and no shape includes a review history by default.
+A useful shape, adapted per PR: abstract (problem, what this does about it, and the issues it
+closes) → **the calls worth overruling** → **what's here** → **what it deliberately does not do**
+→ **before merging**. Four sections is a large PR; two is common. Nothing below the abstract is
+owed to anyone, and no shape includes a review history by default.
 
 ```bash
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
