@@ -49,3 +49,11 @@ where that stops being true.
 messy headers, a padding row, a padding column, padded values. Nothing touches the network. Run
 from the repo root with `uv run pytest`; pandas and python-dotenv are in the root `pyproject.toml`
 dev group for exactly that reason.
+
+`tests/test_download_sheet.py` drives the CLI through click's `CliRunner` with `requests.get`
+stubbed, so the content-type guard is covered without the network — and its CSV case writes into a
+`tmp_path` subdirectory that does not exist yet, which is what keeps the fresh-clone `mkdir` honest.
+
+Both files stub `audiobooks.load_dotenv` out before setting `GOOGLE_SHEET_ID`. `load_dotenv()` does
+not override variables already in the environment, so `monkeypatch.setenv` would win anyway; the
+stub is what stops a developer's own `.env` from being consulted at all.

@@ -54,8 +54,33 @@ def test_text_is_stripped_so_values_group(df):
     assert df["genre"].tolist() == ["Science Fiction", "Fantasy"]
 
 
-def test_sheet_url_says_what_to_do_when_env_is_missing(monkeypatch):
-    monkeypatch.setattr("audiobooks.load_dotenv", lambda *a, **k: False)
-    monkeypatch.delenv("GOOGLE_SHEET_ID", raising=False)
+@pytest.fixture
+def env(monkeypatch):
+    """Set the sheet variables directly, with the real .env stubbed out of the way."""
+
+    def _env(**values):
+        monkeypatch.setattr("audiobooks.load_dotenv", lambda *a, **k: False)
+        for name in ("GOOGLE_SHEET_ID", "GOOGLE_SHEET_GID"):
+            monkeypatch.delenv(name, raising=False)
+        for name, value in values.items():
+            monkeypatch.setenv(name, value)
+
+    return _env
+
+
+def test_sheet_url_says_what_to_do_when_env_is_missing(env):
+    env()
     with pytest.raises(RuntimeError, match="env.default"):
         sheet_url()
+
+
+def test_sheet_url_puts_the_id_and_gid_where_google_wants_them(env):
+    env(GOOGLE_SHEET_ID="SHEET", GOOGLE_SHEET_GID="3")
+    assert sheet_url() == "https://docs.google.com/spreadsheets/d/SHEET/export?format=csv&gid=3"
+
+
+@pytest.mark.parametrize("gid", [None, "", "  "])
+def test_gid_falls_back_to_the_first_tab(env, gid):
+    # env.default ships GOOGLE_SHEET_GID=0, but a .env that drops or empties it still has to work.
+    env(GOOGLE_SHEET_ID="SHEET", **({} if gid is None else {"GOOGLE_SHEET_GID": gid}))
+    assert sheet_url().endswith("gid=0")
