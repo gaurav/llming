@@ -190,8 +190,13 @@ them. Don't argue for a premise the reviewer already accepts. Spend that space o
 
 ### The body has a budget
 
-**About 4,000 characters for the whole body** — abstract, every heading, and every `<details>`
+**About 5,000 characters for the whole body** — abstract, every heading, and every `<details>`
 block included. That is a reviewer's first screen and a little more.
+
+5,000 is a raised ceiling, not a target: it went up from 4,000 because real runs kept landing a few
+hundred over on PRs whose length was earning its keep, and a budget that is always missed stops
+being read as a budget at all. It comes back down — to 4,500 or lower — once runs stop touching it,
+so treat the old figure as the shape to aim for and this one as the point at which to start cutting.
 
 **Folding is not compression.** A `<details>` block costs the same characters as an open one; it
 only costs the reader less to skip. Collapsed text counts against the budget exactly like visible
