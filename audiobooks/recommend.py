@@ -14,6 +14,7 @@ What to listen to next, for the two ways the library actually gets used.
     uv run recommend.py new data/audiobooks.csv --genre fantasy --max-hours 12
     uv run recommend.py relisten data/audiobooks.csv
     uv run recommend.py relisten data/audiobooks.csv --long-ago     # dig past the usual favourites
+    uv run recommend.py taste data/audiobooks.csv                   # which genres have gone down best
 
 `new` ranks what has not been listened to: the next book of a series already under way first, then
 by how well the author, narrator and genre have gone down before. `relisten` ranks finished
@@ -133,8 +134,21 @@ def rank_relisten(df: pd.DataFrame, long_ago: bool) -> pd.DataFrame:
     return picks.sort_values(["score", "duration_hours"], ascending=False)
 
 
+def taste(df: pd.DataFrame, by: str) -> pd.DataFrame:
+    """
+    How each genre (or author, narrator, series, form) has gone down so far, best first, beside
+    how much of it is still waiting. `score` is the mean shrunk exactly as the rankings shrink it,
+    so a genre with one five-star book does not top the table; `mean` is the plain one.
+    """
+    prior, groups = df.liked.mean(), df.groupby(by)
+    table = pd.DataFrame({"rated": groups.liked.count(), "mean": groups.liked.mean(), "owned": groups.size()})
+    table["score"] = (groups.liked.sum() + prior * SHRINKAGE) / (table.rated + SHRINKAGE)
+    table["unheard"] = (~df.heard & df.status.eq("Not started")).groupby(df[by]).sum()
+    return table[table.rated > 0].sort_values("score", ascending=False)
+
+
 @click.command()
-@click.argument("mode", type=click.Choice(["new", "relisten"]))
+@click.argument("mode", type=click.Choice(["new", "relisten", "taste"]))
 @click.argument("source", required=False)
 @click.option("--genre", help="A genre (fantasy), or any part of an Audible category (detectives).")
 @click.option("--form", help="A form from genre_map.yaml: 'radio drama', 'read by the author', 'short stories'.")
@@ -142,13 +156,23 @@ def rank_relisten(df: pd.DataFrame, long_ago: bool) -> pd.DataFrame:
 @click.option("--min-hours", type=float)
 @click.option("--max-hours", type=float)
 @click.option("--long-ago", is_flag=True, help="relisten: favour what was last heard longest ago.")
+@click.option("--by", default="genre", show_default=True, type=click.Choice(["genre", "form", "author", "narrator", "series"]), help="taste: what to group on.")
 @click.option("-n", "count", default=20, show_default=True, help="How many to list.")
 @click.option("--csv", "as_csv", is_flag=True, help="Print CSV with every column, to hand to something else.")
-def main(mode, source, genre, form, fiction, min_hours, max_hours, long_ago, count, as_csv) -> None:
+def main(mode, source, genre, form, fiction, min_hours, max_hours, long_ago, by, count, as_csv) -> None:
     """Recommend books for MODE from SOURCE (a CSV from download_sheet.py; default: the live Sheet)."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     df = score(load(source))
     prior = df.liked.mean()
+
+    if mode == "taste":
+        if fiction is not None:
+            df = df[df.fiction == fiction]
+        table = taste(df, by).head(count)
+        click.echo(f"{'score':>5}  {'mean':>5}  {'rated':>5}  {'owned':>5}  {'unheard':>7}  {by}   (library mean {prior:.2f})")
+        for name, row in table.iterrows():
+            click.echo(f"{row.score:5.2f}  {row['mean']:5.2f}  {row.rated:5.0f}  {row.owned:5.0f}  {row.unheard:7.0f}  {name}")
+        return
 
     picks = rank_new(df) if mode == "new" else rank_relisten(df, long_ago)
     if fiction is not None:
@@ -179,6 +203,7 @@ def main(mode, source, genre, form, fiction, min_hours, max_hours, long_ago, cou
     for row in picks.fillna({"title": "", "author": "", "genre": ""}).itertuples():
         hours = f"{row.duration_hours:.1f}" if pd.notna(row.duration_hours) else ""
         click.echo(layout.format(f"{row.score:.1f}", hours, row.title[:40], row.author[:25], row.genre[:18], row.why))
+
 
 if __name__ == "__main__":
     main()

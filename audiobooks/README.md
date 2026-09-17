@@ -35,6 +35,7 @@ uv run download_sheet.py 2>&1 | tee data/last-run.log              # save the Sh
 uv run enrich.py data/audiobooks.csv 2>&1 | tee data/last-run.log  # look up whatever is new on Audible
 uv run recommend.py new data/audiobooks.csv                        # what to listen to properly
 uv run recommend.py relisten data/audiobooks.csv                   # what to have on in the background
+uv run recommend.py taste data/audiobooks.csv                      # which genres have gone down best
 ```
 
 Every script takes the saved CSV as an optional argument and reads the live Sheet without it.
@@ -63,6 +64,13 @@ uv run recommend.py relisten data/audiobooks.csv --long-ago
   cast, BBC serial, monologue), `short stories`, or `read by the author`. That last one is typed
   on seven books and true of 282: the loader fills it in wherever a book has no other form and its
   author is among its narrators.
+- **`taste`** is the table behind the rankings rather than a ranking: every genre with its mean
+  rating, how many ratings that rests on, how many books are owned and how many are still
+  unheard. `score` is the mean pulled towards the library-wide one, so a genre with a single
+  five-star book does not lead; sort by it, read `mean` beside it. `--by author`, `narrator`,
+  `series` or `form` does the same for those, and `--fiction/--non-fiction` narrows it. This lives
+  here and not in `genre_map.yaml` because it changes with every book rated, and the map is a
+  hand-edited file that should not.
 - The **why** column says what moved each book up or down. If a ranking looks wrong, that is
   where to look first. `--csv` prints every column instead, blurb included, which is the thing to
   hand to an LLM along with a mood ("something funny and short").
@@ -202,9 +210,10 @@ through a book.
 
 Things that fell out of looking at the whole library, each of which shaped the tools:
 
-- **History is the biggest unread pile and the lowest-rated genre** — a 3.4 mean rating against 4.1
-  for Comedy, Horror and Literature. The buying and the enjoying are out of step, and the genre
-  term in the ranking quietly corrects for it.
+- **The buying and the enjoying are out of step.** History is the biggest unheard pile (130 books)
+  and rates 3.5; Advice has 65 unheard and rates 2.7. Horror rates 4.2 and Literature 4.0, against
+  a library mean of 3.7. `recommend.py taste` shows the current table, and the genre term in the
+  ranking quietly corrects for it.
 - **How fast a book gets finished says almost nothing about how it was rated** (r = 0.12 between
   `time_taken_days` and `rating_0_5`), so pace is not used as a stand-in for enjoyment anywhere.
 - **Relistening is a rating.** The books heard twice or more that are also rated average 4.2, so

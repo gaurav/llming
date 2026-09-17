@@ -79,3 +79,13 @@ def test_long_ago_digs_past_the_recent_favourite(library):
     assert usual.index("Recent Favourite") < usual.index("Unrated Favourite")
     assert deeper.index("Unrated Favourite") < deeper.index("Recent Favourite")
     assert "Loved Two" not in usual  # never heard, so never a relisten
+
+
+def test_taste_ranks_groups_by_shrunk_mean_and_counts_what_is_waiting(library):
+    table = recommend.taste(library, "author")
+    # Meh Author is rated twice, both badly; one bad book would have been pulled back to the mean.
+    assert table.index[-1] == "Meh Author"
+    assert table.loc["Meh Author", "mean"] < table.loc["Meh Author", "score"] < library.liked.mean()
+    # Two Saga sequels wait unheard; the second edition of the heard first book is not one of them.
+    assert table.loc["Series Author", "unheard"] == 2
+    assert table.rated.min() > 0  # an author with nothing rated has no taste to report
