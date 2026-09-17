@@ -26,7 +26,7 @@ import logging
 import click
 import pandas as pd
 
-from audiobooks import load, squash
+from audiobooks import author_names, load, squash
 
 # What a relisten is worth as a rating when there is none: the median rating of the books that
 # were both rated and listened to twice or more.
@@ -50,17 +50,21 @@ def group_affinity(df: pd.DataFrame, liked: pd.Series, column: str) -> pd.Series
     Each book's expected liking judged by `column` alone: the mean liking of the other books
     sharing its value, shrunk towards the library-wide mean. Books with nothing to go on get
     exactly that mean, so they neither gain nor lose.
+
+    An author or narrator cell can name several people ("Terry Pratchett, Neil Gaiman"); each is
+    judged on their own and the book takes the average, so a co-written book borrows from both
+    authors' solo work. Series and genre are one value per cell and pass through the same code.
     """
-    # ponytail: groups on the whole cell, so "A, B" co-written is its own author. Split the names
-    # if shared credits start to matter.
     prior = liked.mean()
-    groups = liked.groupby(df[column])
-    total, n = df[column].map(groups.sum()).fillna(0), df[column].map(groups.count()).fillna(0)
-    # Leave the book's own rating out, or every finished book recommends itself. Only where the
-    # book is in a group at all: one with no narrator has nothing to be left out of.
-    own = liked.where(df[column].notna())
-    total, n = total - own.fillna(0), n - own.notna()
-    return (total + prior * SHRINKAGE) / (n + SHRINKAGE)
+    people = df[column].map(lambda cell: sorted(author_names(cell)) or [cell]) if column in ("author", "narrator") else df[column]
+    long = people.explode().dropna().rename("name").reset_index()  # one row per (book, name)
+    long["liked"] = liked.loc[long["index"]].to_numpy()
+    groups = long.groupby("name").liked
+    # Leave the book's own rating out, or every finished book recommends itself.
+    total = long.name.map(groups.sum()) - long.liked.fillna(0)
+    n = long.name.map(groups.count()) - long.liked.notna()
+    long["score"] = (total + prior * SHRINKAGE) / (n + SHRINKAGE)
+    return long.groupby("index").score.mean().reindex(df.index).fillna(prior)
 
 
 def next_in_series(df: pd.DataFrame, heard: pd.Series) -> pd.Series:

@@ -71,6 +71,30 @@ def test_a_book_does_not_vouch_for_itself(library):
     assert by_title.author_affinity["Meh Again"] < library.liked.mean()
 
 
+def test_a_co_written_book_borrows_from_each_authors_own_books():
+    scored = recommend.score(
+        pd.DataFrame(
+            [
+                book("Solo Hit", "Terry Pratchett", "Finished", rating=5, count=1),
+                book("Another Hit", "Terry Pratchett", "Finished", rating=5, count=1),
+                book("Solo Flop", "Neil Gaiman", "Finished", rating=1, count=1),
+                book("Good Omens", "Terry Pratchett, Neil Gaiman"),
+                book("Stranger", "Nobody Known"),
+            ]
+        )
+    ).set_index("title")
+    prior = scored.liked.mean()
+    # Pratchett alone pulls a book up, Gaiman alone pulls it down; the pair lands in between —
+    # and not at the prior, which is what treating "Terry Pratchett, Neil Gaiman" as a stranger did.
+    assert scored.author_affinity["Good Omens"] != pytest.approx(prior)
+    assert scored.author_affinity["Stranger"] == pytest.approx(prior)
+    # Gaiman's only book is judged with its own rating left out, so it sits at the prior too.
+    assert scored.author_affinity["Solo Flop"] == pytest.approx(prior)
+    pratchett_alone = (10 + prior * recommend.SHRINKAGE) / (2 + recommend.SHRINKAGE)
+    gaiman_alone = (1 + prior * recommend.SHRINKAGE) / (1 + recommend.SHRINKAGE)
+    assert scored.author_affinity["Good Omens"] == pytest.approx((pratchett_alone + gaiman_alone) / 2)
+
+
 def test_an_unrated_relisten_counts_as_liked(library):
     assert library.set_index("title").liked["Unrated Favourite"] == recommend.RELISTENED_RATING
 
