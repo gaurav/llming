@@ -55,7 +55,10 @@ bought between the download and the paste. Everything here is shaped by avoiding
   of it.)
 
 Fixing a typo in a title changes a `title|author` key, which orphans that row's cache entry. It
-heals itself — the next `enrich.py` run looks the new key up — so the cache is never edited by hand.
+heals itself: the next `enrich.py` run looks the new key up, and drops every cached row whose key
+the Sheet no longer has, so the cache — and the copy of it uploaded to the Sheet — is never edited
+by hand. The flip side is that `enrich.py` must be given the *current* Sheet: run against a stale
+`data/audiobooks.csv` it prunes books bought since, and then fetches them again next time.
 
 ## The enrichment cache has a copy in the Sheet, and Sheets damages it slightly
 
@@ -94,6 +97,11 @@ autouse fixture for exactly that reason.
 - **Category ladders come back alphabetically**, not by importance, which puts
   `Literature & Fiction` ahead of nearly everything. Hence row order in `genre_map.yaml` being the
   priority, rather than "first ladder wins".
+- **A wrong ASIN is silent.** Anything that answers is accepted, so a typed `Audible ID` is only as
+  right as the person who pasted it. After any round of hand-entered IDs, print the Sheet `title`
+  beside the cache's `audible_title` for those rows and read them; that check is what caught a
+  series page leading to an Italian edition, and a namesake podcast standing in for a radio
+  collection.
 - **Podcasts are in the catalogue too**, under `/podcast/` URLs, and answer by ASIN like a book
   (`content_delivery_type: PodcastParent`), with categories and sometimes a runtime. A search by
   title and author misses them, because the author is "Audible Original" or the producers, so they
@@ -114,6 +122,12 @@ and `… > Classics` to Literature — books typed Literature carry those ladder
 time, the best Audible offers — and everything else under that top level to `Fiction`. Telling the
 two apart needs three ladder levels, which is why `ladder_entries()` matches on the longest prefix
 the map lists rather than a fixed depth.
+
+A ladder whose longest match is a **form** (`… > Anthologies & Short Stories` is Short stories)
+carries on up for a genre, or a collection gets a form and no genre at all. A ladder whose longest
+match already has a genre stops there, and has to: `Biographies & Memoirs > True Crime` ranks
+*below* its own parent on purpose, so letting the parent in as well turns every true-crime memoir
+back into an Autobiography.
 
 Literature has **two entries** in the map, which is why `read_genre_map()` lets an entry's own name
 repeat (`setdefault`) while still refusing a repeated `matches` value. `Literary Fiction` sits above

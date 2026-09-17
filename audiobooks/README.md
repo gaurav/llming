@@ -144,10 +144,12 @@ a per-column summary of the result.
 - **Audible cannot tell a biography from an autobiography**, and files both under one category.
   Nine in ten of those in this library are autobiographies or memoirs, so that is what a blank gets;
   roughly one in ten of the Audible-filled `Autobiography` rows is really a `Biography`.
-- **About 20 books get nothing from Audible**: BBC radio collections sold under other names,
-  titles whose top search hits are German or Spanish editions, and a couple of typos in the Sheet
-  (`The Orchadist`). `data/enrichment-review.csv` lists the near misses with candidates; the
-  right ASIN in the Sheet's `Audible ID` cell fixes any one of them.
+- **A book Audible cannot find by title needs its `Audible ID` typed in.** Every book has one as
+  of the last full pass, but the search misses more kinds of thing than it looks like it should:
+  an author who has changed their name since (`Noelle` / `ND Stevenson`), a podcast (credited to
+  "Audible Original"), a BBC collection sold under another title, a typo in the Sheet. And an ID
+  can be *wrong* without anything complaining — a series page, or a near-namesake, matches
+  happily. `data/enrichment.csv` has `title` beside `audible_title` for checking by eye.
 - **The Audible lookup sends titles and authors to Audible**, unauthenticated, from wherever it is
   run. It is an undocumented public endpoint and could change or close without notice; everything
   else keeps working off the cache if it does.
@@ -186,8 +188,8 @@ a per-column summary of the result.
   with the unread pile: because you loved X, and already own Y.
 - **A lint report for the Sheet**: the status/date disagreements, the 16 titles that appear twice,
   the `Finished?` and `Reading` statuses, the doubled `Started 3` header.
-- **An Open Library fallback** for the books Audible does not list — only worth it if the twenty
-  become two hundred.
+- **An Open Library fallback** for books Audible does not list. There are none today; only worth
+  it if that changes.
 - **Write access to the Sheet** through a service account, if pasting single cells ever becomes a
   chore. It would also let the Sheet stop being link-shared.
 - Replace the PivotTables with a handful of standing summaries — by genre, by author, by year — so
@@ -195,25 +197,25 @@ a per-column summary of the result.
 
 ## What is actually in there
 
-**1,153 books.** The shape that matters for picking something to listen to next, as typed into the
+**1,149 books.** The shape that matters for picking something to listen to next, as typed into the
 Sheet and then as `load()` hands it back once Audible has filled the gaps:
 
 | | in the Sheet | after `load()` |
 |---|---|---|
-| `genre` | 533 filled, 55 distinct values | 1,141 filled, 30 distinct |
-| `narrator` | 700 | 1,129 |
-| `duration_hours` | 613 | 1,123 |
-| `series` | not a column at all | 230 books across 171 series |
-| `fiction` | — | known for 1,107 |
-| `form` | 97 tagged in `grouping`, 20 spellings | 406 tagged, 6 forms |
+| `genre` | 532 filled, 55 distinct values | all 1,149, in 30 values |
+| `narrator` | 701 | 1,141 |
+| `duration_hours` | 613 | 1,135 |
+| `series` | not a column at all | 236 books across 174 series |
+| `fiction` | — | known for 1,118 |
+| `form` | 95 tagged in `grouping`, 20 spellings | 405 tagged, 6 forms |
 
 And what only the Sheet can say:
 
 | | |
 |---|---|
-| `status` | 826 Not started, 205 Finished, 102 Started, 17 Returned, plus a `Finished?` and a `Reading` |
-| `rating_0_5` | 169 filled, and generous: three quarters of what gets rated lands at 3.5 or above |
-| `count` | times listened, 290 filled, `0.5` meaning a partial. 49 books have been heard twice or more |
+| `status` | 823 Not started, 204 Finished, 102 Started, 17 Returned, plus two `Finished?` and a `Reading` |
+| `rating_0_5` | 168 filled, and generous: three quarters of what gets rated lands at 3.5 or above |
+| `count` | times listened, 289 filled, `0.5` meaning a partial. 49 books have been heard twice or more |
 | `grouping` | a second tag for *form* rather than subject — radio drama, full cast, read by the author — on 97 books |
 
 `started`/`finished`/`time_taken_days` repeat seven times across the sheet, one triple per listen
@@ -232,7 +234,7 @@ Things that fell out of looking at the whole library, each of which shaped the t
   everything relistened is rated already — but those five are favourites that would otherwise
   count for nothing.
 - **Audible's idea of a book's genre matches the Sheet's a little under 6 times in 10**, measured on
-  the 526 books that have both. Most of the rest is Audible being more specific (a typed
+  the 537 books that have both. Most of the rest is Audible being more specific (a typed
   `Literature` it calls Historical fiction, or a typed `Literature` it has no way to know is
   literary) or filing a history book under the person it is about. Good enough to fill 600 blanks;
   not good enough to overrule anything typed, which is why it never does.

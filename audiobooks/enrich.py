@@ -17,9 +17,10 @@ series and position, narrators, runtime, category ladders and a short blurb.
     uv run enrich.py --limit 30 2>&1 | tee data/last-run.log    # a trial run
     uv run enrich.py 2>&1 | tee data/last-run.log               # everything not yet cached
 
-Books whose Sheet row has an Audible URL are fetched by ASIN. The rest are searched for by title
-and author, and accepted only on an exact match; the near misses land in
-data/enrichment-review.csv with their candidates. audiobooks.load() joins the cache back on.
+Books whose Sheet row has an Audible ID, or an Audible URL, are fetched by the ASIN in it. The rest
+are searched for by title and author, and accepted only on an exact match; the near misses land in
+data/enrichment-review.csv with their candidates. Rows the Sheet no longer has are dropped from the
+cache, so run this against a freshly downloaded Sheet. audiobooks.load() joins the cache back on.
 """
 
 import html

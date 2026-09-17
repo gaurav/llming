@@ -3,7 +3,8 @@
 #
 #   - Matching ignores case, and an entry matches its own name, so "Radio Drama" needs no line.
 #   - A ladder matches on the longest stretch of it listed here: "History > Europe > Great
-#     Britain" tries all three levels, then "History > Europe", then "History".
+#     Britain" tries all three levels, then "History > Europe", then "History". If that match is a
+#     form with no genre (short stories), it carries on up the ladder for the genre as well.
 #   - Anything not listed passes through exactly as typed, and the loader logs it.
 #   - A value may appear once only; the loader refuses a file that lists one twice. A genre may
 #     have two entries, though, when its ladders belong at different heights — Literature does.
