@@ -28,22 +28,27 @@ carry the study ID. That is also why the script has no default input paths, brea
 elsewhere in this repo that a script runs with no arguments: the defaults would have named the
 study. The worked example in `tests/fixtures/` is synthetic and stands in for the real pair.
 
-The pair this was written for lives in `data/` and describes one study by two routes:
+`data/` is organised one subdirectory per comparison, because the same study has been looked at
+more than one way. The shared REDCap CSV both start from stays at `data/` root.
 
-- **base** — a deterministic script produced a REDCap CSV, and the VLMD tool converted it.
+`data/vlmd-file-comparison/` is the pair this was written for: one study by two routes.
+
+- **base** — a deterministic script produced the REDCap CSV, and the VLMD tool converted it.
 - **revised** — a coworker took that same REDCap CSV, ran an LLM tool over it to fix problems, and
   emitted VLMD directly.
 
-The shared REDCap CSV is in `data/` too, for reference. The script does not read it — see
-Limitations.
+`data/input-file-comparison/` is for the other direction: the coworker's LLM tool also emits a
+cleaned version of the REDCap CSV itself, so diffing that against the original shows what the LLM
+changed before any VLMD was generated — the cleaning step, rather than its downstream effect. Note
+that this script diffs VLMD documents, not CSVs.
 
 ### Output
 
 Two files sharing `--output-prefix`:
 
-- **`data/vlmd-diff.md`** — the review artifact. Document-level property changes, added and removed
+- **`<prefix>.md`** — the review artifact. Document-level property changes, added and removed
   variables with their full JSON, then one section per changed property.
-- **`data/vlmd-diff.csv`** — the complete backing record, one untruncated row per field-level
+- **`<prefix>.csv`** — the complete backing record, one untruncated row per field-level
   change: `variable, section, property, change, base_value, revised_value, category`.
 
 The Markdown groups identical `old → new` value pairs into one entry with a count and the affected
@@ -71,12 +76,13 @@ synthetic pair beside them. They exercise every rendering path except the >20-pa
 ### Usage
 
 ```bash
-uv run vlmddiff.py --base data/a.json --revised data/b.json 2>&1 | tee data/last-run.log
-
-uv run vlmddiff.py -b data/a.json -r data/b.json --output-prefix data/a-vs-b
+# Every run writes into the subdirectory of the comparison it belongs to.
+uv run vlmddiff.py -b data/vlmd-file-comparison/a.json -r data/vlmd-file-comparison/b.json \
+    --output-prefix data/vlmd-file-comparison/vlmd-diff \
+    2>&1 | tee data/vlmd-file-comparison/last-run.log
 
 # Treat nothing as a conversion artifact — everything lands in the main body.
-uv run vlmddiff.py -b data/a.json -r data/b.json --artifact-property ''
+uv run vlmddiff.py -b data/x/a.json -r data/x/b.json --artifact-property ''
 
 uv run vlmddiff.py --help
 ```
@@ -125,8 +131,10 @@ cd vlmddiff && uv run vlmddiff.py \
 
 Not in git — study data, see above:
 
-- `data/*.vlmd-generated-by-script.json` — base input.
-- `data/*.vlmd-generated-by-llm-tool.json` — revised input.
-- `data/*.redcap.csv` — the shared REDCap source, reference only.
-- `data/vlmd-diff.md`, `data/vlmd-diff.csv` — the real outputs, for review elsewhere.
-- `data/last-run.log` — output of the run that produced them.
+- `data/*.redcap.csv` — the shared REDCap source both comparisons start from, reference only.
+- `data/vlmd-file-comparison/*.vlmd-generated-by-script.json` — base input.
+- `data/vlmd-file-comparison/*.vlmd-generated-by-llm-tool.json` — revised input.
+- `data/vlmd-file-comparison/vlmd-diff.md`, `vlmd-diff.csv` — the real outputs, for review
+  elsewhere.
+- `data/vlmd-file-comparison/last-run.log` — output of the run that produced them.
+- `data/input-file-comparison/` — the cleaned-CSV comparison, empty until that file arrives.
