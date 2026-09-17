@@ -61,9 +61,10 @@ uv run recommend.py relisten data/audiobooks.csv --long-ago
 - `--genre` takes a genre from `genre_map.yaml` or any piece of an Audible category, so
   `--genre "sea adventures"` works even though that is nobody's idea of a genre here.
 - `--form` takes one of the forms in `genre_map.yaml`: `radio drama` (anything performed — full
-  cast, BBC serial, monologue), `short stories`, or `read by the author`. That last one is typed
-  on seven books and true of 282: the loader fills it in wherever a book has no other form and its
-  author is among its narrators.
+  cast, BBC serial, monologue), `short stories`, `podcast`, or `read by the author`. The last two
+  are filled in by the loader: `podcast` from Audible's listing type, and `read by the author`
+  wherever a book has no other form and its author is among its narrators — typed on seven books,
+  true of 282.
 - **`taste`** is the table behind the rankings rather than a ranking: every genre with its mean
   rating, how many ratings that rests on, how many books are owned and how many are still
   unheard. `score` is the mean pulled towards the library-wide one, so a genre with a single
@@ -88,6 +89,11 @@ Near misses land in `data/enrichment-review.csv` with their three likeliest cand
 one, put the right book in that row's **`Audible ID`** cell in the Sheet — a product link
 (`https://www.audible.com/pd/B0CZ4XD7HH`) or just the ASIN (`B0CZ4XD7HH`). Then download the Sheet
 again and rerun `enrich.py`, which retries everything unmatched each time.
+
+`enrich.py` warns when a pasted ID's title disagrees with the Sheet's (`Check B0…: the Sheet says
+…, Audible says …`), because Audible accepts any ID that exists; that warning is what tells a
+near-namesake from the right book. A `/series/` page's ID is refused outright — it has no
+categories or runtime, and its books may be another language's edition.
 
 `Audible ID` is separate from `URL` on purpose. `URL` records where the book was bought, so for a
 Libro.fm or Apple Books purchase it is not an Audible link and must not be turned into one;
@@ -147,14 +153,15 @@ a per-column summary of the result.
 - **A book Audible cannot find by title needs its `Audible ID` typed in.** Every book has one as
   of the last full pass, but the search misses more kinds of thing than it looks like it should:
   an author who has changed their name since (`Noelle` / `ND Stevenson`), a podcast (credited to
-  "Audible Original"), a BBC collection sold under another title, a typo in the Sheet. And an ID
-  can be *wrong* without anything complaining — a series page, or a near-namesake, matches
-  happily. `data/enrichment.csv` has `title` beside `audible_title` for checking by eye.
+  "Audible Original"), a BBC collection sold under another title, a typo in the Sheet. A wrong ID
+  is accepted if Audible has it; `enrich.py` warns when the titles disagree, and
+  `data/enrichment.csv` has `title` beside `audible_title` for a second look.
 - **The Audible lookup sends titles and authors to Audible**, unauthenticated, from wherever it is
   run. It is an undocumented public endpoint and could change or close without notice; everything
   else keeps working off the cache if it does.
-- **An author is whatever the cell says.** `Terry Pratchett` and `Terry Pratchett, Neil Gaiman` are
-  two different authors to the ranking, so a co-written book borrows nothing from either.
+- **Names are split on commas, ampersands and "and"**, so `Terry Pratchett, Neil Gaiman` is judged
+  as both and a co-written book borrows from each author's solo work. A name written two ways
+  (`J.R.R.` and `J. R. R.`) still counts as one; a translator credit does not count as an author.
 - **The ranking weights are judgement, not fitted**: author 3, narrator 1.5, genre 1, and a series
   pull of up to 2.5. With 169 ratings there is not enough to fit them on. They are constants at the
   top of `recommend.py`.

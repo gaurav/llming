@@ -49,15 +49,16 @@ ASIN_IN_URL = re.compile(r"audible\.[a-z.]+/(?:pd|podcast)/(?:[^/?#]+/)?([0-9A-Z
 ENRICHMENT_CSV = Path(__file__).parent / "data" / "enrichment.csv"
 GENRE_MAP_YAML = Path(__file__).parent / "genre_map.yaml"
 SHEET_COLUMNS = ["title", "author", "url", "audible_id", "genre", "grouping", "narrator", "duration_hours", "started", "finished"]
-AUDIBLE_COLUMNS = ["asin", "series", "series_position", "narrators", "runtime_min", "categories", "summary"]
+AUDIBLE_COLUMNS = ["asin", "series", "series_position", "narrators", "runtime_min", "categories", "summary", "delivery"]
 
 # Roles the Sheet tacks on to a name: "Tina Kover (translator)", "Ta-Nehisi Coates - introduction",
 # "Rachel Zoffness, PhD", "Sir Arthur C. Clarke" — and Audible's own "Sanjay Gupta MD". Stripped
 # from both sides before comparing, and from the author a search is made with.
 AUTHOR_ROLE = re.compile(r"\(.*?\)|\s-\s.*$|\b(ph\.?d|m\.?d|jr|sr|sir|dame)\b\.?", re.I)
 
-# The form the loader fills in by itself. Spelt as genre_map.yaml spells it.
+# The forms the loader fills in by itself. Spelt as genre_map.yaml spells them.
 READ_BY_THE_AUTHOR = "Read by the author"
+PODCAST = "Podcast"
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,8 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
     extra = read_enrichment()
     if extra is not None:
         extra = extra[extra.status == "matched"].drop_duplicates("key")
-        df = df.merge(extra[["key", *AUDIBLE_COLUMNS]], on="key", how="left")
+        # reindex, not a column list: a cache written before a column existed simply lacks it.
+        df = df.merge(extra.reindex(columns=["key", *AUDIBLE_COLUMNS]), on="key", how="left")
     else:
         logger.info("No Audible metadata yet; run enrich.py to fill genres and series")
         df = df.reindex(columns=[*df.columns, *AUDIBLE_COLUMNS])
@@ -268,13 +270,14 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
     # Typed on a handful of books, true of hundreds. Only where nothing else claimed the form.
     self_read = [bool(author_names(a) & author_names(n)) for a, n in zip(df.author, df.narrator)]
     df.loc[df.form.isna() & pd.Series(self_read, index=df.index), "form"] = READ_BY_THE_AUTHOR
+    df.loc[df.form.isna() & df.delivery.eq("PodcastParent"), "form"] = PODCAST
     df["duration_hours"] = pd.to_numeric(df.duration_hours).fillna(pd.to_numeric(df.runtime_min, errors="coerce") / 60)
     df["series_position"] = pd.to_numeric(df.series_position, errors="coerce")
     # The Sheet repeats started/finished once per listen; the latest of each is what ranking needs.
     for stem in ("started", "finished"):
         columns = [c for c in df.columns if re.fullmatch(rf"{stem}(_[0-9_]+)?", c)]
         df[f"last_{stem}"] = df[columns].apply(pd.to_datetime, errors="coerce").max(axis=1)
-    return df.drop(columns=["narrators", "runtime_min"])
+    return df.drop(columns=["narrators", "runtime_min", "delivery"])
 
 
 def load(source: str = None, enrich: bool = True) -> pd.DataFrame:

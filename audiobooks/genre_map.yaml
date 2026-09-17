@@ -293,6 +293,9 @@
 
 - form: Interviews
 
+# Filled in by the loader from Audible's listing type; typed, it means the same.
+- form: Podcast
+
 - form: Comic book
 
 - form: ""

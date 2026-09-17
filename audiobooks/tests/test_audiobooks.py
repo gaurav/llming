@@ -300,6 +300,28 @@ def test_the_local_cache_is_preferred_to_the_tab(tmp_path, monkeypatch):
     assert len(audiobooks.read_enrichment(local)) == 3
 
 
+def test_a_podcast_gets_its_form_from_audible_unless_one_was_typed(tmp_path, monkeypatch):
+    cache = tmp_path / "enrichment.csv"
+    cache.write_text(
+        "key,status,asin,narrators,runtime_min,categories,delivery\n"
+        "B08DDFD4W7,matched,B08DDFD4W7,,480,Biographies & Memoirs > True Crime,PodcastParent\n"
+        "B0CNS938R2,matched,B0CNS938R2,,,Science Fiction & Fantasy,PodcastParent\n"
+        "B00WH5VZR8,matched,B00WH5VZR8,,573,History,SinglePartBook\n"
+    )
+    monkeypatch.setattr(audiobooks, "ENRICHMENT_CSV", cache)
+    sheet = pd.DataFrame(
+        {
+            "title": ["West Cork", "The Twilight Zone Radio Dramas", "Do No Harm"],
+            "author": ["Sam Bungey", "Rod Serling", "Henry Marsh"],
+            "grouping": [None, "Radio drama", None],
+            "url": [f"https://www.audible.com/podcast/x/{a}" for a in ("B08DDFD4W7", "B0CNS938R2")] + ["https://www.audible.com/pd/x/B00WH5VZR8"],
+        }
+    )
+    df = audiobooks.enriched(sheet)
+    assert df.form.tolist() == ["Podcast", "Radio drama", None]
+    assert "delivery" not in df.columns  # used and dropped, like narrators and runtime_min
+
+
 def test_the_sheet_id_never_reaches_the_log(monkeypatch, caplog):
     # The Sheet is link-shared, so its ID is the access to it, and logs get pasted into transcripts.
     monkeypatch.setenv("GOOGLE_SHEET_ID", "SECRET-SHEET-ID")

@@ -41,7 +41,7 @@ API = "https://api.audible.com/1.0/catalog/products"
 RESPONSE_GROUPS = "product_desc,product_attrs,contributors,series,category_ladders"
 COLUMNS = [
     "key", "status", "title", "author", "asin", "audible_title", "series", "series_position",
-    "narrators", "runtime_min", "release_date", "categories", "summary", "candidates",
+    "narrators", "runtime_min", "release_date", "categories", "summary", "delivery", "candidates",
 ]  # fmt: skip
 
 BRACKETED = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
@@ -100,6 +100,8 @@ def flatten(product) -> dict:
         "release_date": product.get("release_date"),
         "categories": "; ".join(ladders),
         "summary": html.unescape(re.sub(r"<[^>]+>", "", product.get("merchandising_summary") or "")).strip(),
+        # SinglePartBook, MultiPartBook, PodcastParent… — what tells a podcast from a book.
+        "delivery": product.get("content_delivery_type"),
     }
 
 
@@ -118,6 +120,11 @@ def look_up(session, row) -> dict:
         product = response.json().get("product") or {}
         # An ASIN Audible no longer sells still answers 200, with a product that is only an asin.
         if not product.get("title"):
+            return {"status": "not_found"}
+        # A series page answers too, with no categories or runtime of its own — and its books may
+        # be another language's edition. Refused rather than cached as an empty match.
+        if product.get("content_delivery_type") == "BookSeries":
+            logger.warning("%r: %s is a series page, not a listing; the Audible ID wants one of its books", row.title, asin)
             return {"status": "not_found"}
         return {"status": "matched", **flatten(product)}
 
@@ -149,7 +156,8 @@ def main(source, output, limit, refresh, delay) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
     books = load(source, enrich=False)
-    books = books.reindex(columns=list(dict.fromkeys([*books.columns, "audible_id"])))  # an older Sheet lacks it
+    # An older Sheet lacks Audible ID, and tidy() drops any column left entirely blank.
+    books = books.reindex(columns=list(dict.fromkeys([*books.columns, "url", "audible_id", "narrator"])))
     books["key"] = [book_key(*row) for row in zip(books.title, books.author, books.url, books.audible_id)]
     books = books.drop_duplicates("key")
 
@@ -184,6 +192,9 @@ def main(source, output, limit, refresh, delay) -> None:
                 logger.warning("Skipping %r: %s", row.title, e)
                 continue
             rows.append({"key": row.key, "title": row.title, "author": row.author, **found})
+            # A pasted ID is accepted whatever it points at, so say when the title disagrees.
+            if found["status"] == "matched" and "|" not in row.key and not titles_match(row.title, {"title": found["audible_title"]}):
+                logger.warning("Check %s: the Sheet says %r, Audible says %r", row.key, row.title, found["audible_title"])
             # A full run is twelve minutes of requests; a kill signal skips `finally`, so save as we go.
             if len(rows) % 50 == 0:
                 save(rows)

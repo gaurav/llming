@@ -98,10 +98,10 @@ autouse fixture for exactly that reason.
   `Literature & Fiction` ahead of nearly everything. Hence row order in `genre_map.yaml` being the
   priority, rather than "first ladder wins".
 - **A wrong ASIN is silent.** Anything that answers is accepted, so a typed `Audible ID` is only as
-  right as the person who pasted it. After any round of hand-entered IDs, print the Sheet `title`
-  beside the cache's `audible_title` for those rows and read them; that check is what caught a
-  series page leading to an Italian edition, and a namesake podcast standing in for a radio
-  collection.
+  right as the person who pasted it. `enrich.py` warns when a pasted ID's title fails
+  `titles_match()` against the Sheet's, and refuses a `BookSeries` product outright; both checks
+  came from reading `title` beside `audible_title` by hand, which caught a series page leading to
+  an Italian edition and a namesake podcast standing in for a radio collection.
 - **Podcasts are in the catalogue too**, under `/podcast/` URLs, and answer by ASIN like a book
   (`content_delivery_type: PodcastParent`), with categories and sometimes a runtime. A search by
   title and author misses them, because the author is "Audible Original" or the producers, so they
@@ -148,7 +148,9 @@ outranks everything.
   second data source.
 - **Author, narrator, genre and series affinities** are means shrunk towards the library-wide
   mean by `SHRINKAGE` imaginary average books, and each book's own rating is left out of its own
-  groups. Without the leave-one-out every finished book recommends itself in `relisten`.
+  groups. Without the leave-one-out every finished book recommends itself in `relisten`. Author
+  and narrator cells are split into people first (`author_names()`), each judged alone, and the
+  book takes the average; series and genre go through the same code one value per cell.
 - `next_in_series` marks only the *earliest* unheard book of a series with a heard one. Book three
   is not next until book two is heard.
 - `--long-ago` is off by default on purpose: the usual favourites are the right first answer, and

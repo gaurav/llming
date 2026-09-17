@@ -5,12 +5,21 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 from click.testing import CliRunner
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import audiobooks  # noqa: E402
 import enrich  # noqa: E402
 from audiobooks import asin_from_id, asin_from_url, book_key  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def no_real_sheet(monkeypatch):
+    """With no local cache the CLI falls back to the Sheet's enrichment tab; keep tests off it."""
+    monkeypatch.setattr(audiobooks, "load_dotenv", lambda *a, **k: False)
+    monkeypatch.delenv("ENRICHMENT_GID", raising=False)
 
 
 def product(asin, title, author, sequence="", narrator="Someone", subtitle=None):
@@ -23,6 +32,7 @@ def product(asin, title, author, sequence="", narrator="Someone", subtitle=None)
         "series": [{"title": "Truly Devious", "sequence": sequence}],
         "category_ladders": [{"ladder": [{"name": "Teen & Young Adult"}, {"name": "Mystery"}]}],
         "merchandising_summary": "<p>A school &amp; a murder.</p>",
+        "content_delivery_type": "SinglePartBook",
     }
 
 
@@ -127,12 +137,33 @@ def test_an_asin_audible_no_longer_sells_is_not_found():
     assert enrich.look_up(session, row("Do No Harm", "Henry Marsh", url)) == {"status": "not_found"}
 
 
+def test_a_series_page_is_refused_even_though_audible_answers_for_it():
+    # The X-Files: Cold Cases series ASIN answers, with no categories or runtime, and its books are
+    # the Italian edition. Better no match than that one.
+    session = FakeSession({"product": {"asin": "B07RYN6JM3", "title": "X-Files: Cold Cases", "content_delivery_type": "BookSeries"}})
+    url = "https://www.audible.com/pd/X-Files-Cold-Cases-Audiobook/B07RYN6JM3"
+    assert enrich.look_up(session, row("The X-Files: Cold Cases", "Joe Harris", url)) == {"status": "not_found"}
+
+
+def test_a_pasted_id_whose_title_disagrees_with_the_sheet_is_called_out(tmp_path, monkeypatch, caplog):
+    sheet = tmp_path / "audiobooks.csv"
+    sheet.write_text("Title,Author,Narrator,URL,Audible ID\nThe Twilight Zone Radio Dramas,Rod Serling,,,B0CNS938R2\n")
+    monkeypatch.setattr(enrich, "look_up", lambda session, row: {"status": "matched", "audible_title": "The Twilight Zone Radio Show!"})
+
+    with caplog.at_level("WARNING"):
+        result = CliRunner().invoke(enrich.main, [str(sheet), "--output", str(tmp_path / "enrichment.csv"), "--delay", "0"])
+
+    assert result.exit_code == 0, result.output
+    assert "Check B0CNS938R2" in caplog.text and "Radio Show!" in caplog.text
+
+
 def test_a_match_is_flattened_to_plain_columns():
     session = FakeSession({"products": [product("B0774Y5HRR", "Truly Devious", "Maureen Johnson", "1")]})
     found = enrich.look_up(session, row("Truly Devious", "Maureen Johnson"))
     assert found["series"] == "Truly Devious" and found["series_position"] == "1"
     assert found["categories"] == "Teen & Young Adult > Mystery"
     assert found["summary"] == "A school & a murder."
+    assert found["delivery"] == "SinglePartBook"
 
 
 def test_a_rerun_keeps_matches_retries_misses_and_forgets_books_the_sheet_has_lost(tmp_path, monkeypatch):
