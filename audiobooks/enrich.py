@@ -148,7 +148,8 @@ def main(source, output, limit, refresh, delay) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
     books = load(source, enrich=False)
-    books["key"] = [book_key(t, a, u) for t, a, u in zip(books.title, books.author, books.url)]
+    books = books.reindex(columns=list(dict.fromkeys([*books.columns, "audible_id"])))  # an older Sheet lacks it
+    books["key"] = [book_key(*row) for row in zip(books.title, books.author, books.url, books.audible_id)]
     books = books.drop_duplicates("key")
 
     output = Path(output)

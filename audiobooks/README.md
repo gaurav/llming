@@ -79,21 +79,20 @@ uv run recommend.py relisten data/audiobooks.csv --long-ago
 
 `enrich.py` looks every book up in Audible's public catalogue and caches the answers in
 `data/enrichment.csv`: series and position, narrators, runtime, Audible's categories and a short
-blurb. A row with an Audible `url` is fetched by the ASIN in it; any other row — Libro.fm, Apple
-Books, the old `From Audible` pastes — is searched for by title and author and accepted only on an
-exact match. It only looks up what is not cached yet, so after the first twelve-minute run it
-takes seconds. `--limit 30` for a trial, `--refresh` to start again.
+blurb. A row with an `Audible ID` or an Audible `URL` is fetched by the ASIN in it; any other row —
+Libro.fm, Apple Books, the old `From Audible` pastes — is searched for by title and author and
+accepted only on an exact match. It only looks up what is not cached yet, so after the first
+twelve-minute run it takes seconds. `--limit 30` for a trial, `--refresh` to start again.
 
 Near misses land in `data/enrichment-review.csv` with their three likeliest candidates. To settle
-one, in the Sheet:
+one, put the right book in that row's **`Audible ID`** cell in the Sheet — a product link
+(`https://www.audible.com/pd/B0CZ4XD7HH`) or just the ASIN (`B0CZ4XD7HH`). Then download the Sheet
+again and rerun `enrich.py`, which retries everything unmatched each time.
 
-- if the row's `URL` cell is **blank**, paste the right Audible URL into it
-  (`https://www.audible.com/pd/<ASIN>` is enough);
-- if it already holds a Libro.fm or Apple Books link, **leave it** — that is the record of where
-  the book was bought — and correct the `Title` to what Audible calls the book instead. A
-  subtitle after a colon is fine: `ADHD Is Awesome: A Guide to (Mostly) Thriving with ADHD`.
-
-Then download the Sheet again and rerun `enrich.py`, which retries everything unmatched each time.
+`Audible ID` is separate from `URL` on purpose. `URL` records where the book was bought, so for a
+Libro.fm or Apple Books purchase it is not an Audible link and must not be turned into one;
+`Audible ID` says which Audible listing to take the metadata from. It wins over an Audible `URL`
+too, which makes it the way to overrule a match that picked the wrong edition.
 
 **A copy lives in the Sheet.** `data/` is not in git and Audible's endpoint is undocumented, so
 the cache is also kept in a tab of its own, named by `ENRICHMENT_GID` in `.env`. Wherever there is
@@ -147,8 +146,8 @@ a per-column summary of the result.
   roughly one in ten of the Audible-filled `Autobiography` rows is really a `Biography`.
 - **About 20 books get nothing from Audible**: BBC radio collections sold under other names,
   titles whose top search hits are German or Spanish editions, and a couple of typos in the Sheet
-  (`The Orchadist`). `data/enrichment-review.csv` lists the near misses with candidates; a URL
-  pasted into the Sheet's `url` cell fixes any one of them.
+  (`The Orchadist`). `data/enrichment-review.csv` lists the near misses with candidates; the
+  right ASIN in the Sheet's `Audible ID` cell fixes any one of them.
 - **The Audible lookup sends titles and authors to Audible**, unauthenticated, from wherever it is
   run. It is an undocumented public endpoint and could change or close without notice; everything
   else keeps working off the cache if it does.

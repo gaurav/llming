@@ -45,7 +45,7 @@ def main(output: str) -> None:
         url = sheet_url()
     except RuntimeError as e:  # no .env yet — a traceback helps nobody
         raise click.ClickException(str(e))
-    logger.info("Downloading %s", url)
+    logger.info("Downloading the Sheet's master tab")  # not its URL: that carries the Sheet ID
     response = requests.get(url, timeout=60)
     response.raise_for_status()
 

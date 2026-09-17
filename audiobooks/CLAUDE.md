@@ -43,15 +43,16 @@ dropdowns. So a script-generated column pasted back in misaligns silently the mo
 bought between the download and the paste. Everything here is shaped by avoiding that:
 
 - Normalisation happens on load (`genre_map.yaml`), never at entry.
-- Machine-derived data lives in `data/enrichment.csv`, keyed by `book_key()` — the ASIN out of the
-  row's Audible `url`, else squashed `title|author` — and is joined in `enriched()`.
+- Machine-derived data lives in `data/enrichment.csv`, keyed by `book_key()` — an ASIN from
+  `Audible ID` or an Audible `url`, else squashed `title|author` — and is joined in `enriched()`.
 - The Sheet wins every disagreement. Audible fills blank `genre`, `narrator` and `duration_hours`
   and never overrides a typed one; `genre_raw` keeps what was typed.
 - The one hand edit the tools ask for is a single cell, for a book `enrich.py` could not match:
-  an Audible URL pasted into a *blank* `url`, which changes the row's key to the ASIN so the next
-  run fetches it directly — or, where `url` already holds a Libro.fm or Apple Books link, a
-  corrected `title`. Never suggest pasting over an existing `url`: it is the only record of where
-  the book was bought. (That advice was given once, for two Libro.fm rows, before anyone looked.)
+  the ASIN, or a product link, in the Sheet's `Audible ID` column. `book_key()` reads that column
+  first, then an Audible `url`, then falls back to the title. Never suggest pasting an Audible
+  link over `url`: for a Libro.fm or Apple Books purchase it is the only record of where the book
+  was bought. (That advice was given once, before anyone looked, and `Audible ID` exists because
+  of it.)
 
 Fixing a typo in a title changes a `title|author` key, which orphans that row's cache entry. It
 heals itself — the next `enrich.py` run looks the new key up — so the cache is never edited by hand.
@@ -66,10 +67,10 @@ so `read_enrichment()` pads any all-digit `key` or `asin` back to ten, from eith
 other damage is cosmetic (`717.0` to `717`, a leading apostrophe eaten from three blurbs), and a
 library loaded from the tab was checked identical, column for column, to one loaded from the file.
 
-The fallback is logged without its URL, unlike the master tab's. The Sheet ID is the only secret
-here — the Sheet is link-shared, so the ID is the access — and it should stay out of logs and
-transcripts: never `cat .env`, and when checking anything against the live Sheet, filter the URL
-out of whatever gets printed, exception text included.
+Neither tab is logged with its URL; the scripts name the tab instead. The Sheet ID is the only
+secret here — the Sheet is link-shared, so the ID is the access — and it should stay out of logs and
+transcripts: never `cat .env`, and when checking anything against the live Sheet, filter the URL out
+of whatever gets printed, exception text included.
 
 Any test that points `ENRICHMENT_CSV` at a missing file now reaches for `.env` and the network
 unless `load_dotenv` is stubbed and `ENRICHMENT_GID` cleared; `test_audiobooks.py` does both in an

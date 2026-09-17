@@ -47,7 +47,7 @@ ASIN_IN_URL = re.compile(r"audible\.[a-z.]+/pd/(?:[^/?#]+/)?([0-9A-Z]{10})(?:[/?
 # anywhere. The cache is written by enrich.py; the genre map is committed and edited by hand.
 ENRICHMENT_CSV = Path(__file__).parent / "data" / "enrichment.csv"
 GENRE_MAP_YAML = Path(__file__).parent / "genre_map.yaml"
-SHEET_COLUMNS = ["title", "author", "url", "genre", "grouping", "narrator", "duration_hours", "started", "finished"]
+SHEET_COLUMNS = ["title", "author", "url", "audible_id", "genre", "grouping", "narrator", "duration_hours", "started", "finished"]
 AUDIBLE_COLUMNS = ["asin", "series", "series_position", "narrators", "runtime_min", "categories", "summary"]
 
 # Roles the Sheet tacks on to a name: "Tina Kover (translator)", "Ta-Nehisi Coates - introduction",
@@ -82,9 +82,23 @@ def author_names(author) -> set:
     return {squash(AUTHOR_ROLE.sub("", part)) for part in parts} - {""}
 
 
-def book_key(title, author, url) -> str:
-    """What enrichment is keyed on: the ASIN where the Sheet has one, else squashed title|author."""
-    return asin_from_url(url) or f"{squash(title)}|{squash(author)}"
+def asin_from_id(value) -> str:
+    """The ASIN in the Sheet's `Audible ID` cell, which may hold a product link or the bare ASIN."""
+    if not isinstance(value, str):
+        return ""
+    bare = value.strip().upper()
+    # Typed bare, an ISBN-style ASIN is a number to Sheets and loses its leading zero, as in the
+    # enrichment tab. Ten characters, always, so pad it back.
+    return asin_from_url(value) or (bare.zfill(10) if re.fullmatch(r"B[0-9A-Z]{9}|[0-9]{8,9}[0-9X]", bare) else "")
+
+
+def book_key(title, author, url, audible_id=None) -> str:
+    """
+    What enrichment is keyed on: an ASIN, else squashed title|author. `Audible ID` comes first —
+    it is there for books bought elsewhere, whose `URL` is a Libro.fm link, and it doubles as the
+    way to overrule a wrong match — then the ASIN in an Audible `URL`.
+    """
+    return asin_from_id(audible_id) or asin_from_url(url) or f"{squash(title)}|{squash(author)}"
 
 
 def sheet_url(gid: str = None) -> str:
@@ -225,7 +239,7 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
     """
     # Every column used below exists afterwards, empty if the Sheet lacks it.
     df = df.reindex(columns=list(dict.fromkeys([*df.columns, *SHEET_COLUMNS])))
-    df["key"] = [book_key(t, a, u) for t, a, u in zip(df.title, df.author, df.url)]
+    df["key"] = [book_key(*row) for row in zip(df.title, df.author, df.url, df.audible_id)]
     extra = read_enrichment()
     if extra is not None:
         extra = extra[extra.status == "matched"].drop_duplicates("key")
@@ -261,9 +275,9 @@ def load(source: str = None, enrich: bool = True) -> pd.DataFrame:
     Load the library. `source` is a path or URL; the Sheet from .env is the default. `enrich=False`
     hands back the Sheet alone, without the Audible metadata or the genre normalisation.
     """
-    source = source or sheet_url()
-    logger.info("Reading audiobook library from %s", source)
-    df = tidy(pd.read_csv(source))
+    # The live Sheet is named, not printed: its URL carries the Sheet ID, which is the access to it.
+    logger.info("Reading audiobook library from %s", source or "the live Sheet")
+    df = tidy(pd.read_csv(source or sheet_url()))
     return enriched(df) if enrich else df
 
 

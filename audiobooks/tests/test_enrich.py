@@ -7,7 +7,7 @@ from types import SimpleNamespace
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import enrich  # noqa: E402
-from audiobooks import asin_from_url, book_key  # noqa: E402
+from audiobooks import asin_from_id, asin_from_url, book_key  # noqa: E402
 
 
 def product(asin, title, author, sequence="", narrator="Someone", subtitle=None):
@@ -42,6 +42,23 @@ def test_asin_comes_out_of_audible_urls_only():
     assert asin_from_url("https://www.audible.com/pd/Unwinding-Anxiety-Audiobook/0593409469?ref=x") == "0593409469"
     assert asin_from_url("https://libro.fm/audiobooks/9781478971238-the-terror") == ""
     assert asin_from_url(float("nan")) == ""
+
+
+def test_the_audible_id_cell_takes_a_link_or_a_bare_asin_and_nothing_else():
+    assert asin_from_id("https://www.audible.com/pd/Infinite-Jest-Audiobook/B0CZ4XD7HH") == "B0CZ4XD7HH"
+    assert asin_from_id(" b0cz4xd7hh ") == "B0CZ4XD7HH"
+    assert asin_from_id("593409469") == "0593409469"  # Sheets read it as a number and ate the zero
+    assert asin_from_id("not on Audible") == "" and asin_from_id("BIOGRAPHY") == ""
+    assert asin_from_id(float("nan")) == ""
+
+
+def test_a_book_bought_elsewhere_is_keyed_on_its_audible_id_not_its_libro_fm_url():
+    libro = "https://libro.fm/audiobooks/9781668642726"
+    assert book_key("Infinite Jest (30th Anniv Ed)", "David Foster Wallace", libro, "B0CZ4XD7HH") == "B0CZ4XD7HH"
+    assert book_key("Infinite Jest (30th Anniv Ed)", "David Foster Wallace", libro).endswith("|davidfosterwallace")
+    # It also overrules the ASIN in an Audible URL, which is how a wrong edition gets corrected.
+    audible = "https://www.audible.com/pd/Do-No-Harm-Audiobook/B00WH5VZR8"
+    assert book_key("Do No Harm", "Henry Marsh", audible, "B0OTHERED1") == "B0OTHERED1"
 
 
 def test_the_right_book_is_picked_when_the_series_sequel_comes_first():
