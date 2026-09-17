@@ -167,6 +167,21 @@ def test_a_form_in_the_genre_column_leaves_the_genre_to_audible(genre_map):
     assert result == ("History", "Radio drama", False, "audible")
 
 
+def test_a_ladder_that_names_a_form_still_gets_its_genre_from_further_up(tmp_path):
+    path = tmp_path / "genre_map.yaml"
+    path.write_text(
+        "- genre: Autobiography\n  matches: [Biographies & Memoirs]\n"
+        "- genre: True crime\n  matches: [Biographies & Memoirs > True Crime]\n"
+        "- genre: Fiction\n  matches: [Literature & Fiction]\n"
+        "- form: Short stories\n  matches: [Literature & Fiction > Anthologies & Short Stories]\n"
+    )
+    genre_map = audiobooks.read_genre_map(path)
+    stories = "Literature & Fiction > Anthologies & Short Stories > Short Stories"
+    assert settle(genre_map, categories=stories)[0][:2] == ("Fiction", "Short stories")
+    # But a ladder that already has a genre is not joined by its vaguer parent, however that ranks.
+    assert settle(genre_map, categories="Biographies & Memoirs > True Crime > Murder")[0][0] == "True crime"
+
+
 def test_a_genre_the_map_has_not_met_passes_through_and_is_reported(genre_map):
     (genre, *_), unmapped = settle(genre_map, typed="Solarpunk")
     assert genre == "Solarpunk" and unmapped == {"Solarpunk"}

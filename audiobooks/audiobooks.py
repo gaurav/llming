@@ -179,10 +179,13 @@ def ladder_entries(categories, genre_map) -> list:
     entries = []
     for ladder in str(categories).split(";") if isinstance(categories, str) else []:
         levels = [level.strip().lower() for level in ladder.split(">")]
-        prefixes = (" > ".join(levels[:depth]) for depth in range(len(levels), 0, -1))
-        entry = next((genre_map[prefix] for prefix in prefixes if prefix in genre_map), None)
-        if entry:
-            entries.append(entry)
+        found = [genre_map[p] for p in (" > ".join(levels[:d]) for d in range(len(levels), 0, -1)) if p in genre_map]
+        entries += found[:1]
+        # A ladder that names a form ("… > Anthologies & Short Stories") still has a genre further
+        # up it. Only then: a genre-bearing match must not be joined by its own, vaguer parent, or
+        # every "Biographies & Memoirs > True Crime" would turn back into an Autobiography.
+        if found and not found[0][1]:
+            entries += [entry for entry in found[1:] if entry[1]][:1]
     return sorted(entries)
 
 

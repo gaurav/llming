@@ -159,6 +159,9 @@ def main(source, output, limit, refresh, delay) -> None:
     # Only a match is final. The few dozen misses are retried every run, which is how a URL pasted
     # into the Sheet, a new Audible listing or a better matcher gets to take effect.
     cache = cache[cache.status == "matched"]
+    # Nor is a row the Sheet no longer has: a retitled or deleted book would otherwise ride along
+    # into the Sheet's copy of this file for ever.
+    cache = cache[cache.key.isin(books.key)]
     todo = books[~books.key.isin(cache.key)].iloc[:limit]
     logger.info("%d books, %d already cached, looking up %d", len(books), len(cache), len(todo))
 
