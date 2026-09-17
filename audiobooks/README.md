@@ -85,7 +85,15 @@ exact match. It only looks up what is not cached yet, so after the first twelve-
 takes seconds. `--limit 30` for a trial, `--refresh` to start again.
 
 Near misses land in `data/enrichment-review.csv` with their three likeliest candidates. To settle
-one, paste the right Audible URL into that row's `url` cell in the Sheet; the next run picks it up.
+one, in the Sheet:
+
+- if the row's `URL` cell is **blank**, paste the right Audible URL into it
+  (`https://www.audible.com/pd/<ASIN>` is enough);
+- if it already holds a Libro.fm or Apple Books link, **leave it** — that is the record of where
+  the book was bought — and correct the `Title` to what Audible calls the book instead. A
+  subtitle after a colon is fine: `ADHD Is Awesome: A Guide to (Mostly) Thriving with ADHD`.
+
+Then download the Sheet again and rerun `enrich.py`, which retries everything unmatched each time.
 
 **Worth keeping a copy in the Sheet.** The catalogue endpoint is undocumented and could close, and
 `data/` is not in git, so the cache exists on one machine. Every so often, paste the whole of

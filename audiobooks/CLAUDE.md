@@ -47,9 +47,11 @@ bought between the download and the paste. Everything here is shaped by avoiding
   row's Audible `url`, else squashed `title|author` — and is joined in `enriched()`.
 - The Sheet wins every disagreement. Audible fills blank `genre`, `narrator` and `duration_hours`
   and never overrides a typed one; `genre_raw` keeps what was typed.
-- The one hand edit the tools ask for is a single cell: pasting an Audible URL into `url` for a
-  book `enrich.py` could not match. That changes the row's key to the ASIN, so the next run
-  fetches it directly.
+- The one hand edit the tools ask for is a single cell, for a book `enrich.py` could not match:
+  an Audible URL pasted into a *blank* `url`, which changes the row's key to the ASIN so the next
+  run fetches it directly — or, where `url` already holds a Libro.fm or Apple Books link, a
+  corrected `title`. Never suggest pasting over an existing `url`: it is the only record of where
+  the book was bought. (That advice was given once, for two Libro.fm rows, before anyone looked.)
 
 Fixing a typo in a title changes a `title|author` key, which orphans that row's cache entry. It
 heals itself — the next `enrich.py` run looks the new key up — so the cache is never edited by hand.
