@@ -6,9 +6,10 @@ Diffs two HEAL VLMD (variable-level metadata) JSON files variable by variable, m
 stable ID rather than on array position.
 
 The problem this solves: generic JSON diff tools (jsondiff, jsondiff.com) compare the `fields` array
-positionally. When the two files order or size their variable lists differently, everything after the
-first insertion reads as changed and the real edits are buried. Both VLMD files key their variables
-by `name`, so a much better diff is available — match on `name`, then compare property by property.
+positionally. When the two files order or size their variable lists differently, everything after
+the first insertion reads as changed and the real edits are buried. Both VLMD files key their
+variables by `name`, so a much better diff is available — match on `name`, then compare property by
+property.
 
 The output is meant to be committed and reviewed on GitHub.
 
@@ -100,7 +101,8 @@ cd vlmddiff && uv run vlmddiff.py \
   say?" is answerable from the revised file alone.
 - **No schema validation.** The script does not check either file against the VLMD schema
   ([heal_json.json](https://github.com/uc-cdis/heal-platform-sdk/blob/master/heal/vlmd/schemas/heal_json.json),
-  v0.3.2; the [older data-dictionary.json](https://github.com/HEAL/heal-metadata-schemas/blob/main/variable-level-metadata-schema/schemas/data-dictionary.json)
+  v0.3.2; the
+  [older data-dictionary.json](https://github.com/HEAL/heal-metadata-schemas/blob/main/variable-level-metadata-schema/schemas/data-dictionary.json)
   is deprecated). It reports what differs, not what is valid.
 - **Values compare exactly.** `{"enum": ["0","1"]}` vs `{"enum": ["1","0"]}` reads as a change even
   though both describe the same set. Fine for these files; worth revisiting if it produces noise.
