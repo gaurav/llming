@@ -31,6 +31,7 @@ def respond_with(monkeypatch):
     def _respond_with(content, content_type):
         monkeypatch.setattr("audiobooks.load_dotenv", lambda *a, **k: False)
         monkeypatch.setenv("GOOGLE_SHEET_ID", "SHEET")
+        monkeypatch.delenv("ENRICHMENT_GID", raising=False)  # or load() goes looking for that tab
         monkeypatch.setattr(
             download_sheet.requests, "get", lambda *a, **k: FakeResponse(content, content_type)
         )

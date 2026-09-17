@@ -20,6 +20,16 @@ Piranesi,Susanna Clarke, Fantasy,2025-11-14,4,28:28:00,???,,
 """
 
 
+@pytest.fixture(autouse=True)
+def no_real_sheet(monkeypatch):
+    """
+    With no local cache, the loader falls back to the enrichment tab named in .env. Keep every test
+    here off the developer's real Sheet: no .env, and no gid left over in the environment.
+    """
+    monkeypatch.setattr(audiobooks, "load_dotenv", lambda *a, **k: False)
+    monkeypatch.delenv("ENRICHMENT_GID", raising=False)
+
+
 @pytest.fixture
 def df():
     return tidy(pd.read_csv(io.StringIO(SAMPLE)))
@@ -220,3 +230,39 @@ def test_a_book_narrated_by_its_author_is_read_by_the_author_unless_a_form_was_t
         }
     )
     assert audiobooks.enriched(sheet).form.tolist() == ["Read by the author", None, "Radio drama"]
+
+
+CACHE = (
+    "key,status,asin,series,series_position,narrators,runtime_min,categories,summary\n"
+    "593502388,matched,593502388,,,Someone,600,History,Sheets read this ASIN as a number\n"
+    "B00WH5VZR8,matched,B00WH5VZR8,,,Someone,573,History,and left this one alone\n"
+    "piranesi|susannaclarke,matched,1526622424,,,Someone,420,History,a title key is never padded\n"
+)
+
+
+def test_an_asin_that_sheets_turned_into_a_number_gets_its_leading_zero_back(tmp_path):
+    path = tmp_path / "enrichment.csv"
+    path.write_text(CACHE)
+    cache = audiobooks.read_enrichment(path)
+    assert cache.key.tolist() == ["0593502388", "B00WH5VZR8", "piranesi|susannaclarke"]
+    assert cache.asin.tolist() == ["0593502388", "B00WH5VZR8", "1526622424"]
+
+
+def test_with_no_local_cache_the_sheets_enrichment_tab_is_read_and_without_a_gid_nothing_is(tmp_path, monkeypatch):
+    tab = tmp_path / "tab.csv"
+    tab.write_text(CACHE)
+    absent = tmp_path / "data" / "enrichment.csv"
+    assert audiobooks.read_enrichment(absent) is None
+
+    monkeypatch.setenv("ENRICHMENT_GID", "12345")
+    monkeypatch.setattr(audiobooks, "sheet_url", lambda gid=None: str(tab) if gid == "12345" else "wrong tab")
+    assert len(audiobooks.read_enrichment(absent)) == 3
+
+
+def test_the_local_cache_is_preferred_to_the_tab(tmp_path, monkeypatch):
+    # The tab is only as new as its last upload; the local file is what enrich.py just wrote.
+    local = tmp_path / "enrichment.csv"
+    local.write_text(CACHE)
+    monkeypatch.setenv("ENRICHMENT_GID", "12345")
+    monkeypatch.setattr(audiobooks, "sheet_url", lambda gid=None: pytest.fail("went to the Sheet"))
+    assert len(audiobooks.read_enrichment(local)) == 3

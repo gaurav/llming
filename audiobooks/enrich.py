@@ -33,7 +33,7 @@ import pandas as pd
 import requests
 from tqdm import tqdm
 
-from audiobooks import AUTHOR_ROLE, author_names, book_key, load, squash
+from audiobooks import AUTHOR_ROLE, author_names, book_key, load, read_enrichment, squash
 
 API = "https://api.audible.com/1.0/catalog/products"
 # product_desc carries title/subtitle; without it a search result's title comes back null.
@@ -152,7 +152,9 @@ def main(source, output, limit, refresh, delay) -> None:
     books = books.drop_duplicates("key")
 
     output = Path(output)
-    cache = pd.read_csv(output, dtype=str) if output.exists() and not refresh else pd.DataFrame(columns=COLUMNS)
+    # A machine with no cache of its own starts from the copy in the Sheet, not from nothing.
+    cache = None if refresh else read_enrichment(output)
+    cache = pd.DataFrame(columns=COLUMNS) if cache is None else cache.reindex(columns=COLUMNS)
     # Only a match is final. The few dozen misses are retried every run, which is how a URL pasted
     # into the Sheet, a new Audible listing or a better matcher gets to take effect.
     cache = cache[cache.status == "matched"]
@@ -186,6 +188,8 @@ def main(source, output, limit, refresh, delay) -> None:
 
     logger.info("Wrote %s: %s", output, cache.status.value_counts().to_dict())
     logger.info("%d to review in %s", (cache.status == "review").sum(), review_path)
+    if any(row["status"] == "matched" for row in rows):
+        logger.info("New matches: re-import %s over the Sheet's enrichment tab to keep that copy current", output)
 
 
 if __name__ == "__main__":

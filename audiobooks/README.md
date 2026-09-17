@@ -17,8 +17,8 @@ no dropdowns, no validation, nothing pasted back into it. Everything below happe
 
 ## Running it
 
-Set up `.env` once, with the Sheet's ID and the gid of its master tab, both taken from the Sheet's
-own URL:
+Set up `.env` once, with the Sheet's ID and the gids of its master tab and its enrichment tab, all
+taken from the Sheet's own URL:
 
 ```bash
 cp env.default .env
@@ -95,13 +95,17 @@ one, in the Sheet:
 
 Then download the Sheet again and rerun `enrich.py`, which retries everything unmatched each time.
 
-**Worth keeping a copy in the Sheet.** The catalogue endpoint is undocumented and could close, and
-`data/` is not in git, so the cache exists on one machine. Every so often, paste the whole of
-`data/enrichment.csv` over a tab of its own (`File → Import → Replace current sheet` does it in one
-step). Replacing a whole tab cannot misalign the way pasting a column into the master tab can. The
-file carries each title exactly as the Sheet has it, so a `VLOOKUP` on title from the master tab
-can show the series or Audible's categories beside a book, if that is ever wanted there. Nothing
-reads that tab back yet; it is a backup, and restoring is saving it as `data/enrichment.csv`.
+**A copy lives in the Sheet.** `data/` is not in git and Audible's endpoint is undocumented, so
+the cache is also kept in a tab of its own, named by `ENRICHMENT_GID` in `.env`. Wherever there is
+no local `data/enrichment.csv` — a second machine, a lost directory — `load()` and `enrich.py` read
+that tab instead, so nothing has to be fetched again. The local file wins when both exist, because
+the tab is only as new as its last upload; `enrich.py` says when it has new matches worth
+uploading. To refresh the tab: select it, then `File → Import → Upload`, choose
+`data/enrichment.csv`, and pick **Replace current sheet**. Replacing a whole tab cannot misalign
+the way pasting a column into the master tab can.
+
+The tab also carries each title exactly as the master tab has it, so a `VLOOKUP` on title can show
+a book's series or Audible categories beside it, if that is ever wanted there.
 
 ### The genre vocabulary
 

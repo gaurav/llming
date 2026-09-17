@@ -56,6 +56,25 @@ bought between the download and the paste. Everything here is shaped by avoiding
 Fixing a typo in a title changes a `title|author` key, which orphans that row's cache entry. It
 heals itself — the next `enrich.py` run looks the new key up — so the cache is never edited by hand.
 
+## The enrichment cache has a copy in the Sheet, and Sheets damages it slightly
+
+`read_enrichment()` prefers `data/enrichment.csv` and falls back to the tab named by
+`ENRICHMENT_GID`. Importing the CSV into Sheets retypes it: every ISBN-style ASIN
+(`0593502388`) becomes a number and loses its leading zero — 59 of them on the first upload, each
+one a join key, so each a book that silently loses its metadata. An ASIN is always ten characters,
+so `read_enrichment()` pads any all-digit `key` or `asin` back to ten, from either source. The
+other damage is cosmetic (`717.0` to `717`, a leading apostrophe eaten from three blurbs), and a
+library loaded from the tab was checked identical, column for column, to one loaded from the file.
+
+The fallback is logged without its URL, unlike the master tab's. The Sheet ID is the only secret
+here — the Sheet is link-shared, so the ID is the access — and it should stay out of logs and
+transcripts: never `cat .env`, and when checking anything against the live Sheet, filter the URL
+out of whatever gets printed, exception text included.
+
+Any test that points `ENRICHMENT_CSV` at a missing file now reaches for `.env` and the network
+unless `load_dotenv` is stubbed and `ENRICHMENT_GID` cleared; `test_audiobooks.py` does both in an
+autouse fixture for exactly that reason.
+
 ## Audible's catalogue API
 
 `https://api.audible.com/1.0/catalog/products`, no credentials, no documented rate limit;

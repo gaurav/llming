@@ -87,15 +87,15 @@ def book_key(title, author, url) -> str:
     return asin_from_url(url) or f"{squash(title)}|{squash(author)}"
 
 
-def sheet_url() -> str:
-    """Build the CSV export URL from the Sheet ID in .env. Raises if .env is not set up."""
+def sheet_url(gid: str = None) -> str:
+    """The CSV export URL of one tab — the master tab unless given a gid. Raises if .env is not set up."""
     load_dotenv()
     sheet_id = os.environ.get("GOOGLE_SHEET_ID", "").strip()
     if not sheet_id:
         raise RuntimeError(
             "GOOGLE_SHEET_ID is not set. Copy env.default to .env and put your Sheet ID in it."
         )
-    return EXPORT_URL.format(sheet_id=sheet_id, gid=os.environ.get("GOOGLE_SHEET_GID", "0").strip() or "0")
+    return EXPORT_URL.format(sheet_id=sheet_id, gid=gid or os.environ.get("GOOGLE_SHEET_GID", "0").strip() or "0")
 
 
 def normalise_column(name: str) -> str:
@@ -193,6 +193,31 @@ def settle_genre(typed, grouping, categories, genre_map, unmapped) -> tuple:
     return genre, form, fiction, source
 
 
+def read_enrichment(path=None):
+    """
+    What enrich.py has cached: the local file if there is one, else the copy kept in the Sheet's
+    ENRICHMENT_GID tab, else None. The local file is the fresher of the two — the tab is only as
+    new as its last upload — so the tab is what a second machine, or a lost data/, starts from.
+    """
+    path = Path(path or ENRICHMENT_CSV)
+    if path.exists():
+        cache = pd.read_csv(path, dtype=str)
+    else:
+        load_dotenv()
+        gid = os.environ.get("ENRICHMENT_GID", "").strip()
+        if not gid:
+            return None
+        # Not logged with its URL, unlike the master tab: that would put the Sheet ID in every log.
+        logger.info("No %s; reading the Sheet's enrichment tab instead", path)
+        cache = pd.read_csv(sheet_url(gid), dtype=str)
+    # Sheets reads an ISBN-style ASIN as a number and drops its leading zero, which breaks the
+    # join for every such book. An ASIN is always ten characters, so the repair is unambiguous.
+    for column in ("key", "asin"):
+        short = cache[column].str.fullmatch(r"[0-9]{1,9}[0-9X]?", na=False)
+        cache.loc[short, column] = cache.loc[short, column].str.zfill(10)
+    return cache
+
+
 def enriched(df: pd.DataFrame) -> pd.DataFrame:
     """
     Join the Audible metadata cached by enrich.py, then settle each book's genre through
@@ -201,12 +226,12 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
     # Every column used below exists afterwards, empty if the Sheet lacks it.
     df = df.reindex(columns=list(dict.fromkeys([*df.columns, *SHEET_COLUMNS])))
     df["key"] = [book_key(t, a, u) for t, a, u in zip(df.title, df.author, df.url)]
-    if ENRICHMENT_CSV.exists():
-        extra = pd.read_csv(ENRICHMENT_CSV)
+    extra = read_enrichment()
+    if extra is not None:
         extra = extra[extra.status == "matched"].drop_duplicates("key")
         df = df.merge(extra[["key", *AUDIBLE_COLUMNS]], on="key", how="left")
     else:
-        logger.info("No %s yet; run enrich.py to fill genres and series from Audible", ENRICHMENT_CSV)
+        logger.info("No Audible metadata yet; run enrich.py to fill genres and series")
         df = df.reindex(columns=[*df.columns, *AUDIBLE_COLUMNS])
 
     genre_map, unmapped = read_genre_map(), set()
@@ -222,7 +247,7 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
     # Typed on a handful of books, true of hundreds. Only where nothing else claimed the form.
     self_read = [bool(author_names(a) & author_names(n)) for a, n in zip(df.author, df.narrator)]
     df.loc[df.form.isna() & pd.Series(self_read, index=df.index), "form"] = READ_BY_THE_AUTHOR
-    df["duration_hours"] = pd.to_numeric(df.duration_hours).fillna(pd.to_numeric(df.runtime_min) / 60)
+    df["duration_hours"] = pd.to_numeric(df.duration_hours).fillna(pd.to_numeric(df.runtime_min, errors="coerce") / 60)
     df["series_position"] = pd.to_numeric(df.series_position, errors="coerce")
     # The Sheet repeats started/finished once per listen; the latest of each is what ranking needs.
     for stem in ("started", "finished"):
