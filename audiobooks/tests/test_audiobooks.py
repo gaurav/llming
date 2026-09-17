@@ -9,6 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import audiobooks  # noqa: E402
 from audiobooks import normalise_column, sheet_url, tidy  # noqa: E402
 
 # A Sheets export in miniature: messy headers, a blank padding row and column, padded values.
@@ -84,3 +85,116 @@ def test_gid_falls_back_to_the_first_tab(env, gid):
     # env.default ships GOOGLE_SHEET_GID=0, but a .env that drops or empties it still has to work.
     env(GOOGLE_SHEET_ID="SHEET", **({} if gid is None else {"GOOGLE_SHEET_GID": gid}))
     assert sheet_url().endswith("gid=0")
+
+
+# --- genre normalisation and the Audible join -------------------------------------------------
+
+GENRE_MAP = """
+# specific genres sit above the catch-all, so a book with both ladders is Fantasy, not Literature
+- genre: Fantasy
+  fiction: true
+  matches:
+    - Science Fiction & Fantasy > Fantasy
+- genre: Literature
+  fiction: true
+  matches:
+    - Fiction
+    - Literature & Fiction
+- genre: History
+  fiction: false
+- form: Radio drama
+- genre: Comedy
+  form: Radio drama
+  matches:
+    - Radio comedy
+- genre: Comedy
+"""
+
+
+@pytest.fixture
+def genre_map(tmp_path):
+    path = tmp_path / "genre_map.yaml"
+    path.write_text(GENRE_MAP)
+    return audiobooks.read_genre_map(path)
+
+
+def settle(genre_map, typed=None, grouping=None, categories=None):
+    unmapped = set()
+    return audiobooks.settle_genre(typed, grouping, categories, genre_map, unmapped), unmapped
+
+
+def test_a_typed_genre_is_matched_whatever_its_case(genre_map):
+    (genre, form, fiction, source), unmapped = settle(genre_map, typed="FICTION")
+    assert (genre, fiction, source) == ("Literature", True, "sheet") and not unmapped
+
+
+def test_a_typed_genre_beats_audible(genre_map):
+    result, _ = settle(genre_map, typed="History", categories="Science Fiction & Fantasy > Fantasy > Epic")
+    assert result == ("History", None, False, "sheet")
+
+
+def test_the_ladder_highest_in_the_map_wins_not_the_first_one_listed(genre_map):
+    # Audible lists ladders alphabetically, which puts Literature ahead of nearly everything.
+    categories = "Literature & Fiction > Genre Fiction > Literary Fiction; Science Fiction & Fantasy > Fantasy > Epic"
+    assert settle(genre_map, categories=categories)[0] == ("Fantasy", None, True, "audible")
+
+
+def test_a_ladder_falls_back_to_its_top_level(genre_map):
+    assert settle(genre_map, categories="History > Europe > Great Britain")[0][0] == "History"
+
+
+def test_a_form_in_the_genre_column_leaves_the_genre_to_audible(genre_map):
+    result, _ = settle(genre_map, typed="Radio Drama", categories="History > Europe")
+    assert result == ("History", "Radio drama", False, "audible")
+
+
+def test_a_genre_the_map_has_not_met_passes_through_and_is_reported(genre_map):
+    (genre, *_), unmapped = settle(genre_map, typed="Solarpunk")
+    assert genre == "Solarpunk" and unmapped == {"Solarpunk"}
+
+
+def test_an_entry_with_a_genre_and_a_form_does_not_claim_the_bare_genre(genre_map):
+    # "Radio comedy" is filed above plain Comedy here; typing "Comedy" must not gain a form from it.
+    assert settle(genre_map, typed="Comedy")[0][:2] == ("Comedy", None)
+    assert settle(genre_map, typed="Radio comedy")[0][:2] == ("Comedy", "Radio drama")
+
+
+def test_a_value_listed_twice_is_refused(tmp_path):
+    # A repeat would silently shadow the earlier entry, so the map refuses to load at all.
+    path = tmp_path / "genre_map.yaml"
+    path.write_text("- genre: Fantasy\n  matches: [Epic]\n- genre: Literature\n  matches: [epic]\n")
+    with pytest.raises(ValueError, match="appears twice"):
+        audiobooks.read_genre_map(path)
+
+
+def test_the_committed_genre_map_loads():
+    assert audiobooks.read_genre_map()["fantasy"][1] == "Fantasy"
+
+
+def test_audible_fills_blanks_without_overriding_the_sheet(tmp_path, monkeypatch):
+    cache = tmp_path / "enrichment.csv"
+    cache.write_text(
+        "key,status,asin,series,series_position,narrators,runtime_min,categories,summary\n"
+        "B00WH5VZR8,matched,B00WH5VZR8,Some Series,2,Audible Narrator,600,History > Europe,A blurb\n"
+        "piranesi|susannaclarke,matched,B0PIRANESI,,,Chiwetel Ejiofor,420,History,Another\n"
+    )
+    monkeypatch.setattr(audiobooks, "ENRICHMENT_CSV", cache)
+    sheet = pd.DataFrame(
+        {
+            "title": ["Do No Harm", "Piranesi"],
+            "author": ["Henry Marsh", "Susanna Clarke"],
+            "url": ["https://www.audible.com/pd/Do-No-Harm-Audiobook/B00WH5VZR8", None],
+            "narrator": ["Sheet Narrator", None],
+            "duration_hours": [None, None],
+            "finished": pd.to_datetime(["2024-01-01", None]),
+            "finished_3_1": pd.to_datetime(["2025-06-01", None]),
+        }
+    )
+
+    df = audiobooks.enriched(sheet)
+
+    assert df.narrator.tolist() == ["Sheet Narrator", "Chiwetel Ejiofor"]
+    assert df.duration_hours.tolist() == [10.0, 7.0]
+    assert df.series_position.tolist()[0] == 2
+    # The duplicated-header listen columns count too: the latest finish is the 2025 one.
+    assert df.last_finished[0] == pd.Timestamp("2025-06-01")

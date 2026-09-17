@@ -1,0 +1,289 @@
+# The genre vocabulary: what the Sheet's `genre` and `grouping` cells, and Audible's category
+# ladders, are taken to mean. Each entry is one genre (or one form) and everything that maps to it.
+#
+#   - Matching ignores case, and an entry matches its own name, so "Radio Drama" needs no line.
+#   - A ladder is matched on its first two levels ("History > Europe"), then on its first alone.
+#   - Anything not listed passes through exactly as typed, and the loader logs it.
+#   - A value may appear once only; the loader refuses a file that lists one twice.
+#
+# ORDER MATTERS, for Audible only. Audible files a book under several ladders and returns them
+# alphabetically, so a fantasy novel arrives as "Literature & Fiction" first. A book takes the
+# genre of whichever of its ladders comes EARLIEST in this file — so specific genres sit at the
+# top and the catch-all (Literature) at the bottom. A genre typed into the Sheet is never
+# second-guessed, whatever the order.
+#
+# The order was not guessed. For the ~380 books that have both a typed genre and Audible ladders,
+# each candidate order was scored on how often Audible alone would have reproduced the typed
+# genre. This one gets 6 in 10 exactly right, and most of the rest are Audible being more specific
+# than the Sheet (a typed "Literature" that Audible calls Historical fiction). Re-check a reorder
+# the same way before trusting it.
+
+# --- Fiction, most specific first -------------------------------------------------------------
+
+- genre: Mythology
+  fiction: true
+  matches:
+    - Literature & Fiction > Ancient, Classical & Medieval Literature
+
+- genre: Horror
+  fiction: true
+  matches:
+    - Literature & Fiction > Horror
+
+- genre: Fantasy
+  fiction: true
+  matches:
+    - Fantasy comedy
+    - Science Fiction & Fantasy > Fantasy
+    - Children's Audiobooks > Science Fiction & Fantasy
+    - Teen & Young Adult > Science Fiction & Fantasy
+    - LGBTQ+ > Science Fiction & Fantasy
+
+- genre: Science fiction
+  fiction: true
+  matches:
+    - Science Fiction & Fantasy > Science Fiction
+    - Science Fiction & Fantasy
+    - Romance > Science Fiction
+
+- genre: Detective
+  fiction: true
+  matches:
+    - Detective fiction
+    - Police Procedural
+    - Mystery, Thriller & Suspense > Mystery
+    - Mystery, Thriller & Suspense > Crime Fiction
+    - Teen & Young Adult > Mystery, Thriller & Suspense
+
+- genre: Thriller
+  fiction: true
+  matches:
+    - Mystery, Thriller & Suspense > Thriller & Suspense
+    - Mystery, Thriller & Suspense
+    - Romance > Romantic Suspense
+
+- genre: Historical fiction
+  fiction: true
+  matches:
+    - Historical Fiction, Singapore
+    - Literature & Fiction > Historical Fiction
+    - Romance > Historical
+
+- genre: Romance
+  fiction: true
+  matches:
+    - Erotic
+    - Romance > Contemporary
+    - Romance > Sports
+    - LGBTQ+ > Romance
+    - Erotica
+
+- genre: Adventure
+  fiction: true
+  matches:
+    - Action
+    - Literature & Fiction > Action & Adventure
+    - Romance > Action & Adventure
+
+- genre: Poetry
+  matches:
+    - Literature & Fiction > Poetry
+
+- genre: Drama
+  fiction: true
+  matches:
+    - Literature & Fiction > Drama & Plays
+
+- genre: Family drama
+  fiction: true
+
+# --- Non-fiction ------------------------------------------------------------------------------
+
+# History comes first among the non-fiction because that is how the Sheet uses it: a book that is
+# history is filed as History even when Audible also calls it a memoir, science or politics.
+- genre: History
+  fiction: false
+  matches:
+    - Political history
+    - Religious history
+
+# Audible cannot tell a biography (a life, written by someone else) from an autobiography or
+# memoir (written by its subject): no "Biographies & Memoirs" sub-ladder leans towards Biography.
+# Of the books under it that also have a typed genre, nine in ten are Autobiography, so everything
+# goes there, and Biography only ever comes from the Sheet. Expect about one in ten of the
+# Audible-filled Autobiographies to be a biography; typing the genre into the Sheet settles it.
+- genre: Biography
+  fiction: false
+
+- genre: Autobiography
+  fiction: false
+  matches:
+    - Biographies & Memoirs
+    - LGBTQ+ > Biographies & Memoirs
+    - Literature & Fiction > Memoirs, Diaries & Correspondence
+
+# Below Autobiography on purpose: a comedian's memoir and a crime memoir are typed as memoirs.
+- genre: True crime
+  fiction: false
+  matches:
+    - Biographies & Memoirs > True Crime
+
+- genre: Comedy
+  matches:
+    - Humour
+    - Comedy & Humor
+
+- genre: Advice
+  fiction: false
+  matches:
+    - Advice, Politics
+    - Productivity
+    - Selfcare
+    - Work
+    - Relationships, Parenting & Personal Development
+    - Business & Careers
+    - Health & Wellness > Psychology & Mental Health
+    - Health & Wellness > Fitness, Diet & Nutrition
+    - Health & Wellness > Aging & Longevity
+    - Health & Wellness > Alternative & Complementary Medicine
+
+- genre: Medicine
+  fiction: false
+  matches:
+    - Health & Wellness
+
+- genre: Science
+  fiction: false
+  matches:
+    - Biology
+    - Ecology
+    - Science & Engineering
+    - Computers & Technology
+    - Sports & Outdoors > Outdoors & Nature
+    - Home & Garden > Pets & Animal Care
+
+- genre: Economics
+  fiction: false
+  matches:
+    - Money & Finance
+
+- genre: Music
+  fiction: false
+  matches:
+    - The Beatles
+    - Arts & Entertainment > Music
+
+- genre: Entertainment
+  fiction: false
+  matches:
+    - Arts & Entertainment > Entertainment & Performing Arts
+
+- genre: Arts
+  fiction: false
+  matches:
+    - Architecture
+    - Arts & Entertainment
+
+- genre: Food
+  fiction: false
+  matches:
+    - Home & Garden > Food & Wine
+
+- genre: Travel
+  fiction: false
+  matches:
+    - Travel & Tourism
+
+- genre: Sport
+  fiction: false
+  matches:
+    - Sports & Outdoors
+
+- genre: Home
+  fiction: false
+  matches:
+    - Home & Garden
+
+- genre: Religion
+  fiction: false
+  matches:
+    - Religion & Spirituality
+
+- genre: Language
+  fiction: false
+  matches:
+    - Education & Learning
+
+- genre: Documentary
+  fiction: false
+  matches:
+    - Factual
+
+# --- The catch-alls, which lose to everything above -------------------------------------------
+# (Politics & Social Sciences is on half the non-fiction in the library; Literature & Fiction on
+# nearly all the fiction.)
+
+- genre: Politics
+  fiction: false
+  matches:
+    - Advocacy
+    - Law
+    - Politics & Social Sciences
+    - LGBTQ+ > LGBTQ+ Studies
+
+- genre: Literature
+  fiction: true
+  matches:
+    - Fiction
+    - Coming of age
+    - Literature & Fiction
+    - LGBTQ+ > Literature & Fiction
+    - Teen & Young Adult
+    - Children's Audiobooks
+
+# --- Forms: how a book is told rather than what it is about -----------------------------------
+# Typed into either Sheet column. A form leaves the genre for Audible to fill.
+
+- form: Radio drama
+
+- genre: Comedy
+  form: Radio drama
+  fiction: true
+  matches:
+    - Radio comedy
+
+- form: Audio drama
+
+- form: Monologue
+
+- genre: Drama
+  form: Monologue
+  fiction: true
+  matches:
+    - One-man drama
+
+- form: Musical
+
+- form: Epistolary
+  matches:
+    - Epistolery
+
+- form: Short stories
+  matches:
+    - Literature & Fiction > Anthologies & Short Stories
+
+- form: Full cast
+  matches:
+    - Multicast
+
+- form: Read by the author
+  matches:
+    - Author-read
+
+- form: Interviews
+
+- form: Comic book
+
+- form: ""
+  matches:
+    - Read by narrator
