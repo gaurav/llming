@@ -37,10 +37,29 @@ defaults to `title`, `custom`, `format`. `uv run vlmddiff.py --help` has the res
 Tests run from the repo root with `uv run pytest`, or `uv run pytest vlmddiff` for just this one.
 The pair in `tests/fixtures/` is synthetic and stands in for the real files.
 
+## Diffing the REDCap CSVs: `redcapdiff.py`
+
+The same idea one step earlier in the pipeline. `redcapdiff.py` compares two REDCap data
+dictionary CSVs, matching rows on `Variable / Field Name`, and puts every changed cell in a
+category: *whitespace only*, *filled in*, *emptied*, *choice formatting only* (the same codes and
+labels, written differently) or *content change*. The report opens with a count per category, so
+its first table is the summary of what a cleaning step did. It reuses `vlmddiff.py`'s grouping and
+rendering.
+
+```bash
+cd vlmddiff
+uv run redcapdiff.py -b data/<comparison>/original.redcap.csv \
+    -r data/<comparison>/clean.redcap.csv 2>&1 | tee data/<comparison>/last-run.log
+```
+
+It writes `redcap-diff.md`/`.csv` beside `--base`, unless you pass `-o`. The categories are
+heuristics, so read the *content change* section rather than trusting the count alone: it holds
+everything the other rules didn't explain.
+
 ## Watch out for
 
-- **It diffs VLMD documents, not CSVs.** The REDCap CSV both dictionaries derive from is in `data/`
-  for reference only; pointing this at two CSVs will not work.
+- **`vlmddiff.py` diffs VLMD documents, not CSVs.** Pointing it at two REDCap CSVs will not work;
+  that is what `redcapdiff.py`, above, is for.
 - **Values compare exactly.** `{"enum": ["0","1"]}` against `{"enum": ["1","0"]}` reads as a change
   although both describe the same set, and a one-key edit inside `constraints` prints the whole
   object on both sides. Tolerable here because grouping collapses the repeats.
@@ -55,11 +74,10 @@ The pair in `tests/fixtures/` is synthetic and stands in for the real files.
 
 ## If I come back to this
 
-The open question is the input-file comparison: the LLM tool also emits a cleaned version of the
-REDCap CSV, and diffing that against the original would show what the cleaning step did before any
-VLMD was generated. That needs either a CSV differ this tool isn't, or a pass that converts the
-cleaned CSV to VLMD first and reuses this — they answer different questions and the choice hasn't
-been made.
+The pipeline could then be reproducible end to end, except for the one step an agent did: convert
+the cleaned REDCap CSV to VLMD with heal-platform-sdk, check that converting the *original* CSV the
+same way reproduces the script-generated VLMD, and diff the result against the LLM tool's VLMD.
+Whatever remains is what the LLM tool did beyond the cleaning that `redcapdiff.py` documents.
 
 After that: comparing `enum` values as sets rather than sequences, and diffing inside nested
 objects instead of whole, would both cut noise if a future pair produces more of it than this one

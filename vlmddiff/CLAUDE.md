@@ -39,8 +39,11 @@ more than one way. The shared REDCap CSV both start from stays at `data/` root.
 
 `data/input-file-comparison/` is for the other direction: the coworker's LLM tool also emits a
 cleaned version of the REDCap CSV itself, so diffing that against the original shows what the LLM
-changed before any VLMD was generated — the cleaning step, rather than its downstream effect. Note
-that this script diffs VLMD documents, not CSVs.
+changed before any VLMD was generated — the cleaning step, rather than its downstream effect. The
+cleaned CSV was reconstructed *after* the LLM tool had already generated its VLMD, by asking the
+agent to work backwards, so it was not literally the VLMD's input. That comparison is done by
+`redcapdiff.py`, not `vlmddiff.py` (see below). The original CSV there is byte-identical to the one
+at `data/` root.
 
 ### Output
 
@@ -100,6 +103,29 @@ cd vlmddiff && uv run vlmddiff.py \
     -b tests/fixtures/base.json -r tests/fixtures/revised.json -o tests/fixtures/expected
 ```
 
+### `redcapdiff.py`
+
+It imports `diff_documents`, `index_fields`, `group_by_pattern`, `render_property_section` and
+`render_variable_list` from `vlmddiff.py`, so changing those changes both reports. A CSV loads as
+`{"fields": rows}`, and every cell is a string. `diff_field` only looks for a VLMD `section`, so
+each change's section is filled from `Form Name` afterwards.
+
+`classify()` checks in this order, and the first rule that matches wins:
+
+1. **whitespace only** — `str.split()` gives the same tokens on both sides. It comes first so
+   `"  "` → `""` doesn't count as emptied. `str.split()` also splits on NBSP, which is the one case
+   the real pair has, and the report renders non-space whitespace as `<U+00A0>`, because otherwise
+   both sides of the change would look identical.
+2. **filled in** / **emptied** — one side is blank.
+3. **choice formatting only** — only in `Choices, Calculations, OR Slider Labels`. Split on `|`,
+   then on each item's first `,`. A bare `x` means `x, x`, which is how REDCap reads it.
+4. **content change** — everything else.
+
+On the real pair only the Choices column differs: 374 cells, split 349 filled in (every
+`truefalse` field given `True, True | False, False`), 23 choice formatting, 1 whitespace and 1
+content change. There are no tests with a committed expected output. The tests write tiny CSVs to
+`tmp_path`.
+
 ## Known Issues & Limitations
 
 - **No traceback to the REDCap CSV.** An earlier idea was to trace each VLMD variable back to its
@@ -124,6 +150,8 @@ cd vlmddiff && uv run vlmddiff.py \
 ## Related Files
 
 - `vlmddiff.py` — the script.
+- `redcapdiff.py` — the REDCap CSV sibling, importing from `vlmddiff.py`.
+- `tests/test_redcapdiff.py` — its tests.
 - `tests/test_vlmddiff.py`, `tests/conftest.py` — tests. `conftest.py` only puts the parent
   directory on `sys.path`, since `vlmddiff.py` is a plain script rather than an installed package.
 - `tests/fixtures/base.json`, `revised.json` — the synthetic sample pair, used by every test.
@@ -138,4 +166,5 @@ Not in git — study data, see above:
 - `data/vlmd-file-comparison/vlmd-diff.md`, `vlmd-diff.csv` — the real outputs, for review
   elsewhere.
 - `data/vlmd-file-comparison/last-run.log` — output of the run that produced them.
-- `data/input-file-comparison/` — the cleaned-CSV comparison, empty until that file arrives.
+- `data/input-file-comparison/*.redcap.csv`, `*_clean.redcap.csv` — the original and cleaned CSVs.
+- `data/input-file-comparison/redcap-diff.md`, `redcap-diff.csv`, `last-run.log` — their comparison.
