@@ -111,6 +111,11 @@ autouse fixture for exactly that reason.
 - `merchandising_summary` (in `product_attrs`) is a two-sentence blurb. `publisher_summary` is the
   full HTML one and needs `product_extended_attrs`; not fetched, because it would dominate the CSV.
 
+`enrich.py` logs its title-disagreement warnings *after* the loop. tqdm and logging share stderr,
+so a warning written mid-run lands on the progress bar's line, and the `grep -v` that keeps the
+bar out of `data/last-run.log` silently eats it — the first full run "produced no warnings" for
+exactly that reason, while two rows had each other's ASIN.
+
 `enrich.py` saves every 50 rows as well as in a `finally`: a full run is twelve minutes of requests,
 and a kill signal skips `finally` entirely — the first full run lost everything that way.
 

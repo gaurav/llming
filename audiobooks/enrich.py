@@ -45,6 +45,8 @@ COLUMNS = [
 ]  # fmt: skip
 
 BRACKETED = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
+# Where a subtitle starts: "Babel: Or the Necessity…", "What Is a Girl Worth? My Story…"
+SUBTITLE = re.compile(r"[:?!]")
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +54,7 @@ logger = logging.getLogger(__name__)
 def shortened(title) -> set:
     """A title without its subtitle, and without its brackets: '(Dramatised)', '[Audible Edition]'."""
     title = str(title)
-    return {squash(title.split(":")[0]), squash(BRACKETED.sub("", title))} - {""}
+    return {squash(SUBTITLE.split(title)[0]), squash(BRACKETED.sub("", title))} - {""}
 
 
 def titles_match(sheet_title, product) -> bool:
@@ -129,7 +131,7 @@ def look_up(session, row) -> dict:
         return {"status": "matched", **flatten(product)}
 
     params = {
-        "title": BRACKETED.sub("", str(row.title).split(":")[0]).strip(),
+        "title": BRACKETED.sub("", SUBTITLE.split(str(row.title))[0]).strip(),
         "author": AUTHOR_ROLE.sub("", re.split(r",|&", str(row.author))[0]).strip(),
         "num_results": 10,
         "response_groups": RESPONSE_GROUPS,
@@ -183,7 +185,7 @@ def main(source, output, limit, refresh, delay) -> None:
         merged[merged.status == "review"][["title", "author", "candidates"]].to_csv(review_path, index=False)
         return merged
 
-    rows, session = [], requests.Session()
+    rows, disagree, session = [], [], requests.Session()
     try:
         for row in tqdm(todo.itertuples(), total=len(todo)):
             try:
@@ -192,9 +194,9 @@ def main(source, output, limit, refresh, delay) -> None:
                 logger.warning("Skipping %r: %s", row.title, e)
                 continue
             rows.append({"key": row.key, "title": row.title, "author": row.author, **found})
-            # A pasted ID is accepted whatever it points at, so say when the title disagrees.
+            # A pasted ID is accepted whatever it points at, so note when the title disagrees.
             if found["status"] == "matched" and "|" not in row.key and not titles_match(row.title, {"title": found["audible_title"]}):
-                logger.warning("Check %s: the Sheet says %r, Audible says %r", row.key, row.title, found["audible_title"])
+                disagree.append((row.key, row.title, found["audible_title"]))
             # A full run is twelve minutes of requests; a kill signal skips `finally`, so save as we go.
             if len(rows) % 50 == 0:
                 save(rows)
@@ -202,6 +204,10 @@ def main(source, output, limit, refresh, delay) -> None:
     finally:
         cache = save(rows)
 
+    # Logged after the loop, not inside it: tqdm and logging share stderr, and a warning written
+    # mid-bar lands on the bar's line, where anything filtering the bar out of a log eats it too.
+    for key, title, audible_title in disagree:
+        logger.warning("Check %s: the Sheet says %r, Audible says %r", key, title, audible_title)
     logger.info("Wrote %s: %s", output, cache.status.value_counts().to_dict())
     logger.info("%d to review in %s", (cache.status == "review").sum(), review_path)
     if any(row["status"] == "matched" for row in rows):

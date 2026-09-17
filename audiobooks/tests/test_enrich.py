@@ -103,6 +103,12 @@ def test_a_title_in_front_of_a_name_does_not_stop_an_author_matching():
     assert enrich.pick_match("Rendezvous with Rama", "Sir Arthur C. Clarke", None, products)["asin"] == "B002UZLF2U"
 
 
+def test_a_subtitle_after_a_question_mark_is_a_subtitle_too():
+    products = [product("B0WORTH000", "What Is a Girl Worth?", "Rachael Denhollander")]
+    long_title = "What is a Girl Worth? My Story of Breaking the Silence"
+    assert enrich.pick_match(long_title, "Rachael Denhollander", None, products)["asin"] == "B0WORTH000"
+
+
 def test_a_shared_series_prefix_is_not_a_match():
     products = [product("B0HEIR0000", "Star Wars: Heir to the Empire", "Timothy Zahn")]
     assert enrich.pick_match("Star Wars: Thrawn", "Timothy Zahn", None, products) is None
