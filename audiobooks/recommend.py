@@ -181,11 +181,13 @@ def main(mode, source, genre, form, fiction, min_hours, max_hours, long_ago, by,
         # Background listening wants a story. Only what is known to be non-fiction goes: the map
         # leaves Comedy and Poetry undecided, and those stay in unless --fiction insists.
         picks = picks[picks.fiction != False]  # noqa: E712
+    # fillna before .str: with no Audible cache yet, or no forms typed, these columns are entirely
+    # empty, which pandas reads as numbers and refuses to treat as text.
     if genre:
-        in_categories = picks.categories.str.contains(genre, case=False, regex=False, na=False)
-        picks = picks[picks.genre.str.lower().eq(genre.lower()) | in_categories]
+        in_categories = picks.categories.fillna("").astype(str).str.contains(genre, case=False, regex=False)
+        picks = picks[picks.genre.fillna("").astype(str).str.lower().eq(genre.lower()) | in_categories]
     if form:
-        picks = picks[picks.form.str.lower() == form.lower()]
+        picks = picks[picks.form.fillna("").astype(str).str.lower() == form.lower()]
     if min_hours:
         picks = picks[picks.duration_hours >= min_hours]
     if max_hours:

@@ -4,6 +4,9 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import pandas as pd
+from click.testing import CliRunner
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import enrich  # noqa: E402
@@ -130,3 +133,29 @@ def test_a_match_is_flattened_to_plain_columns():
     assert found["series"] == "Truly Devious" and found["series_position"] == "1"
     assert found["categories"] == "Teen & Young Adult > Mystery"
     assert found["summary"] == "A school & a murder."
+
+
+def test_a_rerun_keeps_matches_retries_misses_and_forgets_books_the_sheet_has_lost(tmp_path, monkeypatch):
+    sheet = tmp_path / "audiobooks.csv"
+    sheet.write_text(
+        "Title,Author,Narrator,URL\n"
+        "Do No Harm,Henry Marsh,,https://www.audible.com/pd/Do-No-Harm-Audiobook/B00WH5VZR8\n"
+        "Nimona,ND Stevenson,,\n"
+    )
+    cache = tmp_path / "data" / "enrichment.csv"
+    cache.parent.mkdir()
+    cache.write_text(
+        "key,status,title,asin\n"
+        "B00WH5VZR8,matched,Do No Harm,B00WH5VZR8\n"
+        "nimona|ndstevenson,review,Nimona,\n"
+        "warhorsesofletters|mariephillips,matched,A title the Sheet has since changed,B01DYIH94E\n"
+    )
+    looked_up = []
+    monkeypatch.setattr(enrich, "look_up", lambda session, row: looked_up.append(row.title) or {"status": "matched", "asin": "B01ETXFGOI"})
+
+    result = CliRunner().invoke(enrich.main, [str(sheet), "--output", str(cache), "--delay", "0"])
+
+    assert result.exit_code == 0, result.output
+    assert looked_up == ["Nimona"]  # the match is final; only the near miss goes back to Audible
+    saved = pd.read_csv(cache, dtype=str)
+    assert sorted(saved.key) == ["B00WH5VZR8", "nimona|ndstevenson"] and set(saved.status) == {"matched"}

@@ -298,3 +298,18 @@ def test_the_local_cache_is_preferred_to_the_tab(tmp_path, monkeypatch):
     monkeypatch.setenv("ENRICHMENT_GID", "12345")
     monkeypatch.setattr(audiobooks, "sheet_url", lambda gid=None: pytest.fail("went to the Sheet"))
     assert len(audiobooks.read_enrichment(local)) == 3
+
+
+def test_the_sheet_id_never_reaches_the_log(monkeypatch, caplog):
+    # The Sheet is link-shared, so its ID is the access to it, and logs get pasted into transcripts.
+    monkeypatch.setenv("GOOGLE_SHEET_ID", "SECRET-SHEET-ID")
+    monkeypatch.setenv("ENRICHMENT_GID", "12345")
+    monkeypatch.setattr(audiobooks, "ENRICHMENT_CSV", Path("/nonexistent/enrichment.csv"))
+    fetched = []
+    monkeypatch.setattr(pd, "read_csv", lambda source, **k: fetched.append(source) or pd.DataFrame(
+        {"Title": ["Piranesi"], "Author": ["Susanna Clarke"], "key": ["x"], "status": ["matched"], **{c: [None] for c in audiobooks.AUDIBLE_COLUMNS}}
+    ))
+    with caplog.at_level("INFO"):
+        audiobooks.load()
+    assert len(fetched) == 2 and all("SECRET-SHEET-ID" in url for url in fetched)  # both tabs were read
+    assert "SECRET-SHEET-ID" not in caplog.text

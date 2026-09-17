@@ -5,9 +5,11 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from click.testing import CliRunner
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import audiobooks  # noqa: E402
 import recommend  # noqa: E402
 
 NOW = pd.Timestamp.now()
@@ -89,3 +91,40 @@ def test_taste_ranks_groups_by_shrunk_mean_and_counts_what_is_waiting(library):
     # Two Saga sequels wait unheard; the second edition of the heard first book is not one of them.
     assert table.loc["Series Author", "unheard"] == 2
     assert table.rated.min() > 0  # an author with nothing rated has no taste to report
+
+
+SHEET = """Title,Author,Narrator,Status,Count,Rating (0-5),Genre,Grouping,URL
+A Novel,Some Novelist,,Finished,1,4,Fantasy,,
+A Sketch Show,Some Comic,,Finished,1,4,Comedy,Radio drama,
+A History,Some Historian,,Finished,1,5,History,,
+"""
+
+
+@pytest.fixture
+def listed(tmp_path, monkeypatch):
+    """Run the CLI over a three-book Sheet and hand back the titles it printed, in order."""
+    monkeypatch.setattr(audiobooks, "load_dotenv", lambda *a, **k: False)
+    monkeypatch.delenv("ENRICHMENT_GID", raising=False)
+    monkeypatch.setattr(audiobooks, "ENRICHMENT_CSV", tmp_path / "absent.csv")
+    sheet = tmp_path / "audiobooks.csv"
+    sheet.write_text(SHEET)
+
+    def _listed(*args):
+        result = CliRunner().invoke(recommend.main, [args[0], str(sheet), *args[1:]])
+        assert result.exit_code == 0, result.output
+        return [title for title in ("A Novel", "A Sketch Show", "A History") if title in result.output]
+
+    return _listed
+
+
+def test_a_relisten_leaves_out_only_what_is_known_to_be_non_fiction(listed):
+    # The map leaves Comedy undecided between fiction and not. Background listening wants a story,
+    # so the default drops History and keeps the comedy; --fiction insists, and drops it too.
+    assert listed("relisten") == ["A Novel", "A Sketch Show"]
+    assert listed("relisten", "--fiction") == ["A Novel"]
+    assert listed("relisten", "--non-fiction") == ["A History"]
+
+
+def test_form_and_genre_filters_take_the_maps_spellings_whatever_the_case(listed):
+    assert listed("relisten", "--form", "RADIO DRAMA") == ["A Sketch Show"]
+    assert listed("relisten", "--non-fiction", "--genre", "history") == ["A History"]
