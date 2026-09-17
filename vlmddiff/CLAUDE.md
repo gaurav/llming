@@ -45,6 +45,25 @@ agent to work backwards, so it was not literally the VLMD's input. That comparis
 `redcapdiff.py`, not `vlmddiff.py` (see below). The original CSV there is byte-identical to the one
 at `data/` root.
 
+`data/sdk-vlmd-comparison/` converts both CSVs to VLMD with heal-sdk and diffs the results, to make
+the pipeline reproducible. There are three diffs: script VLMD vs SDK(original), which differ only in
+whitespace; SDK(original) vs SDK(clean), which are byte-identical; and SDK(clean) vs the LLM VLMD.
+`data/cleanup-summary.md` writes up what they show. In short, the cleaned CSV explains none of the
+LLM VLMD's edits. To convert:
+
+```bash
+uvx --python 3.13 --from heal-sdk heal vlmd extract --file_type redcap \
+    --input_file data/x/in.redcap.csv --title "..." --output_dir data/x/out
+```
+
+- **The PyPI package is `heal-sdk`, not `heal` or `heal-platform-sdk`.** `heal` on PyPI is an
+  unrelated placeholder project that pulls in litellm. `heal-sdk` needs Python 3.13.
+- **heal-sdk silently drops rows with an invalid REDCap field type** (`datetime`, `any`), which is
+  why it produces 1457 variables from 1465 CSV rows.
+- **heal-sdk ignores the choices of a `truefalse` field** and always emits `["0", "1"]`. It also
+  parses bare choice codes and strips whitespace itself, which is why the cleaned CSV converts
+  identically.
+
 ### Output
 
 Two files sharing `--output-prefix`, which defaults to `vlmd-diff` in `--base`'s own directory —
