@@ -5,6 +5,7 @@
 #     "click",
 #     "pandas",
 #     "python-dotenv",
+#     "pyyaml",
 #     "requests",
 # ]
 # ///
