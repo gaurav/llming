@@ -98,7 +98,10 @@ GENRE_MAP = """
 - genre: Literature
   fiction: true
   matches:
-    - Fiction
+    - Literature & Fiction > Genre Fiction > Literary Fiction
+- genre: Fiction
+  fiction: true
+  matches:
     - Literature & Fiction
 - genre: History
   fiction: false
@@ -125,7 +128,7 @@ def settle(genre_map, typed=None, grouping=None, categories=None):
 
 def test_a_typed_genre_is_matched_whatever_its_case(genre_map):
     (genre, form, fiction, source), unmapped = settle(genre_map, typed="FICTION")
-    assert (genre, fiction, source) == ("Literature", True, "sheet") and not unmapped
+    assert (genre, fiction, source) == ("Fiction", True, "sheet") and not unmapped
 
 
 def test_a_typed_genre_beats_audible(genre_map):
@@ -137,6 +140,12 @@ def test_the_ladder_highest_in_the_map_wins_not_the_first_one_listed(genre_map):
     # Audible lists ladders alphabetically, which puts Literature ahead of nearly everything.
     categories = "Literature & Fiction > Genre Fiction > Literary Fiction; Science Fiction & Fantasy > Fantasy > Epic"
     assert settle(genre_map, categories=categories)[0] == ("Fantasy", None, True, "audible")
+
+
+def test_a_ladder_matches_on_the_longest_prefix_the_map_lists(genre_map):
+    # Three levels deep is what tells the literary shelf from fiction in general.
+    assert settle(genre_map, categories="Literature & Fiction > Genre Fiction > Literary Fiction")[0][0] == "Literature"
+    assert settle(genre_map, categories="Literature & Fiction > Genre Fiction > Westerns")[0][0] == "Fiction"
 
 
 def test_a_ladder_falls_back_to_its_top_level(genre_map):
@@ -198,3 +207,16 @@ def test_audible_fills_blanks_without_overriding_the_sheet(tmp_path, monkeypatch
     assert df.series_position.tolist()[0] == 2
     # The duplicated-header listen columns count too: the latest finish is the 2025 one.
     assert df.last_finished[0] == pd.Timestamp("2025-06-01")
+
+
+def test_a_book_narrated_by_its_author_is_read_by_the_author_unless_a_form_was_typed(tmp_path, monkeypatch):
+    monkeypatch.setattr(audiobooks, "ENRICHMENT_CSV", tmp_path / "absent.csv")
+    sheet = pd.DataFrame(
+        {
+            "title": ["Born a Crime", "Piranesi", "Cabin Pressure"],
+            "author": ["Trevor Noah", "Susanna Clarke", "John Finnemore"],
+            "narrator": ["Trevor Noah", "Chiwetel Ejiofor", "John Finnemore, Roger Allam"],
+            "grouping": [None, None, "Radio drama"],
+        }
+    )
+    assert audiobooks.enriched(sheet).form.tolist() == ["Read by the author", None, "Radio drama"]

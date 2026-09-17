@@ -2,17 +2,18 @@
 # ladders, are taken to mean. Each entry is one genre (or one form) and everything that maps to it.
 #
 #   - Matching ignores case, and an entry matches its own name, so "Radio Drama" needs no line.
-#   - A ladder is matched on its first two levels ("History > Europe"), then on its first alone.
+#   - A ladder matches on the longest stretch of it listed here: "History > Europe > Great
+#     Britain" tries all three levels, then "History > Europe", then "History".
 #   - Anything not listed passes through exactly as typed, and the loader logs it.
 #   - A value may appear once only; the loader refuses a file that lists one twice.
 #
 # ORDER MATTERS, for Audible only. Audible files a book under several ladders and returns them
 # alphabetically, so a fantasy novel arrives as "Literature & Fiction" first. A book takes the
 # genre of whichever of its ladders comes EARLIEST in this file — so specific genres sit at the
-# top and the catch-all (Literature) at the bottom. A genre typed into the Sheet is never
+# top and the catch-all (Fiction) at the bottom. A genre typed into the Sheet is never
 # second-guessed, whatever the order.
 #
-# The order was not guessed. For the ~380 books that have both a typed genre and Audible ladders,
+# The order was not guessed. For the ~530 books that have both a typed genre and Audible ladders,
 # each candidate order was scored on how often Audible alone would have reproduced the typed
 # genre. This one gets 6 in 10 exactly right, and most of the rest are Audible being more specific
 # than the Sheet (a typed "Literature" that Audible calls Historical fiction). Re-check a reorder
@@ -60,7 +61,6 @@
   matches:
     - Mystery, Thriller & Suspense > Thriller & Suspense
     - Mystery, Thriller & Suspense
-    - Romance > Romantic Suspense
 
 - genre: Historical fiction
   fiction: true
@@ -77,6 +77,7 @@
     - Romance > Sports
     - LGBTQ+ > Romance
     - Erotica
+    - Romance > Romantic Suspense
 
 - genre: Adventure
   fiction: true
@@ -88,11 +89,6 @@
 - genre: Poetry
   matches:
     - Literature & Fiction > Poetry
-
-- genre: Drama
-  fiction: true
-  matches:
-    - Literature & Fiction > Drama & Plays
 
 - genre: Family drama
   fiction: true
@@ -231,11 +227,21 @@
     - Politics & Social Sciences
     - LGBTQ+ > LGBTQ+ Studies
 
+# Literature is the literary shelf, as distinct from fiction in general. Typed, it means exactly
+# that. From Audible, these two ladders are the nearest thing to it: the books typed Literature
+# carry them more often than not, which is as good as Audible gets on a judgement like this one.
 - genre: Literature
   fiction: true
   matches:
-    - Fiction
+    - Literature & Fiction > Genre Fiction > Literary Fiction
+    - Literature & Fiction > Classics
+
+- genre: Fiction
+  fiction: true
+  matches:
     - Coming of age
+    - Epistolery
+    - Epistolary
     - Literature & Fiction
     - LGBTQ+ > Literature & Fiction
     - Teen & Young Adult
@@ -244,7 +250,17 @@
 # --- Forms: how a book is told rather than what it is about -----------------------------------
 # Typed into either Sheet column. A form leaves the genre for Audible to fill.
 
+# Anything performed rather than read out: someone takes on a character and tells the story from
+# inside it, whether that is a full cast, a BBC serial or one actor's monologue.
 - form: Radio drama
+  matches:
+    - Audio drama
+    - Drama
+    - One-man drama
+    - Monologue
+    - Full cast
+    - Multicast
+    - Literature & Fiction > Drama & Plays
 
 - genre: Comedy
   form: Radio drama
@@ -252,30 +268,14 @@
   matches:
     - Radio comedy
 
-- form: Audio drama
-
-- form: Monologue
-
-- genre: Drama
-  form: Monologue
-  fiction: true
-  matches:
-    - One-man drama
-
 - form: Musical
-
-- form: Epistolary
-  matches:
-    - Epistolery
 
 - form: Short stories
   matches:
     - Literature & Fiction > Anthologies & Short Stories
 
-- form: Full cast
-  matches:
-    - Multicast
-
+# Also filled in by the loader, for any book with no other form whose author is among its
+# narrators — which is some 300 books, against the handful where it was typed.
 - form: Read by the author
   matches:
     - Author-read

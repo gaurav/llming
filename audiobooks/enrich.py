@@ -33,7 +33,7 @@ import pandas as pd
 import requests
 from tqdm import tqdm
 
-from audiobooks import book_key, load, squash
+from audiobooks import AUTHOR_ROLE, author_names, book_key, load, squash
 
 API = "https://api.audible.com/1.0/catalog/products"
 # product_desc carries title/subtitle; without it a search result's title comes back null.
@@ -43,21 +43,9 @@ COLUMNS = [
     "narrators", "runtime_min", "release_date", "categories", "summary", "candidates",
 ]  # fmt: skip
 
-# Roles the Sheet tacks on to a name: "Tina Kover (translator)", "Ta-Nehisi Coates - introduction",
-# "Rachel Zoffness, PhD" — and Audible's own "Sanjay Gupta MD". Stripped from both before comparing.
-AUTHOR_ROLE = re.compile(r"\(.*?\)|\s-\s.*$|\b(ph\.?d|m\.?d|jr|sr)\b\.?", re.I)
-
 BRACKETED = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
 
 logger = logging.getLogger(__name__)
-
-
-def author_names(author) -> set:
-    """'Jorge Luis Borges, Andrew Hurley - translator' -> {'jorgeluisborges', 'andrewhurley'}."""
-    if not isinstance(author, str):
-        return set()
-    parts = re.split(r",|&|\band\b", author)
-    return {squash(AUTHOR_ROLE.sub("", part)) for part in parts} - {""}
 
 
 def shortened(title) -> set:

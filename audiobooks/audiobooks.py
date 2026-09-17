@@ -50,6 +50,13 @@ GENRE_MAP_YAML = Path(__file__).parent / "genre_map.yaml"
 SHEET_COLUMNS = ["title", "author", "url", "genre", "grouping", "narrator", "duration_hours", "started", "finished"]
 AUDIBLE_COLUMNS = ["asin", "series", "series_position", "narrators", "runtime_min", "categories", "summary"]
 
+# Roles the Sheet tacks on to a name: "Tina Kover (translator)", "Ta-Nehisi Coates - introduction",
+# "Rachel Zoffness, PhD" — and Audible's own "Sanjay Gupta MD". Stripped from both before comparing.
+AUTHOR_ROLE = re.compile(r"\(.*?\)|\s-\s.*$|\b(ph\.?d|m\.?d|jr|sr)\b\.?", re.I)
+
+# The form the loader fills in by itself. Spelt as genre_map.yaml spells it.
+READ_BY_THE_AUTHOR = "Read by the author"
+
 logger = logging.getLogger(__name__)
 
 
@@ -65,6 +72,14 @@ def squash(text) -> str:
         return ""
     ascii_only = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     return re.sub(r"[^0-9a-z]+", "", ascii_only.lower())
+
+
+def author_names(author) -> set:
+    """'Jorge Luis Borges, Andrew Hurley - translator' -> {'jorgeluisborges', 'andrewhurley'}."""
+    if not isinstance(author, str):
+        return set()
+    parts = re.split(r",|&|\band\b", author)
+    return {squash(AUTHOR_ROLE.sub("", part)) for part in parts} - {""}
 
 
 def book_key(title, author, url) -> str:
@@ -142,11 +157,12 @@ def read_genre_map(path=None) -> dict:
 
 
 def ladder_entries(categories, genre_map) -> list:
-    """Map entries for a book's Audible ladders: each ladder at two levels, else at its top level."""
+    """Map entries for a book's Audible ladders, each matched on the longest prefix the map lists."""
     entries = []
     for ladder in str(categories).split(";") if isinstance(categories, str) else []:
         levels = [level.strip().lower() for level in ladder.split(">")]
-        entry = genre_map.get(" > ".join(levels[:2])) or genre_map.get(levels[0])
+        prefixes = (" > ".join(levels[:depth]) for depth in range(len(levels), 0, -1))
+        entry = next((genre_map[prefix] for prefix in prefixes if prefix in genre_map), None)
         if entry:
             entries.append(entry)
     return sorted(entries)
@@ -203,6 +219,9 @@ def enriched(df: pd.DataFrame) -> pd.DataFrame:
 
     # Audible fills what the Sheet leaves blank, and never overrides it.
     df["narrator"] = df.narrator.fillna(df.narrators)
+    # Typed on a handful of books, true of hundreds. Only where nothing else claimed the form.
+    self_read = [bool(author_names(a) & author_names(n)) for a, n in zip(df.author, df.narrator)]
+    df.loc[df.form.isna() & pd.Series(self_read, index=df.index), "form"] = READ_BY_THE_AUTHOR
     df["duration_hours"] = pd.to_numeric(df.duration_hours).fillna(pd.to_numeric(df.runtime_min) / 60)
     df["series_position"] = pd.to_numeric(df.series_position, errors="coerce")
     # The Sheet repeats started/finished once per listen; the latest of each is what ranking needs.

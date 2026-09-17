@@ -137,13 +137,14 @@ def rank_relisten(df: pd.DataFrame, long_ago: bool) -> pd.DataFrame:
 @click.argument("mode", type=click.Choice(["new", "relisten"]))
 @click.argument("source", required=False)
 @click.option("--genre", help="A genre (fantasy), or any part of an Audible category (detectives).")
+@click.option("--form", help="A form from genre_map.yaml: 'radio drama', 'read by the author', 'short stories'.")
 @click.option("--fiction/--non-fiction", default=None, help="[default: both for new; anything not known to be non-fiction for relisten]")
 @click.option("--min-hours", type=float)
 @click.option("--max-hours", type=float)
 @click.option("--long-ago", is_flag=True, help="relisten: favour what was last heard longest ago.")
 @click.option("-n", "count", default=20, show_default=True, help="How many to list.")
 @click.option("--csv", "as_csv", is_flag=True, help="Print CSV with every column, to hand to something else.")
-def main(mode, source, genre, fiction, min_hours, max_hours, long_ago, count, as_csv) -> None:
+def main(mode, source, genre, form, fiction, min_hours, max_hours, long_ago, count, as_csv) -> None:
     """Recommend books for MODE from SOURCE (a CSV from download_sheet.py; default: the live Sheet)."""
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     df = score(load(source))
@@ -159,6 +160,8 @@ def main(mode, source, genre, fiction, min_hours, max_hours, long_ago, count, as
     if genre:
         in_categories = picks.categories.str.contains(genre, case=False, regex=False, na=False)
         picks = picks[picks.genre.str.lower().eq(genre.lower()) | in_categories]
+    if form:
+        picks = picks[picks.form.str.lower() == form.lower()]
     if min_hours:
         picks = picks[picks.duration_hours >= min_hours]
     if max_hours:

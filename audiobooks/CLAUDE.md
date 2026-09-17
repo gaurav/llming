@@ -78,6 +78,15 @@ heals itself — the next `enrich.py` run looks the new key up — so the cache 
 `enrich.py` saves every 50 rows as well as in a `finally`: a full run is twelve minutes of requests,
 and a kill signal skips `finally` entirely — the first full run lost everything that way.
 
+## Literature is a judgement, Fiction is the catch-all
+
+`Literature` in the Sheet means the literary shelf, not fiction in general, so it cannot simply
+absorb Audible's `Literature & Fiction`. The map sends only `… > Genre Fiction > Literary Fiction`
+and `… > Classics` to Literature — books typed Literature carry those ladders 58% and 52% of the
+time, the best Audible offers — and everything else under that top level to `Fiction`. Telling the
+two apart needs three ladder levels, which is why `ladder_entries()` matches on the longest prefix
+the map lists rather than a fixed depth.
+
 ## How the ranking is built
 
 `recommend.py` exists for two situations, and they want opposite things: `relisten` is for having

@@ -45,6 +45,7 @@ Every script takes the saved CSV as an optional argument and reads the live Shee
 uv run recommend.py new data/audiobooks.csv --genre fantasy --max-hours 12
 uv run recommend.py new data/audiobooks.csv --genre detectives --non-fiction
 uv run recommend.py relisten data/audiobooks.csv --min-hours 10
+uv run recommend.py new data/audiobooks.csv --form "read by the author" --non-fiction
 uv run recommend.py relisten data/audiobooks.csv --long-ago
 ```
 
@@ -58,6 +59,10 @@ uv run recommend.py relisten data/audiobooks.csv --long-ago
   whatever was last heard longest ago.
 - `--genre` takes a genre from `genre_map.yaml` or any piece of an Audible category, so
   `--genre "sea adventures"` works even though that is nobody's idea of a genre here.
+- `--form` takes one of the forms in `genre_map.yaml`: `radio drama` (anything performed — full
+  cast, BBC serial, monologue), `short stories`, or `read by the author`. That last one is typed
+  on seven books and true of 282: the loader fills it in wherever a book has no other form and its
+  author is among its narrators.
 - The **why** column says what moved each book up or down. If a ranking looks wrong, that is
   where to look first. `--csv` prints every column instead, blurb included, which is the thing to
   hand to an LLM along with a mood ("something funny and short").
@@ -114,8 +119,9 @@ a per-column summary of the result.
 
 ## Known issues
 
-- **A genre Audible filled in is a good guess, not a fact.** See the 6-in-10 above. `genre_source`
-  says which genres came from where, and typing a genre into the Sheet always settles it.
+- **A genre Audible filled in is a good guess, not a fact.** It agrees with a typed genre a little
+  under 6 times in 10 (see the end of this file). `genre_source` says which genres came from where,
+  and typing a genre into the Sheet always settles it.
 - **Audible cannot tell a biography from an autobiography**, and files both under one category.
   Nine in ten of those in this library are autobiographies or memoirs, so that is what a blank gets;
   roughly one in ten of the Audible-filled `Autobiography` rows is really a `Biography`.
@@ -180,6 +186,7 @@ Sheet and then as `load()` hands it back once Audible has filled the gaps:
 | `duration_hours` | 613 | 1,123 |
 | `series` | not a column at all | 230 books across 171 series |
 | `fiction` | — | known for 1,107 |
+| `form` | 97 tagged in `grouping`, 20 spellings | 406 tagged, 6 forms |
 
 And what only the Sheet can say:
 
@@ -204,7 +211,8 @@ Things that fell out of looking at the whole library, each of which shaped the t
   an unrated relisten is scored at their median, 4.25. It rescues only five books — nearly
   everything relistened is rated already — but those five are favourites that would otherwise
   count for nothing.
-- **Audible's idea of a book's genre matches the Sheet's 6 times in 10**, measured on the 529 books
-  that have both. Most of the rest is Audible being more specific (a typed `Literature` it calls
-  Historical fiction) or filing a history book under the person it is about. Good enough to fill
-  600 blanks; not good enough to overrule anything typed, which is why it never does.
+- **Audible's idea of a book's genre matches the Sheet's a little under 6 times in 10**, measured on
+  the 526 books that have both. Most of the rest is Audible being more specific (a typed
+  `Literature` it calls Historical fiction, or a typed `Literature` it has no way to know is
+  literary) or filing a history book under the person it is about. Good enough to fill 600 blanks;
+  not good enough to overrule anything typed, which is why it never does.
