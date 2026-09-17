@@ -36,6 +36,69 @@ silently corrupts data:
 - `money` converts in place by stripping everything but digits and a dot. Exactly one row holds
   `???` where the price was never recorded, and that is meant to land as NaN.
 
+## Nothing is ever bulk-pasted into the master tab
+
+New rows go on *top* of the Sheet, and adding one has to stay effortless — no validation, no
+dropdowns. So a script-generated column pasted back in misaligns silently the moment a book is
+bought between the download and the paste. Everything here is shaped by avoiding that:
+
+- Normalisation happens on load (`genre_map.yaml`), never at entry.
+- Machine-derived data lives in `data/enrichment.csv`, keyed by `book_key()` — the ASIN out of the
+  row's Audible `url`, else squashed `title|author` — and is joined in `enriched()`.
+- The Sheet wins every disagreement. Audible fills blank `genre`, `narrator` and `duration_hours`
+  and never overrides a typed one; `genre_raw` keeps what was typed.
+- The one hand edit the tools ask for is a single cell: pasting an Audible URL into `url` for a
+  book `enrich.py` could not match. That changes the row's key to the ASIN, so the next run
+  fetches it directly.
+
+Fixing a typo in a title changes a `title|author` key, which orphans that row's cache entry. It
+heals itself — the next `enrich.py` run looks the new key up — so the cache is never edited by hand.
+
+## Audible's catalogue API
+
+`https://api.audible.com/1.0/catalog/products`, no credentials, no documented rate limit;
+`enrich.py` sleeps half a second between requests anyway. Quirks that cost time:
+
+- **`response_groups` decides which fields exist at all.** `title` and `subtitle` come from
+  `product_desc`; without it a search result's title is `null`, not absent.
+- **An ASIN Audible no longer sells answers 200** with a product holding nothing but the `asin`.
+  `look_up()` treats a missing title as not found.
+- **A search for the first book of a series returns the rest of the series too, often ahead of
+  it.** Never take the first hit. `pick_match()` wants an exact title and a shared author, and the
+  near misses go to `data/enrichment-review.csv`.
+- **Subtitles live on either side.** The Sheet has `Babel: Or the Necessity of Violence…`, Audible
+  has `Babel`. `titles_match()` lets one side be shortened to its pre-colon part but never both —
+  shorten both and `Star Wars: Thrawn` matches every Star Wars book by the same author.
+- **Category ladders come back alphabetically**, not by importance, which puts
+  `Literature & Fiction` ahead of nearly everything. Hence row order in `genre_map.yaml` being the
+  priority, rather than "first ladder wins".
+- `merchandising_summary` (in `product_attrs`) is a two-sentence blurb. `publisher_summary` is the
+  full HTML one and needs `product_extended_attrs`; not fetched, because it would dominate the CSV.
+
+`enrich.py` saves every 50 rows as well as in a `finally`: a full run is twelve minutes of requests,
+and a kill signal skips `finally` entirely — the first full run lost everything that way.
+
+## How the ranking is built
+
+`recommend.py` exists for two situations, and they want opposite things: `relisten` is for having
+something on in the background, so it only offers books already heard and defaults to fiction;
+`new` is for listening properly, so it offers only the unheard, and a series already under way
+outranks everything.
+
+- **Liking** is `rating_0_5`, else 4.25 for an unrated book with `count >= 2`. That number is the
+  median rating of the books that are both rated and relistened, not a guess. It rescues only a
+  handful of unrated books — most relistened books are rated — so it is a calibration, not a
+  second data source.
+- **Author, narrator, genre and series affinities** are means shrunk towards the library-wide
+  mean by `SHRINKAGE` imaginary average books, and each book's own rating is left out of its own
+  groups. Without the leave-one-out every finished book recommends itself in `relisten`.
+- `next_in_series` marks only the *earliest* unheard book of a series with a heard one. Book three
+  is not next until book two is heard.
+- `--long-ago` is off by default on purpose: the usual favourites are the right first answer, and
+  the flag is for the second run, when none of them appeal.
+- The `why` column is not decoration. A ranking nobody can audit gets ignored; every term that
+  moves a score has to be able to say so there.
+
 ## The directory and the module share a name
 
 `audiobooks/audiobooks.py`. `from audiobooks import load` resolves to the module rather than the
@@ -54,6 +117,17 @@ dev group for exactly that reason.
 stubbed, so the content-type guard is covered without the network — and its CSV case writes into a
 `tmp_path` subdirectory that does not exist yet, which is what keeps the fresh-clone `mkdir` honest.
 
-Both files stub `audiobooks.load_dotenv` out before setting `GOOGLE_SHEET_ID`. `load_dotenv()` does
-not override variables already in the environment, so `monkeypatch.setenv` would win anyway; the
-stub is what stops a developer's own `.env` from being consulted at all.
+`tests/test_enrich.py` covers the matcher with canned catalogue products and a fake session — the
+sequel-listed-first case, subtitles and bracketed notes on one side only, credentials on either
+side of an author's name. Every case in it is one the real library produced.
+
+The genre tests in `tests/test_audiobooks.py` run against a miniature map written to `tmp_path`,
+not the committed `genre_map.yaml`, so reordering the real vocabulary cannot break them; one test
+checks only that the committed file loads, which is also what catches a value listed twice.
+`tests/test_recommend.py` builds its library inline. `enriched()` reads `ENRICHMENT_CSV` from
+beside the module, so on a machine with a real cache the download test quietly joins it — harmless,
+since nothing matches, but monkeypatch `audiobooks.ENRICHMENT_CSV` in any test where it matters.
+
+The download and loader tests stub `audiobooks.load_dotenv` out before setting `GOOGLE_SHEET_ID`.
+`load_dotenv()` does not override variables already in the environment, so `monkeypatch.setenv`
+would win anyway; the stub is what stops a developer's own `.env` from being consulted at all.
