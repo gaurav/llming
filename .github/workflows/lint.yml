@@ -1,0 +1,16 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      # Same command and same pinned rumdl as `uv run rumdl check .` locally, so a green
+      # working tree can't go red here.
+      - run: uv run rumdl check .

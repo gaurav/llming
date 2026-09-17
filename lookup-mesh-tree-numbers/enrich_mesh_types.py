@@ -19,6 +19,7 @@ Reads a TSV file with MeSH IDs and outputs a CSV file with the following additio
 """
 
 import csv
+import os
 import sys
 import time
 import logging
@@ -392,6 +393,12 @@ def main(input_file, output_file, delay, log_level):
         format='%(levelname)s: %(message)s',
         stream=sys.stderr
     )
+
+    # Input and output are opened together below, so the same path would truncate the input
+    # before a single row is read.
+    if os.path.realpath(input_file) == os.path.realpath(output_file):
+        raise click.ClickException(f"--output would overwrite the input file: {input_file}")
+
     # Track statistics
     total = 0
     success = 0

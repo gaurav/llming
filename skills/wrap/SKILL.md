@@ -4,7 +4,66 @@ description: Wrap up a piece of work — record durable lessons in the right age
 ---
 
 Wrap up the work done in this session. Four things to do, **in this order** — sections 1 and 2
-write files, so committing before them would leave that work stranded.
+write files, so committing before them would leave that work stranded. Step 0 first establishes
+whether there is anything for them to act on.
+
+## 0. Check what has actually changed
+
+Across several PRs it is easy to lose track of when this last ran, and to invoke it at the end of
+work that a *previous* run produced. Sections 1 and 2 are the expensive part of this skill, so
+find out before paying for them.
+
+```bash
+git fetch --prune --quiet    # ahead/behind counts are only as fresh as the last fetch, and a
+                             # branch whose remote is gone shows [origin/x: gone] only after a
+                             # fetch that prunes — a plain fetch leaves the stale ref in place
+git status --porcelain
+git branch -vv
+git log --oneline @{u}..     # only on a branch that has an upstream
+```
+
+`git branch -vv` lists every local branch with its upstream and ahead/behind counts; a branch
+showing no `[origin/...]` marker simply has no upstream, and asking such a branch for unpushed
+commits exits 128 with `fatal: no upstream configured`.
+
+**Report the evidence, not a verdict.** "Working tree clean, every local branch tracking a live
+upstream and none ahead of it, none behind after a fresh fetch" is three facts the user can
+correct. "There is nothing to do" is a claim this check cannot actually support — see below.
+
+The middle fact is about **every** branch in `git branch -vv`, not just the one you are on:
+section 3 pushes any local branch that is ahead, so a clean `main` says nothing about the feature
+branch sitting three commits ahead of its upstream. It is also about *having* an upstream, not
+just being level with one: a branch that has never been pushed is not ahead of anything, and
+section 3's rule about asking before creating an upstream is precisely the work a gate reading
+"nothing is ahead" would skip. A branch with no `[origin/...]` marker fails this fact.
+
+The third fact comes from the behind counts in `git branch -vv` *after* the fetch above, which is
+what the gate actually needs; `--quiet` hiding which refs that fetch moved doesn't affect it.
+
+**When all three hold, say so, note that a previous run has likely already covered this, and skip
+sections 1–3** — but still run section 4, and do not treat this as the end of the skill. Offer to
+go ahead with 1–3 anyway in one line, and if the user asks, run them: they know what they did
+outside this session, and you do not.
+
+**Section 3's open-PR check survives the skip.** Everything else in that section is about work you
+are doing now, and on this path there is none — but a description goes stale when a push happens,
+and the push that got the branch into this state was the *previous* run's. That is the case with
+nobody left to notice it: this run has nothing to make stale, so it says nothing, and the run that
+did make it stale has ended. Ask the shallow question anyway before section 4.
+
+A clean tree does **not** prove there is nothing owed, so do not over-apply this:
+
+- A lesson or a test can still be missing from work that was already committed — by hand, or by
+  an earlier run that recorded none.
+- Section 4 costs almost nothing and is often the reason someone re-runs this skill.
+
+**Divergence is a finding too, in the other direction.** A dirty tree you did not cause, or
+commits on the remote you do not have, belongs here rather than at section 3 — it is much cheaper
+to raise before writing tests than after. Name it and ask; section 3's rule about leaving other
+people's changes alone then just applies to what you have already surfaced.
+
+If the fetch fails — offline, no auth — say "remote state not checked" and carry on with local
+state. It is a note, not a blocker.
 
 ## 1. Record durable lessons
 
@@ -40,10 +99,11 @@ to do, not a list to propose. Run them.
 
 Do this **after** sections 1 and 2, so the lessons and tests they wrote are included.
 
-Survey the repo with `git status` and `git branch -vv`. The latter lists every local branch with its
-upstream and ahead/behind counts; a branch showing no `[origin/...]` marker simply has no upstream.
-Only ask git for unpushed commits on branches that have one — `git log --oneline @{u}..` exits 128
-with `fatal: no upstream configured` otherwise.
+Re-run `git status` here: sections 1 and 2 have written files since step 0 looked, and those
+files are the ones this section exists to commit. Which branches exist and which have an upstream
+still holds from step 0; don't re-run that. **Ahead counts do not hold** — the commit you are
+about to make moves the checked-out branch past what step 0 counted, so re-read `git branch -vv`
+after committing before reporting any unpushed count below.
 
 Invoking this skill is authorization to commit and push **the work of this session**:
 
@@ -56,6 +116,14 @@ Invoking this skill is authorization to commit and push **the work of this sessi
 - If the user has said not to push unasked, honour that: report each branch and its unpushed commit
   count, and stop.
 
+**If the branch has an open PR, pushing to it is what makes its description stale** — so say so
+before moving on. `gh pr view --json number,url,title,body` and ask only the shallow question: does
+the body still describe what the branch now contains? One line if not, naming the PR and suggesting
+`update-pr`. Do **not** rewrite it, and do not go diff-hunting to decide: judging a description
+against the change is `update-pr`'s Steps 3–5, it is a more careful pass than there is time for
+here, and doing it badly at the end of a session is worse than saying it needs doing. No PR on the
+branch means skip this silently — plenty of work never gets one.
+
 ## 4. Suggest follow-up issues
 
 Loose ends, deferred fixes, things noticed but out of scope. One line each, numbered, so we can
@@ -65,12 +133,27 @@ Naming something as a follow-up is a thinking tool, not a prediction — plenty 
 belong in the current PR once written down, and that's a good outcome, not a scope failure. Write
 each one so it works either way: specific enough to file as an issue, specific enough to just do.
 
-For each, say where it probably belongs, using the same bar as the `copilot-review` skill: fold it
-into the current PR unless it is genuinely unrelated to this work, or needs enough design thinking
-that doing it here would swamp the PR. "Somewhat awkward to do here" does not qualify.
+For each, say where it probably belongs, using the same bar as the `copilot-review` and `update-pr`
+skills: fold it into the current work when it's small, needs no testing independent of what's
+already there, and is thematically connected; file it otherwise. Anything needing planning or
+discussion becomes an issue, unless deferring it would substantially change this work's code — then
+do it now rather than twice. "Somewhat awkward to do here" is not grounds to defer.
+
+**Mark the blockers separately.** An item that doesn't fit the current work can still be one the
+work isn't honestly finished without — behaviour that's wrong under some real circumstance, an error
+path that loses work or data, or documentation that misdescribes what shipped. List those first and
+say plainly that they block, because the rest of this list reads as optional and they are not. Size
+is not severity: too big to do now is a reason to hand it over, never a reason to call it minor.
+
+A blocker named only in this summary dies with the session, which is worse than not noticing it —
+it was seen, and then lost. If the work has an open PR, **offer to add the blocking items to its
+description** as `- [ ]` checkboxes; that is where `update-pr` finds them and forces a decision on
+each the next time it runs. Appending means reading the current description and writing the whole
+thing back with `--body-file`, because `gh pr edit` replaces the body and a freshly composed one
+drops whatever a human wrote.
 
 **Do not file, create, or start any of them.** Offer `gh issue create` for the ones the user wants
-tracked, and wait to be told which. If the user pulls one into the current PR instead, that is new
-work — do it, then run section 3 again.
+tracked, and the checkboxes above the same way, and wait to be told which. If the user pulls one
+into the current PR instead, that is new work — do it, then run section 3 again.
 
 Keep the whole output short. Bullets, not prose.
