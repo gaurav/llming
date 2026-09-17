@@ -388,6 +388,20 @@ def test_cli_output_matches_the_committed_example(tmp_path):
         ) == expected
 
 
+def test_cli_defaults_the_output_beside_the_base_file(tmp_path):
+    """data/ holds one subdirectory per comparison; an omitted -o must not escape it."""
+    comparison = tmp_path / "some-comparison"
+    comparison.mkdir()
+    base = comparison / "base.json"
+    base.write_text((FIXTURES / "base.json").read_text(encoding="utf-8"), encoding="utf-8")
+    result = CliRunner().invoke(
+        main, ["-b", str(base), "-r", str(FIXTURES / "revised.json")]
+    )
+    assert result.exit_code == 0, result.output
+    assert (comparison / "vlmd-diff.md").exists()
+    assert (comparison / "vlmd-diff.csv").exists()
+
+
 def test_cli_appends_to_the_prefix_rather_than_replacing_its_suffix(tmp_path):
     result = CliRunner().invoke(
         main,

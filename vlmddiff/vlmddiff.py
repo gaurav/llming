@@ -29,7 +29,10 @@ from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 import click
 
-DEFAULT_PREFIX = "data/vlmd-diff"
+# No fixed default: data/ holds one subdirectory per comparison, so a constant path would drop
+# every run's output in the same place regardless of which comparison it belongs to. Derived from
+# --base instead, which puts the report beside the files it describes.
+DEFAULT_PREFIX_STEM = "vlmd-diff"
 
 # Properties that differ because the two conversion tools have different conventions, not because
 # anyone edited the metadata. Reported in an appendix so they can be confirmed uniform and skipped.
@@ -344,8 +347,8 @@ def write_csv(path: Path, changes: List[Change], artifact_properties: Sequence[s
     help="The VLMD file to diff to.",
 )
 @click.option(
-    "-o", "--output-prefix", type=click.Path(dir_okay=False, path_type=Path),
-    default=DEFAULT_PREFIX, show_default=True, help="Writes <prefix>.md and <prefix>.csv.",
+    "-o", "--output-prefix", type=click.Path(dir_okay=False, path_type=Path), default=None,
+    help=f"Writes <prefix>.md and <prefix>.csv.  [default: {DEFAULT_PREFIX_STEM}, beside --base]",
 )
 @click.option("--id-key", default="name", show_default=True, help="Field property used to match variables.")
 @click.option(
@@ -359,7 +362,7 @@ def write_csv(path: Path, changes: List[Change], artifact_properties: Sequence[s
 def main(
     base_path: Path,
     revised_path: Path,
-    output_prefix: Path,
+    output_prefix: Optional[Path],
     id_key: str,
     artifact_property: Tuple[str, ...],
     log_level: str,
@@ -371,6 +374,9 @@ def main(
         datefmt="%H:%M:%S",
         stream=sys.stderr,
     )
+
+    if output_prefix is None:
+        output_prefix = base_path.parent / DEFAULT_PREFIX_STEM
 
     # Append rather than with_suffix, which would turn a prefix of `foo.diff` into `foo.md`.
     markdown_path = Path(f"{output_prefix}.md")

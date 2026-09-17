@@ -44,7 +44,8 @@ that this script diffs VLMD documents, not CSVs.
 
 ### Output
 
-Two files sharing `--output-prefix`:
+Two files sharing `--output-prefix`, which defaults to `vlmd-diff` in `--base`'s own directory —
+there is no fixed default path, because one would write every comparison's report to the same place:
 
 - **`<prefix>.md`** — the review artifact. Document-level property changes, added and removed
   variables with their full JSON, then one section per changed property.
@@ -76,9 +77,9 @@ synthetic pair beside them. They exercise every rendering path except the >20-pa
 ### Usage
 
 ```bash
-# Every run writes into the subdirectory of the comparison it belongs to.
+# With no -o, the report lands beside --base, which is the subdirectory of the comparison it
+# belongs to. Pass -o only to name it something other than vlmd-diff.
 uv run vlmddiff.py -b data/vlmd-file-comparison/a.json -r data/vlmd-file-comparison/b.json \
-    --output-prefix data/vlmd-file-comparison/vlmd-diff \
     2>&1 | tee data/vlmd-file-comparison/last-run.log
 
 # Treat nothing as a conversion artifact — everything lands in the main body.
