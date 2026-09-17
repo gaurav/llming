@@ -18,6 +18,7 @@ byte-for-byte as Google exports it, so the loader sees exactly what the Sheet sa
 """
 
 import logging
+from pathlib import Path
 
 import click
 import requests
@@ -54,6 +55,8 @@ def main(output: str) -> None:
             "probably not shared: set its access to 'Anyone with the link'. Check the ID and gid too."
         )
 
+    # data/ is gitignored, so it is absent after a fresh clone — and it is where --output defaults.
+    Path(output).parent.mkdir(parents=True, exist_ok=True)
     with open(output, "wb") as f:
         f.write(response.content)
     logger.info("Wrote %s (%d bytes)", output, len(response.content))
