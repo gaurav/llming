@@ -81,6 +81,11 @@ def test_credentials_on_either_side_do_not_stop_an_author_matching():
     assert enrich.pick_match("Tell Me Where It Hurts", "Rachel Zoffness, PhD", None, products)["asin"] == "B0PAIN0000"
 
 
+def test_a_title_in_front_of_a_name_does_not_stop_an_author_matching():
+    products = [product("B002UZLF2U", "Rendezvous with Rama", "Arthur C. Clarke")]
+    assert enrich.pick_match("Rendezvous with Rama", "Sir Arthur C. Clarke", None, products)["asin"] == "B002UZLF2U"
+
+
 def test_a_shared_series_prefix_is_not_a_match():
     products = [product("B0HEIR0000", "Star Wars: Heir to the Empire", "Timothy Zahn")]
     assert enrich.pick_match("Star Wars: Thrawn", "Timothy Zahn", None, products) is None

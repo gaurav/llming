@@ -109,6 +109,12 @@ time, the best Audible offers — and everything else under that top level to `F
 two apart needs three ladder levels, which is why `ladder_entries()` matches on the longest prefix
 the map lists rather than a fixed depth.
 
+Literature has **two entries** in the map, which is why `read_genre_map()` lets an entry's own name
+repeat (`setdefault`) while still refusing a repeated `matches` value. `Literary Fiction` sits above
+Comedy, because Audible also files *Infinite Jest*, Rushdie's *Shame* and Nabokov's *The Enchanter*
+under `Comedy & Humor`; `Classics` sits below it, because Wodehouse and Jerome K. Jerome are
+classics that are comedies. Moving both above Comedy turns *My Man Jeeves* into Literature.
+
 ## How the ranking is built
 
 `recommend.py` exists for two situations, and they want opposite things: `relisten` is for having

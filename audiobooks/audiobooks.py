@@ -51,8 +51,9 @@ SHEET_COLUMNS = ["title", "author", "url", "audible_id", "genre", "grouping", "n
 AUDIBLE_COLUMNS = ["asin", "series", "series_position", "narrators", "runtime_min", "categories", "summary"]
 
 # Roles the Sheet tacks on to a name: "Tina Kover (translator)", "Ta-Nehisi Coates - introduction",
-# "Rachel Zoffness, PhD" — and Audible's own "Sanjay Gupta MD". Stripped from both before comparing.
-AUTHOR_ROLE = re.compile(r"\(.*?\)|\s-\s.*$|\b(ph\.?d|m\.?d|jr|sr)\b\.?", re.I)
+# "Rachel Zoffness, PhD", "Sir Arthur C. Clarke" — and Audible's own "Sanjay Gupta MD". Stripped
+# from both sides before comparing, and from the author a search is made with.
+AUTHOR_ROLE = re.compile(r"\(.*?\)|\s-\s.*$|\b(ph\.?d|m\.?d|jr|sr|sir|dame)\b\.?", re.I)
 
 # The form the loader fills in by itself. Spelt as genre_map.yaml spells it.
 READ_BY_THE_AUTHOR = "Read by the author"
@@ -161,8 +162,10 @@ def read_genre_map(path=None) -> dict:
         value = (rank, genre, form, entry.get("fiction"))
         # An entry matches its own name as well as what is listed under it. One with both a genre
         # and a form is a special case ("Radio comedy" is Comedy *and* Radio drama) and owns neither.
-        own_name = [] if (genre and form) or not (genre or form) else [genre or form]
-        for raw in [*own_name, *entry.get("matches", [])]:
+        if bool(genre) != bool(form):
+            # setdefault, not a refusal: a genre may have two entries, at different heights.
+            lookup.setdefault((genre or form).lower(), value)
+        for raw in entry.get("matches", []):
             key = str(raw).strip().lower()
             if key in lookup:  # a repeat would silently shadow the earlier entry
                 raise ValueError(f"{raw!r} appears twice in {path or GENRE_MAP_YAML}")

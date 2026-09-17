@@ -186,6 +186,23 @@ def test_a_value_listed_twice_is_refused(tmp_path):
         audiobooks.read_genre_map(path)
 
 
+def test_a_genre_may_have_two_entries_at_different_heights(tmp_path):
+    # Literary Fiction has to outrank Comedy while Classics stays below it, so Literature is listed
+    # twice. Infinite Jest carries the first pair of ladders; My Man Jeeves the second.
+    path = tmp_path / "genre_map.yaml"
+    path.write_text(
+        "- genre: Literature\n  matches: [Literature & Fiction > Genre Fiction > Literary Fiction]\n"
+        "- genre: Comedy\n  matches: [Comedy & Humor]\n"
+        "- genre: Literature\n  matches: [Literature & Fiction > Classics]\n"
+    )
+    genre_map = audiobooks.read_genre_map(path)
+    literary = "Comedy & Humor > Literature & Fiction; Literature & Fiction > Genre Fiction > Literary Fiction"
+    classic = "Comedy & Humor > Literature & Fiction; Literature & Fiction > Classics"
+    assert settle(genre_map, categories=literary)[0][0] == "Literature"
+    assert settle(genre_map, categories=classic)[0][0] == "Comedy"
+    assert settle(genre_map, typed="literature")[0][0] == "Literature"
+
+
 def test_the_committed_genre_map_loads():
     assert audiobooks.read_genre_map()["fantasy"][1] == "Fantasy"
 

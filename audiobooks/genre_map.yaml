@@ -5,7 +5,8 @@
 #   - A ladder matches on the longest stretch of it listed here: "History > Europe > Great
 #     Britain" tries all three levels, then "History > Europe", then "History".
 #   - Anything not listed passes through exactly as typed, and the loader logs it.
-#   - A value may appear once only; the loader refuses a file that lists one twice.
+#   - A value may appear once only; the loader refuses a file that lists one twice. A genre may
+#     have two entries, though, when its ladders belong at different heights — Literature does.
 #
 # ORDER MATTERS, for Audible only. Audible files a book under several ladders and returns them
 # alphabetically, so a fantasy novel arrives as "Literature & Fiction" first. A book takes the
@@ -124,6 +125,15 @@
   matches:
     - Biographies & Memoirs > True Crime
 
+# Above Comedy, and apart from the rest of Literature at the bottom of the file: Audible files
+# Infinite Jest, Rushdie's Shame and Nabokov's The Enchanter under "Comedy & Humor" as well as
+# "Literary Fiction", and they are not comedies. "Classics" stays below Comedy, with the rest of
+# Literature, because Wodehouse and Jerome K. Jerome are classics that *are* comedies.
+- genre: Literature
+  fiction: true
+  matches:
+    - Literature & Fiction > Genre Fiction > Literary Fiction
+
 - genre: Comedy
   matches:
     - Humour
@@ -228,12 +238,12 @@
     - LGBTQ+ > LGBTQ+ Studies
 
 # Literature is the literary shelf, as distinct from fiction in general. Typed, it means exactly
-# that. From Audible, these two ladders are the nearest thing to it: the books typed Literature
-# carry them more often than not, which is as good as Audible gets on a judgement like this one.
+# that. From Audible, "Literary Fiction" (further up, above Comedy) and "Classics" are the nearest
+# thing to it: the books typed Literature carry them more often than not, which is as good as
+# Audible gets on a judgement like this one.
 - genre: Literature
   fiction: true
   matches:
-    - Literature & Fiction > Genre Fiction > Literary Fiction
     - Literature & Fiction > Classics
 
 - genre: Fiction
