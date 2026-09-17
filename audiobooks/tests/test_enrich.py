@@ -40,6 +40,10 @@ def row(title, author, url=None, narrator=None):
 def test_asin_comes_out_of_audible_urls_only():
     assert asin_from_url("https://www.audible.com/pd/Do-No-Harm-Audiobook/B00WH5VZR8") == "B00WH5VZR8"
     assert asin_from_url("https://www.audible.com/pd/Unwinding-Anxiety-Audiobook/0593409469?ref=x") == "0593409469"
+    assert asin_from_url("https://www.audible.com/podcast/West-Cork/B08DDFD4W7") == "B08DDFD4W7"
+    # A series page is not a listing: it has no categories or runtime, and its children may be
+    # another language's edition. The X-Files one is Italian.
+    assert asin_from_url("https://www.audible.com/series/X-Files-Cold-Cases-Audiobooks/B07RYN6JM3") == ""
     assert asin_from_url("https://libro.fm/audiobooks/9781478971238-the-terror") == ""
     assert asin_from_url(float("nan")) == ""
 

@@ -40,8 +40,9 @@ EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=cs
 DATE_COLUMN_HINT = re.compile(r"date|started|finished|purchased|bought|added|released", re.I)
 
 # The ASIN is the last path segment of an Audible product URL: .../pd/Do-No-Harm-Audiobook/B00WH5VZR8
-# Ten characters, either B0-style or an ISBN-10 (which can end in X).
-ASIN_IN_URL = re.compile(r"audible\.[a-z.]+/pd/(?:[^/?#]+/)?([0-9A-Z]{10})(?:[/?#]|$)")
+# Ten characters, either B0-style or an ISBN-10 (which can end in X). Podcasts live under /podcast/
+# and the catalogue answers for their ASINs exactly as it does for a book's.
+ASIN_IN_URL = re.compile(r"audible\.[a-z.]+/(?:pd|podcast)/(?:[^/?#]+/)?([0-9A-Z]{10})(?:[/?#]|$)")
 
 # Both sit beside this file rather than under the working directory, so load() finds them from
 # anywhere. The cache is written by enrich.py; the genre map is committed and edited by hand.

@@ -94,6 +94,12 @@ autouse fixture for exactly that reason.
 - **Category ladders come back alphabetically**, not by importance, which puts
   `Literature & Fiction` ahead of nearly everything. Hence row order in `genre_map.yaml` being the
   priority, rather than "first ladder wins".
+- **Podcasts are in the catalogue too**, under `/podcast/` URLs, and answer by ASIN like a book
+  (`content_delivery_type: PodcastParent`), with categories and sometimes a runtime. A search by
+  title and author misses them, because the author is "Audible Original" or the producers, so they
+  need an `Audible ID`. **`/series/` URLs are deliberately not read**: a series ASIN answers, but
+  with no categories or runtime, and its children can be another language's edition — *X-Files:
+  Cold Cases* leads to the Italian one, narrators and all.
 - `merchandising_summary` (in `product_attrs`) is a two-sentence blurb. `publisher_summary` is the
   full HTML one and needs `product_extended_attrs`; not fetched, because it would dominate the CSV.
 
