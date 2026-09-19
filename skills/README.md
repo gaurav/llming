@@ -10,6 +10,8 @@ isn't recoverable from the skill itself.
 
 - **copilot-review** — pins the repeated steps and my triage preferences so an agent doesn't
   re-derive them on every PR.
+- **github-issues** — a rule rather than a task: correct your own stale issue instead of commenting
+  under it, and never rewrite anyone else's.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
 - **update-pr** — keeps the PR honest about itself and about its own size: the description is read
@@ -31,6 +33,31 @@ run leaves its record on the PR itself. Threads it handled are resolved, and the
 carry the reply saying why. So a human can see whether another run is wanted before starting one,
 and an agent that starts one anyway finds most threads already resolved and does almost nothing.
 The state the other two skills have to derive from git is, for this skill, just visible.
+
+## github-issues
+
+The only rule in a directory of tasks, and the reason it is here rather than in a `CLAUDE.md` is
+worth recording, because #20 argues the opposite and is right about the case it was arguing.
+
+The rule itself: an issue I wrote that has gone out of date should be edited until it is accurate,
+with whatever it still asks for that no longer belongs there split out into a new issue — and an
+issue anyone else wrote should never be edited, whatever permissions I hold on the repository. The
+first half is about how issues are read. Nobody reads the comments under a wrong description before
+acting on it, so a correcting comment leaves the wrong thing in the place people look. The second
+half needs no justification beyond stating it, but agents do not infer it: admin rights on a
+repository read as permission to fix anything in it.
+
+In #20 I said an ambient writing convention is not skill-shaped, on the grounds that nobody would
+ever type `/cite-provenance`. That still holds. What makes this one different is that it applies at
+a moment with a name — *about to change an issue* — rather than every time durable text gets
+written, and a moment with a name is something a `description` can describe. Whether that is enough
+to actually trigger it is the open question, and the skill is the experiment: if it turns out not to
+fire, the answer is a hook rather than better prose, and #32 records what that costs.
+
+Which is also why this is a flat skill and not the `skills/github-skills/` grouping directory I set
+out to build. Skill discovery is one level deep, so a grouping directory loads nothing at all. That
+finding and what to do instead are in #32; the summary is that bundling is a plugin's job, not a
+directory's.
 
 ## sync-docs
 
@@ -240,6 +267,9 @@ Context dependent, and deliberately broad. Two rough patterns so far:
   tracked over time instead of being reinvented each session.
 - **An experiment** (`sync-docs`) — either about what tasks an LLM can usefully take on, or about
   LLM use itself. I expect more of these: ticket triage, planning skills.
+- **A rule that only bites at one identifiable moment** (`github-issues`). Ambient conventions
+  belong in memory or a `CLAUDE.md`; a rule with a trigger can be a skill, and gets to stay out of
+  context until it is needed. Unproven — see that skill's section.
 
 Not every skill here will finish, and that's fine. Some turn out not to be useful. Some get built
 just far enough to unblock one project and then set aside for review when there's time. And the

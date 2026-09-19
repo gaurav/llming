@@ -78,6 +78,11 @@ the directory is linked. Symlinking the `SKILL.md` alone appears to work and the
 a skill has anything beside it — the prose arrives, the rest of the directory doesn't, and the
 skill's own relative paths resolve to nothing on the machine that needs them.
 
+One symlink per skill, because discovery is one level deep: the loader globs
+`~/.claude/skills/*/SKILL.md`, so a directory grouping several skills together is not found and
+says nothing about it. Bundling them into one installable unit is a plugin's job — see #32 for the
+layout and for when it becomes worth doing.
+
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
 Python helper in `skills/copilot-review/`, and `npx prettier --prose-wrap never` replaced a
