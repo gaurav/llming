@@ -45,7 +45,9 @@ issue anyone else wrote should never be edited, whatever permissions I hold on t
 first half is about how issues are read. Nobody reads the comments under a wrong description before
 acting on it, so a correcting comment leaves the wrong thing in the place people look. The second
 half needs no justification beyond stating it, but agents do not infer it: admin rights on a
-repository read as permission to fix anything in it.
+repository read as permission to fix anything in it. "Edited" means the words: body and title.
+Triage — labels, assignees, milestone, project — stays allowed on anyone's issue, because it is
+easy to undo and shows in the timeline, where the author can object to it.
 
 Closing follows from the second half but is not quite the same rule. Someone else's issue can be
 closed, but only by a `Closes #N` in the pull request that resolves it, never directly. A direct

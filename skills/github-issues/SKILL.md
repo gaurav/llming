@@ -48,10 +48,13 @@ text rather than adding to it. The split-out issue needs the same agreement befo
 
 ## The issue is anyone else's
 
-Never change anything on it: not the body, the title or the labels, and not the assignees, the
-milestone, the project or whether it is open — closing has its own section below, and reopening is
-no different. Not when the repository belongs to the user, not with admin rights, not when the
-correction is obviously right. Leave a comment instead.
+Never edit the body or the title. Not when the repository belongs to the user, not with admin
+rights, not when the correction is obviously right. Leave a comment instead. Whether it is open is
+off limits in the same way — closing has its own section below, and reopening is no different.
+
+Triage is fine: labels, assignees, the milestone, the project. It is what write access is for, it
+is easy to undo, and it shows in the issue's timeline, so an author who thinks their bug has been
+filed as unimportant can see that and say so.
 
 Write access is permission to administer the repository; it is not permission to rewrite what
 someone else wrote. The same goes for the issues of a bot or of a former colleague whose account is
