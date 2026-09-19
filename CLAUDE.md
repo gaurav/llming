@@ -26,6 +26,9 @@ Two settings are deliberate and worth knowing before you fight them:
   has to be one line however long it runs.
 - **MD041 is off.** It wants every file to open with a level-1 heading; a `CLAUDE.md` or `SKILL.md`
   opens with instructions rather than a title, so the rule never applies here.
+- **`**/tests/fixtures/**` is excluded.** A committed fixture is expected tool output that a test
+  compares against byte for byte, so `--fix` rewrapping one breaks the test rather than fixing
+  anything. Regenerate a fixture from the tool, never from the linter.
 
 ## README.md and CLAUDE.md
 

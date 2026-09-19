@@ -1,0 +1,21 @@
+variable,section,property,change,base_value,revised_value,category
+AWAKE,Actigraphy,constraints,changed,"{""enum"": [""0"", ""1""]}","{""enum"": [""True"", ""False""]}",substantive
+WEAR,Actigraphy,constraints,changed,"{""enum"": [""0"", ""1""]}","{""enum"": [""True"", ""False""]}",substantive
+AWAKE,Actigraphy,custom,added,,"{""Field Note"": ""Whether the participant was awake.""}",artifact
+PAINSCORE,Questionnaire,custom,added,,"{""Text Validation Type OR Show Slider Number"": ""integer""}",artifact
+VISITDAT,Demographics,custom,added,,"{""Text Validation Type OR Show Slider Number"": ""date_mdy""}",artifact
+WEAR,Actigraphy,custom,added,,"{""Field Note"": ""Whether the device was being worn.""}",artifact
+site,Demographics,custom,added,,"{""Section Header"": ""demographics""}",artifact
+PAINSCORE,Questionnaire,description,changed,"""Secondary outcome: worst pain in the last 24 hours""","""worst pain in the last 24 hours""",substantive
+VISITDAT,Demographics,description,changed,"""demographics: date of visit""","""date of visit""",substantive
+site,Demographics,description,changed,"""demographics: Site(blinded)""","""Site(blinded)""",substantive
+AWAKE,Actigraphy,enumLabels,removed,"{""0"": ""False"", ""1"": ""True""}",,substantive
+PAINSCORE,Questionnaire,enumLabels,changed,"{""0"": ""No pain"", ""10"": ""Worst possible pain""}","{""0"": ""No pain"", ""1"": """", ""10"": ""Worst possible pain"", ""2"": """", ""3"": """", ""4"": """", ""5"": """", ""6"": """", ""7"": """", ""8"": """", ""9"": """"}",substantive
+WEAR,Actigraphy,enumLabels,removed,"{""0"": ""False"", ""1"": ""True""}",,substantive
+VISITDAT,Demographics,format,removed,"""any""",,artifact
+site,Demographics,format,removed,"""any""",,artifact
+AWAKE,Actigraphy,title,removed,"""Whether the participant was awake.""",,artifact
+PAINSCORE,Questionnaire,title,removed,"""Secondary outcome: worst pain in the last 24 hours""",,artifact
+VISITDAT,Demographics,title,removed,"""demographics: date of visit""",,artifact
+WEAR,Actigraphy,title,removed,"""Whether the device was being worn.""",,artifact
+site,Demographics,title,removed,"""demographics: Site(blinded)""",,artifact

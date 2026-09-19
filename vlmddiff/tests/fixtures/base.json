@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "0.3.2",
+  "title": "Example Data Dictionary: ../input/example.redcap.csv",
+  "fields": [
+    {
+      "name": "AWAKE",
+      "type": "boolean",
+      "description": "Whether the participant was awake.",
+      "title": "Whether the participant was awake.",
+      "section": "Actigraphy",
+      "enumLabels": {"0": "False", "1": "True"},
+      "constraints": {"enum": ["0", "1"]}
+    },
+    {
+      "name": "WEAR",
+      "type": "boolean",
+      "description": "Whether the device was being worn.",
+      "title": "Whether the device was being worn.",
+      "section": "Actigraphy",
+      "enumLabels": {"0": "False", "1": "True"},
+      "constraints": {"enum": ["0", "1"]}
+    },
+    {
+      "name": "PAINSCORE",
+      "type": "integer",
+      "description": "Secondary outcome: worst pain in the last 24 hours",
+      "title": "Secondary outcome: worst pain in the last 24 hours",
+      "section": "Questionnaire",
+      "enumLabels": {"0": "No pain", "10": "Worst possible pain"},
+      "constraints": {"enum": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]}
+    },
+    {
+      "name": "VISITDAT",
+      "type": "string",
+      "description": "demographics: date of visit",
+      "title": "demographics: date of visit",
+      "section": "Demographics",
+      "format": "any"
+    },
+    {
+      "name": "site",
+      "type": "string",
+      "description": "demographics: Site(blinded)",
+      "title": "demographics: Site(blinded)",
+      "section": "Demographics",
+      "format": "any"
+    },
+    {
+      "name": "RETIRED",
+      "type": "string",
+      "description": "A variable the LLM tool dropped.",
+      "title": "A variable the LLM tool dropped.",
+      "section": "Demographics"
+    }
+  ]
+}
