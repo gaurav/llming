@@ -54,10 +54,20 @@ links back, rather than being left buried in a description now mostly about some
 Splitting is the point: the edit is for what the issue is *about*, the new issue is for what is
 left over.
 
-Say what you are about to change and get the user's agreement before running `gh issue edit`. An
-edit to an issue is visible to everyone watching the repository, and unlike a comment it replaces
-text rather than adding to it. The split-out issue needs the same agreement before
-`gh issue create`: describe it alongside the edit, so the user agrees to both halves at once.
+Whether to ask first depends on the size of the edit, and that is a judgement to make, not a rule to
+look up:
+
+- **A minor edit — go ahead.** A correction, a note that part of it already happened in a named PR,
+  more detail added to what is there. The issue still asks for the same thing once you are done.
+  Make the edit, then tell the user in a line what changed.
+- **A major edit — ask first.** The issue is about something different afterwards: investigation
+  showed the bug has another shape than the one described, or a broad issue is becoming several
+  narrower ones. Say what you are about to change and get the user's agreement before running
+  `gh issue edit`. Anything split out into a new issue is on this side by definition, so describe
+  the `gh issue create` alongside the edit and the user agrees to both halves at once.
+
+An edit is visible to everyone watching the repository, and unlike a comment it replaces text rather
+than adding to it, so when the size is a close call, ask.
 
 ## The issue is anyone else's
 
@@ -94,5 +104,6 @@ closed. Comment on the other issue suggesting it be closed in favour of the bett
 link, and leave the decision to its author or the user — or, if the case is clear-cut, ask the user
 whether to close it now.
 
-The user's own issue may be closed directly, on the same terms as an edit: say why it is finished
-and get agreement first. A closing keyword in a PR is still the better route when a PR exists.
+The user's own issue may be closed directly, on the same terms as a major edit: say why it is
+finished and get agreement first. A closing keyword in a PR is still the better route when a PR
+exists.

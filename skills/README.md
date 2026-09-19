@@ -64,6 +64,12 @@ better issue stays open whoever wrote it, the other gets a comment suggesting it
 the case is obvious the agent asks me rather than waiting on a comment nobody may answer. One
 escape hatch seemed better than a rule per case.
 
+Editing my own issue asks first only when the edit is major — the issue is about something different
+afterwards, or is being split. Minor edits just happen and get reported in a line. The line between
+them is left to the agent's judgement on purpose: I expect it to be drawn wrongly sometimes, and an
+agent asking me to confirm a typo fix is a real example to refine the wording with, which a rule
+written in advance would not be. Either way I see something, which also tells me the skill fired.
+
 In #20 I said an ambient writing convention is not skill-shaped, on the grounds that nobody would
 ever type `/cite-provenance`. That still holds. What makes this one different is that it applies at
 a moment with a name — *about to change an issue* — rather than every time durable text gets
