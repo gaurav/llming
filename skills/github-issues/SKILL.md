@@ -19,9 +19,11 @@ gh issue view <N> --repo <owner>/<repo> --json author,title,body,createdAt,url
 gh api user --jq .login
 ```
 
-Compare `author.login` against the logged-in user rather than against a name written down here —
-that way a second GitHub account errs toward treating an issue as someone else's, which is the safe
-direction. The user is `gaurav` on github.com.
+Compare `author.login` against the logged-in user rather than against a name from anywhere else —
+this file, a memory, the repository owner. That way a second GitHub account errs toward treating an
+issue as someone else's, which is the safe direction. The `gh api user` comparison decides: if the
+two logins differ, the issue is someone else's, even when the author is an account the user is
+known to own.
 
 ## The issue is the user's own, and out of date
 
