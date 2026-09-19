@@ -72,6 +72,19 @@ Before opening an issue, check that one doesn't already cover the finding, the w
 `github-issues` skill describes. If one does, link it instead of filing a second, and let that skill
 decide whether it may be edited to cover the finding or only commented on.
 
+A deferred issue is filed without asking first, unlike the follow-ups `update-pr` and `wrap` only
+offer, and what earns it that is that it explains itself: whoever opens it cold can see what was
+flagged, where, and in which change. So the body carries all of it, not a summary of it:
+
+- the PR (`#NNN`) and a link to Copilot's comment — the thread's `url` from Step 2, or for a
+  suppressed comment the PR plus the `path:line` it named;
+- a permalink to the lines at the PR's head commit, not at the branch, which moves —
+  `https://github.com/OWNER/REPO/blob/<sha>/<path>#L<line>`, with the sha from
+  `gh pr view "$PR" --repo "$OWNER/$REPO" --json headRefOid -q .headRefOid`;
+- **the code fragment itself, in a fenced block.** A permalink only renders as code inside its own
+  repository, and an outdated thread has no `line` to link to at all, so paste the lines as well;
+- what Copilot claimed, what you found when you checked it, and why it didn't fit this PR.
+
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
 the summary so the user can pull it back into the PR if they disagree. If instead it blocks, add the
 TODO to the PR description, reply saying where it went (`Blocks this PR — added as a TODO in the

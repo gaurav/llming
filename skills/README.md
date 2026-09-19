@@ -34,6 +34,14 @@ carry the reply saying why. So a human can see whether another run is wanted bef
 and an agent that starts one anyway finds most threads already resolved and does almost nothing.
 The state the other two skills have to derive from git is, for this skill, just visible.
 
+It is also the one skill here that files an issue without asking me first. `update-pr` and `wrap`
+offer their follow-ups and wait, because an issue born at the end of a session needs enough context
+written into it to make sense later, and I want to see that before it exists. An issue deferred from
+a Copilot comment starts with that context: a specific comment on a specific line of a specific PR.
+The skill requires the issue to carry all of it — the comment link, a permalink at the head commit,
+and the code fragment pasted in, since a link to a line that has since moved explains nothing — so
+it should be understandable cold. If one ever isn't, that is the reason to make this skill ask too.
+
 ## github-issues
 
 The only rule in a directory of tasks, and the reason it is here rather than in a `CLAUDE.md` is
