@@ -11,7 +11,7 @@ isn't recoverable from the skill itself.
 - **copilot-review** — pins the repeated steps and my triage preferences so an agent doesn't
   re-derive them on every PR.
 - **github-issues** — a rule rather than a task: correct your own stale issue instead of commenting
-  under it, and never rewrite anyone else's.
+  under it, never rewrite anyone else's, and close anyone else's only through a PR.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
 - **update-pr** — keeps the PR honest about itself and about its own size: the description is read
@@ -46,6 +46,19 @@ first half is about how issues are read. Nobody reads the comments under a wrong
 acting on it, so a correcting comment leaves the wrong thing in the place people look. The second
 half needs no justification beyond stating it, but agents do not infer it: admin rights on a
 repository read as permission to fix anything in it.
+
+Closing follows from the second half but is not quite the same rule. Someone else's issue can be
+closed, but only by a `Closes #N` in the pull request that resolves it, never directly. A direct
+close that turns out to be wrong is one nobody sees — the bug just stops being tracked until it is
+rediscovered — whereas a closing keyword puts the claim in front of a reviewer, beside the change
+it rests on, and leaves a link behind.
+
+All of it is what an agent does unasked, and I can overrule any of it for a single issue. That
+clause exists because of duplicates: read strictly, the rules would have an agent close my detailed
+issue in favour of someone else's thin one, mine being the only one it is allowed to close. The
+better issue stays open whoever wrote it, the other gets a comment suggesting it be closed, and if
+the case is obvious the agent asks me rather than waiting on a comment nobody may answer. One
+escape hatch seemed better than a rule per case.
 
 In #20 I said an ambient writing convention is not skill-shaped, on the grounds that nobody would
 ever type `/cite-provenance`. That still holds. What makes this one different is that it applies at
