@@ -43,7 +43,8 @@ left over.
 
 Say what you are about to change and get the user's agreement before running `gh issue edit`. An
 edit to an issue is visible to everyone watching the repository, and unlike a comment it replaces
-text rather than adding to it.
+text rather than adding to it. The split-out issue needs the same agreement before
+`gh issue create`: describe it alongside the edit, so the user agrees to both halves at once.
 
 ## The issue is anyone else's
 
