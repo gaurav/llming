@@ -48,8 +48,10 @@ text rather than adding to it. The split-out issue needs the same agreement befo
 
 ## The issue is anyone else's
 
-Never edit the body, the title or the labels. Not when the repository belongs to the user, not with
-admin rights, not when the correction is obviously right. Leave a comment instead.
+Never change anything on it: not the body, the title or the labels, and not the assignees, the
+milestone, the project or whether it is open — closing has its own section below, and reopening is
+no different. Not when the repository belongs to the user, not with admin rights, not when the
+correction is obviously right. Leave a comment instead.
 
 Write access is permission to administer the repository; it is not permission to rewrite what
 someone else wrote. The same goes for the issues of a bot or of a former colleague whose account is
