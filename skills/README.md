@@ -79,9 +79,10 @@ fire, the answer is a hook rather than better prose, and #32 records what that c
 
 Measuring that is two greps over the session transcripts, which record every skill load as a `Skill`
 tool call. The first lists sessions that changed an issue, the second the ones that loaded the
-skill; a session in the first list and not the second is a miss. When I first ran them the first
-list had about thirty sessions, all from before the skill existed, so only sessions newer than the
-install count.
+skill; a session in the first list and not the second is a miss. The first grep only sees the
+`gh issue` CLI, so an issue changed through `gh api` or an MCP tool is not counted and the first
+list is a floor. When I first ran them the first list had about thirty sessions, all from before the
+skill existed, so only sessions newer than the install count.
 
 ```bash
 cd ~/.claude/projects
