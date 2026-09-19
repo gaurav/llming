@@ -1,6 +1,6 @@
 ---
 name: github-issues
-description: Rules for changing a GitHub issue — when to edit an issue rather than comment on it, whose issues must never be edited, and how someone else's issue may be closed. Use before editing, retitling, relabelling, closing or commenting on any GitHub issue, and whenever an issue turns out to be out of date, superseded or partly done.
+description: Rules for changing a GitHub issue — when to edit an issue rather than comment on it, whose issues must never be edited, and how someone else's issue may be closed. Use before filing, editing, retitling, relabelling, closing, reopening or commenting on any GitHub issue, and whenever an issue turns out to be out of date, superseded or partly done.
 ---
 
 # github-issues
@@ -30,6 +30,19 @@ issue as someone else's, which is the safe direction. The `gh api user` comparis
 two logins differ, the issue is someone else's, even when the author is an account the user is
 known to own.
 
+## Before filing a new issue
+
+Look for one that already covers it, closed ones included:
+
+```bash
+gh issue list --repo <owner>/<repo> --state all --search "<key terms> in:title,body" \
+  --json number,state,title,author --jq '.[] | "#\(.number) \(.state) @\(.author.login) \(.title)"'
+```
+
+A match turns "file an issue" into "change an issue", and the rest of this skill decides how: edit
+it if it is the user's, comment if it is not, reopen it if it was closed and the matter is live
+again. A second issue about the same thing is the duplicate problem below, made on purpose.
+
 ## The issue is the user's own, and out of date
 
 Edit the body so it is accurate. Do not append a comment that contradicts it, and do not narrate
@@ -49,12 +62,14 @@ text rather than adding to it. The split-out issue needs the same agreement befo
 ## The issue is anyone else's
 
 Never edit the body or the title. Not when the repository belongs to the user, not with admin
-rights, not when the correction is obviously right. Leave a comment instead. Whether it is open is
-off limits in the same way — closing has its own section below, and reopening is no different.
+rights, not when the correction is obviously right. Leave a comment instead. Closing it is
+restricted too, and has its own section below.
 
 Triage is fine: labels, assignees, the milestone, the project. It is what write access is for, it
 is easy to undo, and it shows in the issue's timeline, so an author who thinks their bug has been
-filed as unimportant can see that and say so.
+filed as unimportant can see that and say so. Reopening is fine on the same grounds, for an issue
+or an unmerged pull request: the worst a wrong reopen does is put something back on the list, where
+it gets looked at again — the opposite of what a wrong close does.
 
 Write access is permission to administer the repository; it is not permission to rewrite what
 someone else wrote. The same goes for the issues of a bot or of a former colleague whose account is

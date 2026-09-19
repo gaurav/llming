@@ -47,7 +47,9 @@ acting on it, so a correcting comment leaves the wrong thing in the place people
 half needs no justification beyond stating it, but agents do not infer it: admin rights on a
 repository read as permission to fix anything in it. "Edited" means the words: body and title.
 Triage — labels, assignees, milestone, project — stays allowed on anyone's issue, because it is
-easy to undo and shows in the timeline, where the author can object to it.
+easy to undo and shows in the timeline, where the author can object to it. Reopening an issue or an
+unmerged PR is allowed for the same reason, and because a wrong reopen fails the right way: the
+thing goes back on the list and gets looked at again.
 
 Closing follows from the second half but is not quite the same rule. Someone else's issue can be
 closed, but only by a `Closes #N` in the pull request that resolves it, never directly. A direct
@@ -68,6 +70,24 @@ a moment with a name — *about to change an issue* — rather than every time d
 written, and a moment with a name is something a `description` can describe. Whether that is enough
 to actually trigger it is the open question, and the skill is the experiment: if it turns out not to
 fire, the answer is a hook rather than better prose, and #32 records what that costs.
+
+Measuring that is two greps over the session transcripts, which record every skill load as a `Skill`
+tool call. The first lists sessions that changed an issue, the second the ones that loaded the
+skill; a session in the first list and not the second is a miss. When I first ran them the first
+list had about thirty sessions, all from before the skill existed, so only sessions newer than the
+install count.
+
+```bash
+cd ~/.claude/projects
+grep -lrE --include='*.jsonl' '"command":"[^"]*gh issue (create|edit|close|reopen|comment)' . | sort
+grep -lr --include='*.jsonl' '"skill":"github-issues"' . | sort
+```
+
+The other skills that touch issues — `copilot-review`, `update-pr` and `wrap` — each point at this
+one by name at the moment they would file one, which is also where the look-for-an-existing-issue
+check lives, so it is written once. Those pointers are a second route to the rule, and a confound
+for the experiment: a load that happens inside one of those skills says the pointer worked, not the
+description.
 
 Which is also why this is a flat skill and not the `skills/github-skills/` grouping directory I set
 out to build. Skill discovery is one level deep, so a grouping directory loads nothing at all. That
