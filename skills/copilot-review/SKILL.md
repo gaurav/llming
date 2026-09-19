@@ -68,6 +68,10 @@ goes:
 the PR is finished without it. "Somewhat awkward to do in this diff" is not grounds to defer — do it
 anyway. When in doubt between deferring and asking, ask.
 
+Before opening an issue, check that one doesn't already cover the finding, the way the
+`github-issues` skill describes. If one does, link it instead of filing a second, and let that skill
+decide whether it may be edited to cover the finding or only commented on.
+
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
 the summary so the user can pull it back into the PR if they disagree. If instead it blocks, add the
 TODO to the PR description, reply saying where it went (`Blocks this PR — added as a TODO in the
