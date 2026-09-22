@@ -228,6 +228,26 @@ directions — items ticked off that got reverted later, items never added becau
 after the description was written — and the skill forces a decision on each one: do it here, drop
 it, or file it.
 
+A ticked box is the part that took a second look. There are two kinds of checkbox in my
+descriptions — to-dos the PR owes before merging, and readiness checks that show it can merge — and
+`- [x]` is the wrong final form for both. A description states the final state, and a ticked box is
+a piece of the PR's history left standing in it. So the skill dissolves every one: a finished to-do
+is just part of the change and gets described, or not, like the rest of it; a finished readiness
+check becomes a verification record, in the description and, where the repo has a place for one, in
+a changelog line or an SOP, because "this kind of change was checked by these people" is worth more
+to the next release than to this PR. Open items stay `- [ ]`, since that list is what
+`copilot-review`, `wrap` and prcoder all write to.
+
+Two rules hold that together. The agent never ticks a box: its own work goes straight to prose, so
+a tick only ever means a person said so. And for a sign-off only a person can give, it asks me who
+and when rather than inferring it — I checked whether the body's edit history could answer that, and
+it cannot, because every edit made through my `gh` login is recorded as mine, the agent's included.
+
+prcoder's `<!-- prcoder:todo -->` block is deliberately not special-cased, though the block treats a
+line's text as the item's identity and a running prcoder rewrites it within a minute, so dissolving
+a line there can be reverted or bury a queue item. gaurav/prcoder#27 removes the block, and skill
+prose about another tool's internals would have outlived it.
+
 The hard-wrapping rule is the one an agent breaks by reflex, because every other file it has been
 reading is wrapped at 80 columns and GitHub turns each of those newlines into a line break. It very
 nearly cost this repo a bundled script: I wrote a 110-line unwrapper for bodies that arrive already
