@@ -152,7 +152,8 @@ each the next time it runs. Appending means reading the current description and 
 thing back with `--body-file`, because `gh pr edit` replaces the body and a freshly composed one
 drops whatever a human wrote.
 
-Before offering one, check it isn't already tracked, the way the `github-issues` skill describes. An
+Before offering a follow-up issue, check it isn't already tracked, the way the `github-issues` skill
+describes. An
 existing issue is a link in this list, not a new one, and that skill says whether it may be edited
 to cover what you found or only commented on.
 
