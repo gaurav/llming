@@ -90,13 +90,21 @@ tool call. The first lists sessions that changed an issue, the second the ones t
 skill; a session in the first list and not the second is a miss. The first grep only sees the
 `gh issue` CLI, so an issue changed through `gh api` or an MCP tool is not counted and the first
 list is a floor. When I first ran them the first list had about thirty sessions, all from before the
-skill existed, so only sessions newer than the install count.
+skill existed, so only sessions newer than the install count — `grep -l` prints paths and no dates,
+so get those from the transcript files' mtimes (`... | xargs ls -lt`).
 
 ```bash
 cd ~/.claude/projects
-grep -lrE --include='*.jsonl' '"command":"[^"]*gh issue (create|edit|close|reopen|comment)' . | sort
+grep -lrE --include='*.jsonl' \
+  '"command":"([^"]|\\")*gh issue (create|edit|close|reopen|comment)' . | sort
 grep -lr --include='*.jsonl' '"skill":"github-issues"' . | sort
 ```
+
+The `([^"]|\\")*` in the first pattern is what lets the command field contain a quoted argument
+before the `gh issue` call — a heredoc into `"$S/issue.md"`, a `sed -i '' 's/…/…/' "$f"` on the line
+above. A plain `[^"]*` stops dead at that first escaped quote and silently drops the session, which
+looks exactly like a session where the skill correctly had nothing to fire on. Here it was missing
+about a third of them.
 
 The other skills that touch issues — `copilot-review`, `update-pr` and `wrap` — each point at this
 one by name at the moment they would file one, which is also where the look-for-an-existing-issue
