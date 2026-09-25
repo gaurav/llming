@@ -93,7 +93,9 @@ skill; a session in the first list and not the second is a miss. The first grep 
 `gh issue` CLI, so an issue changed through `gh api` or an MCP tool is not counted and the first
 list is a floor. When I first ran them the first list had about thirty sessions, all from before the
 skill existed, so only sessions newer than the install count — `grep -l` prints paths and no dates,
-so get those from the transcript files' mtimes (`... | xargs ls -lt`).
+so get those from the transcript files' mtimes (`... | xargs ls -lt`). Transcripts stay on the
+machine that ran the session, and so does the install date, so each machine gives its own counts
+against its own cutoff: run the greps on every machine and add them up.
 
 ```bash
 cd ~/.claude/projects
