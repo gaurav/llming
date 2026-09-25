@@ -43,6 +43,9 @@ A match turns "file an issue" into "change an issue", and the rest of this skill
 it if it is the user's, comment if it is not, reopen it if it was closed and the matter is live
 again. A second issue about the same thing is the duplicate problem below, made on purpose.
 
+Whether a new issue goes on a milestone, and which one, is decided by the `github-milestones`
+skill — load it before filing.
+
 ## The issue is the user's own, and out of date
 
 Edit the body so it is accurate. Do not append a comment that contradicts it, and do not narrate
@@ -79,7 +82,8 @@ Triage is fine: labels, assignees, the milestone, the project. It is what write 
 is easy to undo, and it shows in the issue's timeline, so an author who thinks their bug has been
 filed as unimportant can see that and say so. Reopening is fine on the same grounds, for an issue
 or an unmerged pull request: the worst a wrong reopen does is put something back on the list, where
-it gets looked at again — the opposite of what a wrong close does.
+it gets looked at again — the opposite of what a wrong close does. Which milestone is the right one
+is a separate question, answered by the `github-milestones` skill.
 
 Write access is permission to administer the repository; it is not permission to rewrite what
 someone else wrote. The same goes for the issues of a bot or of a former colleague whose account is
