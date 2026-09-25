@@ -12,6 +12,8 @@ isn't recoverable from the skill itself.
   re-derive them on every PR.
 - **github-issues** — a rule rather than a task: correct your own stale issue instead of commenting
   under it, never rewrite anyone else's, and close anyone else's only through a PR.
+- **github-milestones** — my milestone scheme, so an agent tells a bucket from a deadline, leaves
+  untriaged issues alone, and doesn't treat a soft release date that has passed as an alarm.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
 - **update-pr** — keeps the PR honest about itself and about its own size: the description is read
@@ -116,6 +118,55 @@ Which is also why this is a flat skill and not the `skills/github-skills/` group
 out to build. Skill discovery is one level deep, so a grouping directory loads nothing at all. That
 finding and what to do instead are in #32; the summary is that bundling is a plugin's job, not a
 directory's.
+
+## github-milestones
+
+My milestones do two different jobs, and an agent that sees only the titles and due dates can't
+tell which is which. Buckets (Critical, Needed soon, Needed later, Not urgent, Upstream) are
+priorities, and they're undated. Release and date milestones are the contents of an upcoming
+release, and their due dates range from hard to purely hopeful. Most are the hopeful kind, so most
+of my milestones are past due most of the time. That's fine, but it reads as neglect to anything
+that takes a due date at face value. The skill carries the scheme from machine to machine. It
+also records the default that a milestone is a release: its issues get built, published as a
+GitHub release, and then the milestone is closed. That holds unless a repository says it uses a
+Project instead.
+
+The canonical bucket list will live in `MILESTONES.md` in
+[gaurav/milestones](https://github.com/gaurav/milestones), the tool I'm building to keep on top of
+all this. The skill reads it from there and keeps its own copy of the list as a fallback until that
+file exists. Once it does, the copy in the skill should shrink to a pointer.
+
+Two restraints matter more than the scheme itself. First, an agent shouldn't milestone an issue
+unless the milestone is obvious. My triage picks up anything without a milestone, and a guessed
+bucket hides the issue from that triage. Second, due dates get suggested, never edited, and only
+when something really is urgent, or when an urgency date on a bucket has outlived its urgency.
+Without that second rule, every session that lists milestones turns into a report on which ones
+are overdue.
+
+It is a separate skill rather than more of `github-issues`, even though the two meet whenever an
+issue is filed. `github-issues` fires at one moment, *about to change an issue*, and is partly an
+experiment in whether a description naming a single moment is enough to make a skill trigger.
+Most of the milestone rules bite at moments that don't involve changing an issue: cutting a
+release, closing a milestone, choosing what to work on next. A description stretched to cover all
+of those would describe two skills, and it would change what that experiment measures partway
+through. The cost of keeping them apart is that filing an issue has to load both. `github-issues`
+points here at both of the places where milestones come up, the same way the other skills point
+at `github-issues`.
+
+Checking whether it fires works the same way as for `github-issues`, and has the same caveat: only
+the `gh` CLI is visible, so the first list is a lower bound. The `repos/<owner>/<repo>/` part keeps
+the `gaurav/milestones` repository itself from matching.
+
+```bash
+cd ~/.claude/projects
+grep -lrE --include='*.jsonl' \
+  -e '"command":"([^"]|\\")*gh issue (create|edit)([^"]|\\")*(--milestone|-m )' \
+  -e '"command":"([^"]|\\")*gh api ([^"]|\\")*repos/[^/" ]+/[^/" ]+/milestones' . | sort
+grep -lr --include='*.jsonl' '"skill":"github-milestones"' . | sort
+```
+
+Where it might go next: a triage skill that works through the unmilestoned issues with me, which is
+the other half of the "leave it unmilestoned" rule.
 
 ## sync-docs
 
@@ -325,9 +376,9 @@ Context dependent, and deliberately broad. Two rough patterns so far:
   tracked over time instead of being reinvented each session.
 - **An experiment** (`sync-docs`) — either about what tasks an LLM can usefully take on, or about
   LLM use itself. I expect more of these: ticket triage, planning skills.
-- **A rule that only bites at one identifiable moment** (`github-issues`). Ambient conventions
-  belong in memory or a `CLAUDE.md`; a rule with a trigger can be a skill, and gets to stay out of
-  context until it is needed. Unproven — see that skill's section.
+- **A rule that only bites at identifiable moments** (`github-issues`, `github-milestones`). Ambient
+  conventions belong in memory or a `CLAUDE.md`; a rule with a trigger can be a skill, and gets to
+  stay out of context until it is needed. Unproven — see that skill's section.
 
 Not every skill here will finish, and that's fine. Some turn out not to be useful. Some get built
 just far enough to unblock one project and then set aside for review when there's time. And the
