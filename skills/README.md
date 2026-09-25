@@ -92,8 +92,10 @@ tool call. The first lists sessions that changed an issue, the second the ones t
 skill; a session in the first list and not the second is a miss. The first grep only sees the
 `gh issue` CLI, so an issue changed through `gh api` or an MCP tool is not counted and the first
 list is a floor. When I first ran them the first list had about thirty sessions, all from before the
-skill existed, so only sessions newer than the install count — `grep -l` prints paths and no dates,
-so get those from the transcript files' mtimes (`... | xargs ls -lt`). Transcripts stay on the
+skill existed, so only sessions *started* after the install count. `grep -l` prints paths and no
+dates, and a file's mtime is the wrong date: it is when the session last wrote, and a session
+running across the install picks the skill up mid-session yet acted on plans made before it
+existed. Take each session's first timestamp instead (the loop below). Transcripts stay on the
 machine that ran the session, and so does the install date, so each machine gives its own counts
 against its own cutoff: run the greps on every machine and add them up.
 
@@ -102,7 +104,15 @@ cd ~/.claude/projects
 grep -lrE --include='*.jsonl' \
   '"command":"([^"]|\\")*gh issue (create|edit|close|reopen|comment)' . | sort
 grep -lr --include='*.jsonl' '"skill":"github-issues"' . | sort
+# pipe either list through this for each session's start time
+while read -r f; do
+  echo "$(grep -o -m1 -- '"timestamp":"[^"]*"' "./$f" | cut -d'"' -f4) $f"
+done
 ```
+
+The paths come back as `-Users-…/<id>.jsonl` with no leading `./`, so any command handed one bare
+reads it as an option: `xargs ls -lt` errors, and `grep` prints nothing, which looks like a session
+with no timestamp. Hence the `--` and the `./`.
 
 The `([^"]|\\")*` in the first pattern is what lets the command field contain a quoted argument
 before the `gh issue` call — a heredoc into `"$S/issue.md"`, a `sed -i '' 's/…/…/' "$f"` on the line
