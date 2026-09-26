@@ -6,8 +6,8 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
   the context window is, how much of the 5-hour and 7-day quotas is left, and which model and
   effort level are running.
 - `user-CLAUDE.md`, the instructions I give Claude Code in every session on every machine: use
-  several commits where they help, and write PR titles and descriptions as a lasting record.
-  Installed as `~/.claude/CLAUDE.md`.
+  several commits where they help, and write PRs with the `update-pr` skill. Installed as
+  `~/.claude/CLAUDE.md`.
 
 <!-- rumdl-disable MD013 -->
 
@@ -60,9 +60,9 @@ a machine may already have one with additions of its own, so compare the two fir
   might not be in a huge one.
 - **Without a reset time, the quota clock shows a nonsense time** (the start of 1970, in local
   time). Claude Code has always sent one so far.
-- **`user-CLAUDE.md` overlaps the [`update-pr`](../../skills/update-pr/SKILL.md) skill.** Both say
-  how to write a PR's title and description, the skill in far more detail. Changing one means
-  checking the other still agrees.
+- **`user-CLAUDE.md` defers to the [`update-pr`](../../skills/update-pr/SKILL.md) skill** on PR
+  titles and descriptions, keeping only a two-line summary for a machine without it. Changing the
+  skill's rules means checking that summary still agrees.
 
 ## Preferences
 
