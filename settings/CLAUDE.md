@@ -49,6 +49,12 @@ goes with it.
 
 ### How the layout works
 
+- **Every colour is a palette reference (`p:role`)**. There are no hex values in the blocks.
+  `palettes.list` holds the named palettes, and `palettes.template` picks one from `$POSH_PALETTE`,
+  falling back to the default. Top-level `palette` is a copy of the default, used when
+  `$POSH_PALETTE` names a palette that doesn't exist. To add a palette, fill every role, and check
+  contrast against both the bar and black (the frame, dots and `▶` sit on the terminal background).
+  `preview-palettes.zsh` reads the palette names from the JSON.
 - The prompt is three blocks: left-aligned line 1, right-aligned line 1 (which carries the
   `filler` dots, which only work on a right-aligned block), and a `"newline": true` block for
   line 2. `transient_prompt` is a top-level key, not a block.

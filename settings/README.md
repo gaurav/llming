@@ -76,22 +76,19 @@ when the prompt collapses (see *Transient prompt*), and a new window doesn't sta
 2. The current path, with `~` for home. Past 30 columns, the leading folders shrink to their first
    letter (`~/D/llming/settings/oh-my-posh`). The current folder is bold.
 3. Git: branch, then `⇣n` behind / `⇡n` ahead, `*n` stashes, `+n` staged, `!n` unstaged, `?n`
-   untracked. Each count is hidden when it is zero. The branch is green when the tree is clean and
-   amber when there are changes.
+   untracked. Each count is hidden when it is zero.
 
-The segments share one dark slate background. They are divided by small text-height angles, `›`
+The segments share one background bar. They are divided by small text-height angles, `›`
 on the left and `‹` on the right (U+203A and U+2039). The full-height Nerd Font powerline arrows
 looked too big. The left group ends in a solid powerline arrow (U+E0B0), and the right group
 begins with its mirror image (U+E0B2).
 
-**The gap** between the two sides is filled with dots (`·`) in a lighter grey-blue, the same as the
-frame.
+**The gap** between the two sides is filled with dots (`·`) in the frame colour.
 
 **Line 1, right**, from left to right:
 
 1. How long the previous command took, which is always shown instead of a clock. A quick command
-   shows just the duration (`450ms`) in lavender, the one hue not used elsewhere, since grey was
-   hard to read. One taking **3 seconds or more** shows in amber, with its
+   shows just the duration (`450ms`). One taking **3 seconds or more** is highlighted and gains its
    finish time: `took 2m 10s, finished 2:03:43am`.
 2. `✘ n`, the exit code, only after a failed command.
 3. The Python, Node or Java version, only inside a project in that language, with no virtualenv
@@ -101,35 +98,38 @@ frame.
 A `─╮` frame closes the right side. If line 1 doesn't fit the window, the right side is hidden.
 
 **Line 2**: `╰─ ▶`, a filled triangle. `❯` was too tall, and the small `▸` hard to spot. It is
-orange, a colour used nowhere else so the live prompt stands out, and red after a failed command.
+in the prompt colour (orange in every palette), used nowhere else so the live prompt stands out,
+and in the error colour after a failed command.
 The cursor goes after it.
 
 **Transient prompt**: once a command runs, its two-line prompt collapses to just `▶ command` in
-muted green (muted red if it failed). The blank line before it goes too. The scrollback holds
+muted green, or muted red if it failed. The blank line before it goes too. The scrollback holds
 commands and output rather than repeated status lines, and only the live prompt is bright, while the
 colour still makes old prompts easy to find.
 
-**Colours**:
+**Colours** are chosen by role. All text on the bar is **one colour**. Colour is kept for things
+worth noticing:
 
-Text on the bar is at least 7:1 contrast against it (the red exit code 5.8:1, the separators
-5:1).
+| Role       | Used for                                                            |
+| ---------- | ------------------------------------------------------------------- |
+| `bar`      | segment background                                                  |
+| `text`     | everything on the bar: path, branch, duration, versions, user@host  |
+| `sep`      | the `›` / `‹` separators                                            |
+| `frame`    | `╭─`, `─╮`, `╰─` and the filler dots                                |
+| `prompt`   | the live `▶`                                                        |
+| `error`    | exit code, live `▶` after a failure                                 |
+| `warn`     | slow duration, unstaged count, root bolt                            |
+| `ok`       | staged count                                                        |
+| `info`     | untracked count                                                     |
+| `old_ok`   | `▶` in the scrollback                                               |
+| `old_err`  | `▶` in the scrollback after a failure                               |
 
-| Colour     | Hex       | Used for                                                 |
-| ---------- | --------- | -------------------------------------------------------- |
-| slate      | `#263238` | segment background                                       |
-| grey-blue  | `#546E7A` | frame, filler dots                                       |
-| grey       | `#90A4AE` | separators                                               |
-| light cyan | `#A5ECF5` | path                                                     |
-| white      | `#FFFFFF` | current folder, `user@host`                              |
-| green      | `#AED581` | clean git branch, staged count                           |
-| amber      | `#FFD54F` | changed git branch, unstaged count, slow duration, root  |
-| lavender   | `#E1BEE7` | quick duration                                           |
-| light blue | `#B3E5FC` | untracked count                                          |
-| red        | `#FF8A80` | exit code                                                |
-| orange     | `#FFA726` | live `▶`                                                 |
-| red        | `#FF5252` | live `▶` after a failure                                 |
-| muted green | `#86A86E` | `▶` in the scrollback (`#E57373` if it failed)          |
-| brand      | various   | Python `#FFE873`, Node `#9CCC65`, Java `#FFB74D`         |
+The theme has several palettes that fill these roles, all meant for a black background. The
+default is *tokyo-night*. The others are *charcoal* (neutral greys), *gruvbox* (warm),
+*catppuccin* (pastel) and *lean* (no bar, text straight on black). `export POSH_PALETTE=<name>`
+switches the current shell to another, from its next prompt.
+`zsh ~/.config/oh-my-posh/preview-palettes.zsh` draws the prompt in every palette so they can be
+compared.
 
 **In p10k**, `p10k configure` gets the layout close with these choices: *Classic* style,
 *Unicode*, *Angled* separators, *Sharp* heads, *Flat* tails, *Two lines*, *Dotted* connection,
