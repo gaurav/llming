@@ -155,18 +155,25 @@ quota_seg=""
 if [ -n "$five_pct" ]; then
   five_color=$(pct_color "$five_pct")
   five_remaining=$(awk -v p="$five_pct" 'BEGIN{printf "%.0f", 100 - p}')
-  five_left=$(fmt_duration $((five_reset - now)))
-  five_clock=$(fmt_clock "$five_reset")
-  five_pace=$(pace_color "$five_pct" "$five_reset" 18000)
-  quota_seg="${c_sep}5h:${c_reset} ${five_color}${five_remaining}%${c_reset} ${c_dim}until ${five_clock} ${c_reset}${five_pace}(${five_left})${c_reset}"
+  quota_seg="${c_sep}5h:${c_reset} ${five_color}${five_remaining}%${c_reset}"
+  # without a reset time, "until" would read as resetting now; show just the percentage
+  if [ -n "$five_reset" ]; then
+    five_left=$(fmt_duration $((five_reset - now)))
+    five_clock=$(fmt_clock "$five_reset")
+    five_pace=$(pace_color "$five_pct" "$five_reset" 18000)
+    quota_seg="${quota_seg} ${c_dim}until ${five_clock} ${c_reset}${five_pace}(${five_left})${c_reset}"
+  fi
 fi
 if [ -n "$week_pct" ]; then
   week_color=$(pct_color "$week_pct")
   week_remaining=$(awk -v p="$week_pct" 'BEGIN{printf "%.0f", 100 - p}')
-  week_left=$(fmt_duration $((week_reset - now)))
-  week_clock=$(fmt_clock_day "$week_reset")
-  week_pace=$(pace_color "$week_pct" "$week_reset" 604800)
-  week_seg="${c_sep}7d:${c_reset} ${week_color}${week_remaining}%${c_reset} ${c_dim}until ${week_clock} ${c_reset}${week_pace}(${week_left})${c_reset}"
+  week_seg="${c_sep}7d:${c_reset} ${week_color}${week_remaining}%${c_reset}"
+  if [ -n "$week_reset" ]; then
+    week_left=$(fmt_duration $((week_reset - now)))
+    week_clock=$(fmt_clock_day "$week_reset")
+    week_pace=$(pace_color "$week_pct" "$week_reset" 604800)
+    week_seg="${week_seg} ${c_dim}until ${week_clock} ${c_reset}${week_pace}(${week_left})${c_reset}"
+  fi
   if [ -n "$quota_seg" ]; then
     quota_seg="${quota_seg}${sep}${week_seg}"
   else

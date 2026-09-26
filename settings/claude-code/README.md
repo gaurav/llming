@@ -58,8 +58,6 @@ a machine may already have one with additions of its own, so compare the two fir
   once. Pace colouring is on trial, and may yet be dropped or get its own colour or symbol.
 - **The branch colour runs `git status` on every update.** That's quick in the repos I use, but
   might not be in a huge one.
-- **Without a reset time, the quota clock shows a nonsense time** (the start of 1970, in local
-  time). Claude Code has always sent one so far.
 - **`user-CLAUDE.md` defers to the [`update-pr`](../../skills/update-pr/SKILL.md) skill** on PR
   titles and descriptions, keeping only a two-line summary for a machine without it. Changing the
   skill's rules means checking that summary still agrees.
@@ -85,7 +83,8 @@ No PR number: Claude Code already shows it.
 rounded to a whole percent. No maximum: the percentage already says it.
 
 **Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with a day in place of the
-time (`until Tue 8pm (3d 5h)`). The percentage is what's **left**, not what's used.
+time (`until Tue 8pm (3d 5h)`). The percentage is what's **left**, not what's used. Without a
+reset time, just the percentage.
 
 **Pace**: the countdown in brackets turns yellow when I'm using a quota faster than its window is
 passing, so at this rate it would run out before the reset. Precisely: when the percentage used is
