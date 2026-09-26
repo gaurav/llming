@@ -200,7 +200,7 @@ every part of it well written, most of it collapsed history, an account of the t
 *third* copy of documentation already in that repo's README and code comments. The fix was a
 different location, not better prose. Nobody reads a PR description except during review and when
 writing a changelog line, so anything needed at any other time goes into the repo first — code
-comment, `CLAUDE.md`, docs — and the description links to it. The body has a budget of about 4,000
+comment, `CLAUDE.md`, docs — and the description links to it. The body has a budget of about 5,000
 characters, with an escape hatch rather than a hard cap: a cap gets gamed or broken silently, and a
 bare principle gets agreed with and ignored. The budget counts collapsed text, because the previous
 rule said churn *goes in a `<details>` block* and the model complied — 17,000 characters of
