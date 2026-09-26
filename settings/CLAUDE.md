@@ -1,5 +1,8 @@
 `README.md` has the install steps and each tool's settings in words. This file has the specifics.
 
+Every machine shares these docs, so don't describe one machine's state ("cloned on this machine",
+"no JDK here yet"). Say what holds wherever the settings are installed, or leave it out.
+
 ## Checking installed copies against the repo
 
 Settings are installed as copies, so a machine's copy and this repo drift apart. **Before changing a
