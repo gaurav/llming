@@ -63,6 +63,15 @@ close that turns out to be wrong is one nobody sees — the bug just stops being
 rediscovered — whereas a closing keyword puts the claim in front of a reviewer, beside the change
 it rests on, and leaves a link behind.
 
+That argument holds for my own issues too, so the keyword is the preferred route for those as well.
+Adding it to an unmerged PR needs no permission, even when it is a different PR from the one being
+worked on, and the skill had to say so explicitly: an agent once closed my issue directly because
+its last item had landed on another PR's branch and the keyword "wouldn't fit". A closed issue
+backed by unmerged work stays closed if the PR is abandoned. Closing directly is kept for catching
+up with work that already merged unconnected, done with a comment on the issue, since the comment
+records why and a report in the terminal is easy to miss. Closing for any other reason (obsolete,
+superseded, won't-do) asks me first, except in very obvious cases.
+
 All of it is what an agent does unasked, and I can overrule any of it for a single issue. That
 clause exists because of duplicates: read strictly, the rules would have an agent close my detailed
 issue in favour of someone else's thin one, mine being the only one it is allowed to close. The
