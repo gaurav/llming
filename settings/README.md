@@ -15,7 +15,7 @@ commands. So far there are four:
 - [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
 - [`vim/`](vim/README.md): my Vim setup, with syntax highlighting in the terminal's colours.
 - [`claude-code/`](claude-code/README.md): my Claude Code status line (git branch, context and
-  quota use, model).
+  quota use, model), and the instructions every Claude Code session gets.
 
 The first two are described in sections below. The others have their own `README.md` in their
 directory.

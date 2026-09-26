@@ -10,6 +10,7 @@ tool here, and before committing, diff the two:**
 | oh-my-posh  | `oh-my-posh/`                 | `~/.config/oh-my-posh/`         |
 | Vim         | `vim/vimrc`                   | `~/.vim/vimrc`                  |
 | Claude Code | `claude-code/statusline.sh`   | `~/.claude/statusline.sh`       |
+| Claude Code | `claude-code/user-CLAUDE.md`  | `~/.claude/CLAUDE.md`           |
 | Terminal    | `terminal-app/*.terminal`     | Terminal's preferences (below)  |
 
 `diff -r oh-my-posh ~/.config/oh-my-posh` from `settings/`, and so on. For each difference, ask the
@@ -189,6 +190,10 @@ repos (a bare remote plus clones that are clean, dirty, ahead and behind) and po
 
 The `statusline-setup` agent that `/statusline` launches has no shell, so it can't run the script.
 Test its edits from the main session.
+
+**Don't rename `user-CLAUDE.md` to `CLAUDE.md`**, although that is its installed name. Claude Code
+loads a file called `CLAUDE.md` from any directory it reads files in, so under that name it would
+become instructions for every agent working in `claude-code/` rather than a file they're editing.
 
 ### Colours and glyphs
 

@@ -1,8 +1,13 @@
 # Claude Code
 
-My [Claude Code](https://claude.com/claude-code) status line: one line under the input box showing
-the git branch, how full the context window is, how much of the 5-hour and 7-day quotas is left,
-and which model and effort level are running.
+My [Claude Code](https://claude.com/claude-code) setup, in two files:
+
+- `statusline.sh`, my status line: one line under the input box showing the git branch, how full
+  the context window is, how much of the 5-hour and 7-day quotas is left, and which model and
+  effort level are running.
+- `user-CLAUDE.md`, the instructions I give Claude Code in every session on every machine: use
+  several commits where they help, and write PR titles and descriptions as a lasting record.
+  Installed as `~/.claude/CLAUDE.md`.
 
 <!-- rumdl-disable MD013 -->
 
@@ -13,6 +18,8 @@ main ⇡1 ♦ ctx 42% (84k) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until 
 <!-- rumdl-enable MD013 -->
 
 ## Install
+
+The status line:
 
 ```bash
 cp ~/Developer/llming/settings/claude-code/statusline.sh ~/.claude/statusline.sh
@@ -30,6 +37,16 @@ permissions and other per-machine settings:
 
 It needs `jq` and `git`. The status line updates after Claude's next message.
 
+My instructions:
+
+```bash
+cp -i ~/Developer/llming/settings/claude-code/user-CLAUDE.md ~/.claude/CLAUDE.md
+```
+
+Claude Code reads `~/.claude/CLAUDE.md` at the start of every session, in every project, alongside
+the project's own `CLAUDE.md`, so it takes effect in the next session. `-i` asks before overwriting:
+a machine may already have one with additions of its own, so compare the two first.
+
 ## Known issues
 
 - **The colours are tuned for my Solarized Darker Terminal.app profile** (see
@@ -43,6 +60,9 @@ It needs `jq` and `git`. The status line updates after Claude's next message.
   might not be in a huge one.
 - **Without a reset time, the quota clock shows a nonsense time** (the start of 1970, in local
   time). Claude Code has always sent one so far.
+- **`user-CLAUDE.md` overlaps the [`update-pr`](../../skills/update-pr/SKILL.md) skill.** Both say
+  how to write a PR's title and description, the skill in far more detail. Changing one means
+  checking the other still agrees.
 
 ## Preferences
 
@@ -95,5 +115,8 @@ Tried and rejected:
 
 ## Next steps
 
+- Copy `user-CLAUDE.md` back over `~/.claude/CLAUDE.md` on the machine it came from. That copy is
+  unwrapped and this one is wrapped at 100 columns, so until then a diff between them shows every
+  line changed although the text is the same.
 - Decide whether pace colouring is worth keeping, and whether it needs its own colour.
 - Check the branch segment's speed in a large repo.
