@@ -135,6 +135,8 @@ fi
 
 # ---- context window ----
 ctx_used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+# total_input_tokens is what's in the window now (the latest API response's input plus cache
+# reads and writes), not a session total: the docs say so, and used_percentage is the same sum.
 ctx_in=$(echo "$input" | jq -r '.context_window.total_input_tokens // empty')
 
 ctx_seg=""
