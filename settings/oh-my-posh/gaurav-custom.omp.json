@@ -59,6 +59,7 @@
       "type": "prompt",
       "alignment": "right",
       "filler": "<#546E7A>\u00b7</>",
+      "overflow": "hide",
       "segments": [
         {
           "type": "text",
