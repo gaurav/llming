@@ -80,8 +80,9 @@ flagged, where, and in which change. So the body carries all of it, not a summar
 - the PR (`#NNN`) and a link to Copilot's comment — the thread's `url` from Step 2, or for a
   suppressed comment the PR plus the `path:line` it named;
 - a permalink to the lines **as Copilot saw them**:
-  `https://github.com/OWNER/REPO/blob/<commit>/<path>#L<orig_line>`, from the thread's own `commit`
-  and `orig_line` in Step 2. Not the branch, which moves, and not its head either — an outdated
+  `https://github.com/OWNER/REPO/blob/<commit>/<path>#L<orig_start_line>-L<orig_line>`, from the
+  thread's own `commit` and lines in Step 2, or just `#L<orig_line>` when `orig_start_line` is null
+  (a single-line comment). Not the branch, which moves, and not its head either — an outdated
   thread's lines are by definition no longer where the head has them, so a head permalink points at
   unrelated code, which is worse than no link. A suppressed comment has no thread to take a commit
   from: use the `commit_id` of the review it came from in Step 2b, for the same reason — it may
@@ -130,7 +131,8 @@ query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
         nodes{
           id isResolved isOutdated path line
           comments(first:100){
-            nodes{ author{login} body databaseId url originalCommit{oid} originalLine }
+            nodes{ author{login} body databaseId url
+                   originalCommit{oid} originalStartLine originalLine }
           }
         }
       }
@@ -145,6 +147,7 @@ query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
    path, line, outdated: .isOutdated,
    url: .comments.nodes[0].url,
    commit: .comments.nodes[0].originalCommit.oid,
+   orig_start_line: .comments.nodes[0].originalStartLine,
    orig_line: .comments.nodes[0].originalLine,
    comments: [.comments.nodes[] | {author: (.author.login // "ghost"), body}]}'
 ```
