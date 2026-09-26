@@ -61,8 +61,6 @@ let g:tokyonight_style = 'night'   " or 'storm'
 colorscheme tokyonight
 ```
 
-It's cloned on this machine but not turned on.
-
 ## Next steps
 
 - Try Tokyo Night in Ghostty, where 24-bit colour works, and decide whether to turn it on.

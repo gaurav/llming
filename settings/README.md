@@ -69,9 +69,9 @@ Terminal.app needs one set as the profile's font (I use MesloLGM Nerd Font:
 - **The Python version can be the wrong one in uv projects.** The segment asks pyenv, then
   whichever `python3` is on the `PATH`. It never looks at a project's `.venv`, so a uv project
   pinned to another Python shows the system version instead.
-- **The Java segment is untested.** There is no JDK on this machine yet, and macOS's
-  `/usr/bin/java` placeholder may pop up an "install Java" dialog when the prompt runs it. That
-  only happens in a folder with Java files.
+- **The Java segment is untested**, since it was set up without a JDK installed. On a Mac with no
+  JDK, the `/usr/bin/java` placeholder may pop up an "install Java" dialog when the prompt runs it.
+  That only happens in a folder with Java files.
 - **On a narrow window, line 1's right side disappears** when it doesn't fit beside the left side.
   The red `▶` still shows that a command failed.
 - **Testing changes from a shell that already runs oh-my-posh** needs care: see `CLAUDE.md`.
