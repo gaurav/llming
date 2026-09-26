@@ -43,7 +43,7 @@ grep -lrE --include='*.jsonl' \
 grep -lr --include='*.jsonl' '"skill":"github-issues"' . | sort
 # github-milestones; repos/<owner>/<repo>/ keeps the gaurav/milestones repo itself from matching
 grep -lrE --include='*.jsonl' \
-  -e '"command":"([^"]|\\")*gh issue (create|edit)([^"]|\\")*(--milestone|-m )' \
+  -e '"command":"([^"]|\\")*gh issue (create|edit)([^"&;|]|\\")*(--milestone|-m )' \
   -e '"command":"([^"]|\\")*gh api ([^"]|\\")*repos/[^/" ]+/[^/" ]+/milestones' . | sort
 grep -lr --include='*.jsonl' '"skill":"github-milestones"' . | sort
 # pipe any list through this for each session's start time
@@ -58,10 +58,14 @@ done
   mid-session yet acted on plans made before it existed. Use each session's first timestamp.
 - **Count per machine.** Transcripts stay on the machine that ran the session, and so does the
   install date, so run the greps on every machine against its own cutoff and add them up.
-- **The paths come back as `-Users-…/<id>.jsonl`** with no leading `./`, so any command handed one
-  bare reads it as an option: `xargs ls -lt` errors, and `grep` prints nothing, which looks like a
-  session with no timestamp. Hence the `--` and the `./`.
+- **The paths may come back as `-Users-…/<id>.jsonl`** with no leading `./`. `/usr/bin/grep` prints
+  the `./`, but the `grep` in Claude Code's shell is ugrep, which drops it, and a bare path reads as
+  an option: `xargs ls -lt` errors, and `grep` prints nothing, which looks like a session with no
+  timestamp. Hence the `--` and the `./`, which is harmless (`././…`) when the `./` is there.
 - **`([^"]|\\")*`, not `[^"]*`.** The command field can contain a quoted argument before the `gh`
   call — a heredoc into `"$S/issue.md"`, a `sed -i '' 's/…/…/' "$f"` on the line above. A plain
   `[^"]*` stops at the first escaped quote and silently drops the session, which looks exactly like
   a session where the skill correctly had nothing to fire on. It was missing about a third of them.
+- **After `gh issue`, the gap also stops at `&`, `;` and `|`.** Otherwise the `-m` pattern matches
+  in the next command on the line — `gh issue create … && git commit -m "…"` — and a session with no
+  milestone in it counts as a miss. An `-m` inside the issue's own title still matches.
