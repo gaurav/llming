@@ -144,6 +144,9 @@ compared.
 ### Next steps
 
 - Find the theme a real name to replace `gaurav-custom`.
+- Live with *tokyo-night* for a while. It was the clear first pick, but if it stops working for
+  me, *charcoal* and *gruvbox* were the runners-up to try next (`export POSH_PALETTE=charcoal`).
+- Check the git segment's speed in a large repo. If it lags, set the top-level `"async": true`.
 - Bring over the `~/.p10k.zsh` from the Terminal.app machines, so both versions sit side by side.
 - Once a JDK or a Python version manager is installed, check that the Java and Python segments
   report the right versions.
@@ -190,4 +193,6 @@ Terminal ▸ Settings ▸ Profiles, select it, and click **Default**.
 
 ### Next steps
 
-- Rename the profile if it drifts far from Solarized Darker.
+- Decide whether to keep the Solarized profiles now that Tokyo Night Darker is the default.
+- Give Tokyo Night Darker a better name if it drifts from Tokyo Night. If I switch prompt palette,
+  make a matching Terminal profile the same way (see `CLAUDE.md`).
