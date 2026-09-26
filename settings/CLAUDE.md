@@ -2,7 +2,7 @@
 
 ## oh-my-posh
 
-The config is `oh-my-posh/p10k-classic.omp.json`. `~/.config/oh-my-posh` is a symlink to the
+The config is `oh-my-posh/gaurav-custom.omp.json`. `~/.config/oh-my-posh` is a symlink to the
 `oh-my-posh/` directory (not to `settings/`), so `~/.zshrc` points at a stable path.
 
 ### Previewing a change
@@ -13,7 +13,7 @@ whatever `.zshrc` loaded. Edits to *that* file are picked up at the next prompt,
 path is ignored. Drop the session variable to preview a different file:
 
 ```bash
-C="$PWD/oh-my-posh/p10k-classic.omp.json"   # run from settings/
+C="$PWD/oh-my-posh/gaurav-custom.omp.json"   # run from settings/
 env -u POSH_SESSION_ID oh-my-posh print primary --config "$C" \
   --shell zsh --plain -w 100 --execution-time 4200 --status 1
 env -u POSH_SESSION_ID oh-my-posh print transient --config "$C" --shell zsh --plain --status 1
@@ -55,7 +55,7 @@ as text. A JSON syntax error doesn't fail: it exits 0 and renders the default th
 
 ### Shell side
 
-`ZSH_THEME` is emptied only when oh-my-posh will run. Emptying it unconditionally leaves
-Terminal.app with zsh's bare `%` prompt, and leaving it set everywhere makes Oh My Zsh set up a
-theme that oh-my-posh then overwrites. `oh-my-posh init zsh` reads `transient_prompt` from the
-config and installs its zle hook itself, so no extra zsh code is needed for the transient prompt.
+`ZSH_THEME` is empty, because oh-my-posh now draws the prompt in every terminal, Terminal.app
+included. Leaving an Oh My Zsh theme set makes both set up a prompt, and oh-my-posh's overwrites
+the other. `oh-my-posh init zsh` reads `transient_prompt` from the config and installs its zle
+hook itself, so no extra zsh code is needed for the transient prompt.

@@ -8,8 +8,9 @@ into wherever that tool reads its config. So far there is one:
 
 ## Shell prompt (oh-my-posh)
 
-My terminal prompt: powerlevel10k's two-line "classic" layout, rebuilt as an
-[oh-my-posh](https://ohmyposh.dev/) theme. I moved because p10k is no longer getting new features
+My terminal prompt, `gaurav-custom` (a working name until it settles), as an
+[oh-my-posh](https://ohmyposh.dev/) theme. It started as powerlevel10k's two-line "classic" layout
+and is being tweaked from there. I moved because p10k is no longer getting new features
 and is hard to configure by hand, while oh-my-posh is one JSON file. The
 [Preferences](#preferences) section describes the prompt without any oh-my-posh syntax, so it can
 be rebuilt in p10k or in whatever tool comes next.
@@ -19,7 +20,7 @@ be rebuilt in p10k or in whatever tool comes next.
 ╰─ ❯
 ```
 
-It's not used on every machine. Where Terminal.app with p10k already works, it stays.
+It's not used on every machine yet. Machines where p10k already works keep it for now.
 
 ### Install
 
@@ -28,30 +29,23 @@ brew install jandedobbeleer/oh-my-posh/oh-my-posh
 ln -s ~/Developer/llming/settings/oh-my-posh ~/.config/oh-my-posh
 ```
 
-Then in `~/.zshrc`, after the `ZSH_THEME=` line and before Oh My Zsh is sourced:
+Then in `~/.zshrc`, set `ZSH_THEME=""` so Oh My Zsh doesn't draw a prompt of its own, and add
+this at the end:
 
 ```zsh
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-  ZSH_THEME=""
-fi
-```
-
-and at the end:
-
-```zsh
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-  eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/p10k-classic.omp.json)"
-fi
+eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/gaurav-custom.omp.json)"
 ```
 
 Open a new tab to see it. Editing the JSON takes effect at the next prompt, with no reload needed.
-The glyphs need a [Nerd Font](https://www.nerdfonts.com/). Ghostty has the symbols built in; other
-terminals need one set as their font (`brew install --cask font-meslo-lg-nerd-font`).
+The glyphs need a [Nerd Font](https://www.nerdfonts.com/). Ghostty has the symbols built in.
+Terminal.app needs one set as the profile's font (I use MesloLGS Nerd Font:
+`brew install --cask font-meslo-lg-nerd-font`).
 
 ### Known issues
 
-- **Terminal.app is left out on purpose.** It has no 24-bit colour, so the hex colours come out
-  wrong. It keeps the Oh My Zsh `robbyrussell` theme (or p10k, on machines that have it).
+- **The colours need a 24-bit colour terminal.** Ghostty is one. Older versions of Terminal.app
+  aren't, and there the hex colours come out approximated. If the grey-blue bar looks wrong in
+  Terminal.app, check with `printf '\e[48;2;84;110;122m  #546E7A  \e[0m\n'`.
 - **No instant prompt or background git status.** p10k draws a cached prompt before `.zshrc` has
   finished loading, and gets git status from a background daemon. oh-my-posh does neither: it runs
   `git status` before every prompt. That's quick in the repos I use, but it might not be in a huge
