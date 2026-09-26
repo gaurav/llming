@@ -2,11 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "version": 4,
   "final_space": true,
+  "enable_cursor_positioning": true,
   "console_title_template": "{{ .Folder }}",
   "blocks": [
     {
       "type": "prompt",
       "alignment": "left",
+      "newline": true,
       "segments": [
         {
           "type": "text",
@@ -71,7 +73,7 @@
           "type": "executiontime",
           "style": "plain",
           "background": "#263238",
-          "foreground": "#B0BEC5",
+          "foreground": "#E1BEE7",
           "foreground_templates": [
             "{{ if ge .Ms 3000 }}#FFD54F{{ end }}"
           ],

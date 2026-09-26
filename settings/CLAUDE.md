@@ -23,6 +23,17 @@ env -u POSH_SESSION_ID oh-my-posh print transient --config "$C" --shell zsh --pl
 as text. A JSON syntax error doesn't fail: it exits 0 and renders the default theme with a
 `CONFIG PARSE ERROR` segment, which is easy to miss in a real terminal.
 
+`print` can't show how prompts behave over time: the transient collapse, the blank line, the
+cursor-position query. To check those without a human at a terminal, run `zsh -i` under Python's
+`pty.fork()` and feed its output into a `pyte` screen (pip-install `pyte` into a throwaway venv).
+Answer the query by setting `screen.write_process_input` to write back to the pty. Type commands
+with `os.write(fd, b"cmd\r")`, wait a few seconds, and print `screen.display`.
+
+The blank line comes from `"newline": true` on the first block. `enable_cursor_positioning` keeps it
+off the top of a fresh window. It asks the terminal where the cursor is, and skips the newline in
+column 0 of row 0. The transient prompt redraws from the start of the prompt, so the blank line
+goes with it.
+
 ### Editing the JSON
 
 - **Keep glyphs as `\uXXXX` escapes.** Nerd Font icons are private-use code points that most

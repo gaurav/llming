@@ -67,6 +67,9 @@ Terminal.app needs one set as the profile's font (I use MesloLGS Nerd Font:
 
 These are what to reproduce, whatever the tool.
 
+**A blank line** comes before the prompt, separating it from the last command's output. It goes
+when the prompt collapses (see *Transient prompt*), and a new window doesn't start with one.
+
 **Line 1, left**, opening with a `╭─` frame:
 
 1. A lightning bolt, only when running as root.
@@ -87,7 +90,8 @@ frame.
 **Line 1, right**, from left to right:
 
 1. How long the previous command took, which is always shown instead of a clock. A quick command
-   shows just a dim duration (`450ms`). One taking **3 seconds or more** shows in amber, with its
+   shows just the duration (`450ms`) in lavender, the one hue not used elsewhere, since grey was
+   hard to read. One taking **3 seconds or more** shows in amber, with its
    finish time: `took 2m 10s, finished 2:03:43am`.
 2. `✘ n`, the exit code, only after a failed command.
 3. The Python, Node or Java version, only inside a project in that language, with no virtualenv
@@ -101,9 +105,9 @@ orange, a colour used nowhere else so the live prompt stands out, and red after 
 The cursor goes after it.
 
 **Transient prompt**: once a command runs, its two-line prompt collapses to just `▶ command` in
-muted green (muted red if it failed). The scrollback holds commands and output rather than repeated
-status lines, and only the live prompt is bright, while the colour still makes old prompts easy to
-find.
+muted green (muted red if it failed). The blank line before it goes too. The scrollback holds
+commands and output rather than repeated status lines, and only the live prompt is bright, while the
+colour still makes old prompts easy to find.
 
 **Colours**:
 
@@ -119,7 +123,7 @@ Text on the bar is at least 7:1 contrast against it (the red exit code 5.8:1, th
 | white      | `#FFFFFF` | current folder, `user@host`                              |
 | green      | `#AED581` | clean git branch, staged count                           |
 | amber      | `#FFD54F` | changed git branch, unstaged count, slow duration, root  |
-| light grey | `#B0BEC5` | quick duration                                           |
+| lavender   | `#E1BEE7` | quick duration                                           |
 | light blue | `#B3E5FC` | untracked count                                          |
 | red        | `#FF8A80` | exit code                                                |
 | orange     | `#FFA726` | live `▶`                                                 |
