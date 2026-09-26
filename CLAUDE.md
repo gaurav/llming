@@ -102,8 +102,10 @@ installed by symlinking that subdirectory into wherever the tool reads from
 (`ln -s ~/Developer/llming/settings/oh-my-posh ~/.config/oh-my-posh`), the same way skills are.
 Like skills, settings have no CLI, `data/` directory, or run log.
 
-`settings/` has one `README.md`/`CLAUDE.md` pair, with a section per tool, like
-`skills/README.md`. The README is written so each setup can be recreated **without** the config
-file. Not every machine uses the same tools, so the README records the preferences themselves in
-plain words. The config file is one way of expressing those preferences. Edits to a machine's
-startup files (`~/.zshrc`) are not committed: the README shows the lines to add instead.
+`settings/` has one `README.md`/`CLAUDE.md` pair, with a section per tool, like `skills/README.md`.
+A tool with more to say can have its own `README.md` in its subdirectory instead (`settings/vim/`),
+and `settings/README.md` then just lists it with a link. The README is written so each setup can be
+recreated **without** the config file. Not every machine uses the same tools, so the README records
+the preferences themselves in plain words. The config file is one way of expressing those
+preferences. Edits to a machine's startup files (`~/.zshrc`) are not committed: the README shows the
+lines to add instead.

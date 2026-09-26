@@ -3,10 +3,14 @@
 Settings for the tools I use, kept here so a setup that works on one machine can be recreated on
 another. Each tool's config files live in a subdirectory named after the tool, which is symlinked
 into wherever that tool reads its config (or imported, for tools like Terminal.app that can't
-read a file in place). So far there are two:
+read a file in place). So far there are three:
 
 - [`oh-my-posh/`](#shell-prompt-oh-my-posh): my zsh prompt.
 - [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
+- [`vim/`](vim/README.md): my Vim setup, with syntax highlighting in the terminal's colours.
+
+The first two are described in sections below. Vim has its own `README.md` in its directory, which
+covers installing it and the colour schemes that can be added.
 
 ## Shell prompt (oh-my-posh)
 

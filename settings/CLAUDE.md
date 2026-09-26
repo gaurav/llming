@@ -133,3 +133,12 @@ To make a new profile from an existing one without quitting Terminal:
    the bytes change but the values don't.
 
 That's how `Tokyo Night Darker` was made from `Solarized Darker`.
+
+## Vim
+
+`~/.vim` is a symlink to `vim/`, so anything Vim writes into `~/.vim` lands in the repo. `pack/`
+(cloned plugins) and `.netrwhist` (the file browser's history) are gitignored for that reason.
+Check `git status` for anything new after installing a plugin.
+
+`~/.vim/vimrc` is only read when `~/.vimrc` doesn't exist. If an edit to `vim/vimrc` has no
+effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim loaded.

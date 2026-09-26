@@ -211,3 +211,8 @@ __marimo__/
 
 # macOS
 .DS_Store
+
+# Vim packages are cloned into settings/vim/pack/ on each machine, not committed. See
+# settings/vim/README.md.
+settings/vim/pack/
+settings/vim/.netrwhist
