@@ -29,9 +29,9 @@ Two settings are deliberate and worth knowing before you fight them:
 
 **Read the diff after `--fix`: it can break a paragraph without complaint.** rumdl reads a wrapped
 line that happens to start with `#` — an issue reference, say — as a heading, although CommonMark
-needs a space after the `#`. `--fix` then "repairs" it into a real one, splitting the sentence around
-a new `## N` heading, and a clean re-check hides that anything happened. Reword the sentence so the
-`#` falls mid-line.
+needs a space after the `#`. `--fix` then "repairs" it into a real one, splitting the sentence
+around a new `## N` heading, and a clean re-check hides that anything happened. Reword the sentence
+so the `#` falls mid-line.
 
 ## README.md and CLAUDE.md
 
