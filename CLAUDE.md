@@ -78,6 +78,20 @@ the directory is linked. Symlinking the `SKILL.md` alone appears to work and the
 a skill has anything beside it — the prose arrives, the rest of the directory doesn't, and the
 skill's own relative paths resolve to nothing on the machine that needs them.
 
+The symlinks point into this working tree, so **the checked-out branch decides which skills are
+live**, in every session on the machine and not just ones in this repo. Check out a feature branch
+and its half-edited `SKILL.md` is what every agent runs. Check out a branch that predates a skill
+and that skill's symlink dangles: the skill drops out of the listing without an error, and comes
+back when the branch does. That is handy for trying a skill before it merges, and it is a trap for
+anything that measures whether a skill fires — a session run while the skill was absent looks
+exactly like one where it failed to trigger. Leave this checkout on the branch you want live, and
+do unrelated branch work in a `git worktree`.
+
+One symlink per skill, because discovery is one level deep: the loader globs
+`~/.claude/skills/*/SKILL.md`, so a directory grouping several skills together is not found and
+says nothing about it. Bundling them into one installable unit is a plugin's job — see #32 for the
+layout and for when it becomes worth doing.
+
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
 Python helper in `skills/copilot-review/`, and `npx prettier --prose-wrap never` replaced a
