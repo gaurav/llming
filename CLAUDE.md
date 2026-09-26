@@ -29,6 +29,12 @@ Two settings are deliberate and worth knowing before you fight them:
 - **MD041 is off.** It wants every file to open with a level-1 heading; a `CLAUDE.md` or `SKILL.md`
   opens with instructions rather than a title, so the rule never applies here.
 
+**Read the diff after `--fix`: it can break a paragraph without complaint.** rumdl reads a wrapped
+line that happens to start with `#` — an issue reference, say — as a heading, although CommonMark
+needs a space after the `#`. `--fix` then "repairs" it into a real one, splitting the sentence
+around a new `## N` heading, and a clean re-check hides that anything happened. Reword the sentence
+so the `#` falls mid-line.
+
 ## README.md and CLAUDE.md
 
 Each kind of thing here is documented by a pair of files, and the split between them is the same
@@ -79,6 +85,20 @@ Editing through either path is the same file, so a change made on one machine is
 the directory is linked. Symlinking the `SKILL.md` alone appears to work and then fails the moment
 a skill has anything beside it — the prose arrives, the rest of the directory doesn't, and the
 skill's own relative paths resolve to nothing on the machine that needs them.
+
+The symlinks point into this working tree, so **the checked-out branch decides which skills are
+live**, in every session on the machine and not just ones in this repo. Check out a feature branch
+and its half-edited `SKILL.md` is what every agent runs. Check out a branch that predates a skill
+and that skill's symlink dangles: the skill drops out of the listing without an error, and comes
+back when the branch does. That is handy for trying a skill before it merges, and it is a trap for
+anything that measures whether a skill fires — a session run while the skill was absent looks
+exactly like one where it failed to trigger. Leave this checkout on the branch you want live, and
+do unrelated branch work in a `git worktree`.
+
+One symlink per skill, because discovery is one level deep: the loader globs
+`~/.claude/skills/*/SKILL.md`, so a directory grouping several skills together is not found and
+says nothing about it. Bundling them into one installable unit is a plugin's job — see #32 for the
+layout and for when it becomes worth doing.
 
 Prefer a skill that is only `SKILL.md`. Before adding a helper script, check whether an existing
 tool already does the job — `gh api graphql --paginate` with a `--jq` filter replaced a 95-line
