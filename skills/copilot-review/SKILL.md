@@ -84,9 +84,8 @@ flagged, where, and in which change. So the body carries all of it, not a summar
   and `orig_line` in Step 2. Not the branch, which moves, and not its head either — an outdated
   thread's lines are by definition no longer where the head has them, so a head permalink points at
   unrelated code, which is worse than no link. A suppressed comment has no thread to take a commit
-  from: use the head as of filing
-  (`gh pr view "$PR" --repo "$OWNER/$REPO" --json headRefOid -q .headRefOid`), and file it before
-  Step 4 pushes fixes, or the sha will show the fixed code rather than what was flagged;
+  from: use the `commit_id` of the review it came from in Step 2b, for the same reason — it may
+  predate later pushes;
 - **the code fragment itself, in a fenced block.** A permalink only renders as code inside its own
   repository, so paste the lines as well;
 - what Copilot claimed, what you found when you checked it, and why it didn't fit this PR.
@@ -190,7 +189,7 @@ comments live in the review body's `<details>` blocks, so read the bodies:
 ```bash
 gh api --paginate "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
   --jq '.[] | select((.user.login // "") | ascii_downcase | startswith("copilot"))
-        | "=== \(.submitted_at) ===\n\(.body)"'
+        | "=== \(.submitted_at) \(.commit_id) ===\n\(.body)"'
 ```
 
 Don't trim that command: reviews page **oldest first**, and an unguarded `.user.login` errors on a
@@ -199,7 +198,9 @@ deleted account. Both failures print nothing, which reads exactly like "no suppr
 Copilot labels these blocks inconsistently — `Comments suppressed due to low confidence (N)` and
 `Suppressed comments (N)` are both current — so scan for `<summary>` lines containing *suppressed*
 rather than matching one exact heading. Each entry gives a `path:line` and a quoted code snippet;
-that is enough to find the code, and there is no thread id to carry forward.
+that is enough to find the code, and there is no thread id to carry forward. Carry the review's
+`commit_id` with each one instead: it is the commit Copilot read, which a deferred issue's permalink
+needs.
 
 - **Later reviews supersede earlier ones.** Copilot re-reviews on each push, so a suppressed comment
   from the first review may already be fixed. Check the *current* file before acting, exactly as
