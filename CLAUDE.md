@@ -27,6 +27,12 @@ Two settings are deliberate and worth knowing before you fight them:
 - **MD041 is off.** It wants every file to open with a level-1 heading; a `CLAUDE.md` or `SKILL.md`
   opens with instructions rather than a title, so the rule never applies here.
 
+**Read the diff after `--fix`: it can break a paragraph without complaint.** rumdl reads a wrapped
+line that happens to start with `#` — an issue reference, say — as a heading, although CommonMark
+needs a space after the `#`. `--fix` then "repairs" it into a real one, splitting the sentence
+around a new `## N` heading, and a clean re-check hides that anything happened. Reword the sentence
+so the `#` falls mid-line.
+
 ## README.md and CLAUDE.md
 
 Both kinds of thing here are documented by a pair of files, and the split between them is the same

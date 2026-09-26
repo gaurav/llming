@@ -222,11 +222,17 @@ a property of *my* reader and not of GitHub, in case the tool changes and the ru
 
 Three things in the old body are treated as stale until checked, because a skill designed to run
 repeatedly will otherwise re-assert them forever, each run's confidence borrowed from the one
-before. **Numbers:** anything a reader could recount from the diff gets approximated, and the ones
-that *are* the claim — test results, benchmarks, versions — say where and at which commit they were
-measured, so the next run can notice they predate three commits. **Cross-references:** every `#N`
-gets re-checked, after a paragraph on how two other PRs related to this one survived several rounds
-past both merging. **Claims about the code:** a description saying a validator "now runs on every
+before. **Numbers:** anything a reader could recount gets approximated, and the ones that *are* the
+claim — test outcomes, benchmarks, versions — say where and at which commit they were measured, so
+the next run can notice they predate three commits. Test counts are in the first group: knowing the
+suite has exactly 221 tests, or that a PR added 33, was almost never useful, and keeping the figure
+exact was a steady source of churn. Only a failure or a skip is worth an exact number.
+**Cross-references:** every `#N` gets re-checked, after a paragraph on how two other PRs related to
+this one survived several rounds past both merging — unless the round was too small to change the
+body, because a lookup per reference on every small run was mostly wasted and I'd rather accept the
+odd issue going stale unnoticed. The exception is a reference whose state the body asserts, such as
+"stacked on #33": that changes when other work lands, not when this PR does, so a quiet PR says
+nothing about it. **Claims about the code:** a description saying a validator "now runs on every
 `.base` file" was written from intent, and a review found it walking half of them. Nothing in the
 diff flags a sentence like that, so each load-bearing claim is confirmed against the code as it
 stands or cut down to what can be.
@@ -235,6 +241,21 @@ The checkbox pass is the part I'd have skipped by hand. TODO lists in a descript
 directions — items ticked off that got reverted later, items never added because they surfaced
 after the description was written — and the skill forces a decision on each one: do it here, drop
 it, or file it.
+
+A ticked box is the part that took a second look. There are two kinds of checkbox in my
+descriptions — to-dos the PR owes before merging, and readiness checks that show it can merge — and
+`- [x]` is the wrong final form for both. A description states the final state, and a ticked box is
+a piece of the PR's history left standing in it. So the skill dissolves every one: a finished to-do
+is just part of the change and gets described, or not, like the rest of it; a finished readiness
+check becomes a verification record, in the description and, where the repo has a place for one, in
+a changelog line or an SOP, because "this kind of change was checked by these people" is worth more
+to the next release than to this PR. Open items stay `- [ ]`, since that list is what
+`copilot-review`, `wrap` and prcoder all write to.
+
+Two rules hold that together. The agent never ticks a box: its own work goes straight to prose, so
+a tick only ever means a person said so. And for a sign-off only a person can give, it asks me who
+and when rather than inferring it — I checked whether the body's edit history could answer that, and
+it cannot, because every edit made through my `gh` login is recorded as mine, the agent's included.
 
 The hard-wrapping rule is the one an agent breaks by reflex, because everything else it reads is
 wrapped at 80 columns and GitHub turns each of those newlines into a line break. The skill says
