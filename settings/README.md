@@ -2,9 +2,11 @@
 
 Settings for the tools I use, kept here so a setup that works on one machine can be recreated on
 another. Each tool's config files live in a subdirectory named after the tool, which is symlinked
-into wherever that tool reads its config. So far there is one:
+into wherever that tool reads its config (or imported, for tools like Terminal.app that can't
+read a file in place). So far there are two:
 
 - [`oh-my-posh/`](#shell-prompt-oh-my-posh): my zsh prompt.
+- [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
 
 ## Shell prompt (oh-my-posh)
 
@@ -131,3 +133,33 @@ the scrollback holds commands and output rather than repeated status lines.
 - Bring over the `~/.p10k.zsh` from the Terminal.app machines, so both versions sit side by side.
 - Once a JDK or a Python version manager is installed, check that the Java and Python segments
   report the right versions.
+
+## Terminal.app profile
+
+`terminal-app/Solarized Darker.terminal` is the Terminal.app profile I use with the prompt above:
+Solarized colours on a black background, with MesloLGM Nerd Font 12 pt so the prompt's icons
+render. The window opens at 120×32, because line 1 of the prompt hides its right side when it
+doesn't fit, which happened often at the default 80 columns. Inactive windows turn slightly
+see-through and blurred.
+
+### Install
+
+Install MesloLGM Nerd Font (`brew install --cask font-meslo-lg-nerd-font`), then double-click the
+`.terminal` file. Terminal imports it and opens a window with it. To make it the default, go to
+Terminal ▸ Settings ▸ Profiles, select it, and click **Default**.
+
+### Known issues
+
+- **Colours in the prompt look slightly darker than their hex values**, e.g. `#546E7A` measured
+  as RGB(72, 99, 110). It's still the same hue, so it isn't the 256-colour fallback. It's most
+  likely macOS colour management or the inactive-window transparency.
+- **Bright black is almost invisible.** In Solarized, "bright black" is the background tone
+  (`#04202A` here), which is meant for a Solarized background, not black. Anything drawn in it
+  (some `git` output, zsh autosuggestions if I add them) nearly vanishes.
+- **The selection colour is dark teal on black** and hard to see.
+
+### Next steps
+
+- Lighten bright black and the selection colour. Neither can be set through AppleScript, so it has
+  to be done in Terminal ▸ Settings, then re-exported (see `CLAUDE.md`).
+- Rename the profile if it drifts far from Solarized Darker.

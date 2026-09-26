@@ -72,3 +72,31 @@ as text. A JSON syntax error doesn't fail: it exits 0 and renders the default th
 included. Leaving an Oh My Zsh theme set makes both set up a prompt, and oh-my-posh's overwrites
 the other. `oh-my-posh init zsh` reads `transient_prompt` from the config and installs its zle
 hook itself, so no extra zsh code is needed for the transient prompt.
+
+## Terminal.app
+
+The profile lives in `~/Library/Preferences/com.apple.Terminal.plist` under `Window Settings`.
+The `.terminal` file here is that one dictionary, extracted as it is:
+
+```bash
+plutil -extract "Window Settings.Solarized Darker" xml1 \
+  -o "terminal-app/Solarized Darker.terminal" ~/Library/Preferences/com.apple.Terminal.plist
+```
+
+Re-export after every change and commit it. Colours and the font are keyed archives stored as
+base64 `<data>`, so a diff of the file shows nothing readable. To see what changed, decode it with
+`plistlib`: each colour's archive has an `NSRGB` string of 0–1 floats.
+
+**Change the profile through AppleScript while Terminal is running**, not by editing the plist
+behind its back. Terminal keeps its profiles in memory and may write them back over the edit.
+AppleScript changes save straight away:
+
+```bash
+osascript -e 'tell application "Terminal"' \
+  -e 'set number of columns of settings set "Solarized Darker" to 120' -e 'end tell'
+```
+
+The scriptable properties are the window size, font name and size, antialiasing, and the cursor,
+background, normal text and bold text colours (as 16-bit `{r, g, b}`). **The 16 ANSI colours and
+the selection colour are not scriptable.** Change those in Terminal ▸ Settings, or quit Terminal
+first and then edit the plist.
