@@ -21,22 +21,15 @@ gh api "repos/<owner>/<repo>/milestones?state=open" --paginate \
 
 ## Buckets
 
-The authoritative list lives in the `gaurav/milestones` repository:
+The buckets, what each one means, and the rules for them live in `MILESTONES.md` in the
+`gaurav/milestones` repository. Read it before putting an issue in a bucket or touching a bucket
+milestone:
 
 ```bash
 gh api repos/gaurav/milestones/contents/MILESTONES.md --jq .content | base64 -d
 ```
 
-A 404 means the file hasn't been written yet; use this list until it has, and prefer the file
-wherever the two disagree.
-
-- **Critical** — must go into the next release. The only bucket that isn't for setting aside.
-- **Needed soon**, **Needed later**, **Not urgent** — work that can be put aside for now, in
-  descending order of how soon it comes back.
-- **Upstream** — issues to finalize here and then send on to an upstream data or code source.
-
-Buckets are undated. The exception is a date added for urgency — a deadline for contacting an
-upstream source, say — which comes off again once the urgency has passed.
+If it can't be fetched, say so and leave buckets alone rather than working from the names.
 
 ## Release and deadline milestones
 

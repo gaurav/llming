@@ -116,10 +116,10 @@ also records the default that a milestone is a release: its issues get built, pu
 GitHub release, and then the milestone is closed. That holds unless a repository says it uses a
 Project instead.
 
-The canonical bucket list will live in `MILESTONES.md` in
+The canonical bucket list lives in `MILESTONES.md` in
 [gaurav/milestones](https://github.com/gaurav/milestones), the tool I'm building to keep on top of
-all this. The skill reads it from there and keeps its own copy of the list as a fallback until that
-file exists. Once it does, the copy in the skill should shrink to a pointer.
+all this. The skill points there rather than keeping its own copy, so a change to the buckets is
+made once.
 
 Two restraints matter more than the scheme itself. First, an agent shouldn't milestone an issue
 unless the milestone is obvious. My triage picks up anything without a milestone, and a guessed
