@@ -120,3 +120,16 @@ and round-trip the whole domain through `defaults`: `defaults export com.apple.T
 edit the colour archive's `NSRGB` string with `plistlib`, then `defaults import com.apple.Terminal
 x.plist`. That goes through the preferences daemon (`cfprefsd`), whereas writing
 `~/Library/Preferences/com.apple.Terminal.plist` directly can be undone by its cached copy.
+
+To make a new profile from an existing one without quitting Terminal:
+
+1. Copy the `.terminal` dict in Python.
+2. Swap colours by cloning an existing colour archive and replacing its `NSRGB` string.
+3. Change `name`.
+4. `open` the file. Terminal imports it (and opens a window with it).
+5. Make it the default with AppleScript
+   (`set default settings to settings set "…"`, and the same for `startup settings`).
+6. Re-export Terminal's stored copy over the file. Terminal re-encodes the archives on import, so
+   the bytes change but the values don't.
+
+That's how `Tokyo Night Darker` was made from `Solarized Darker`.

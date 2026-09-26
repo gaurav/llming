@@ -40,7 +40,7 @@ eval "$(oh-my-posh init zsh --config ~/.config/oh-my-posh/gaurav-custom.omp.json
 
 Open a new tab to see it. Editing the JSON takes effect at the next prompt, with no reload needed.
 The glyphs need a [Nerd Font](https://www.nerdfonts.com/). Ghostty has the symbols built in.
-Terminal.app needs one set as the profile's font (I use MesloLGS Nerd Font:
+Terminal.app needs one set as the profile's font (I use MesloLGM Nerd Font:
 `brew install --cask font-meslo-lg-nerd-font`).
 
 ### Known issues
@@ -150,7 +150,17 @@ compared.
 
 ## Terminal.app profile
 
-`terminal-app/Solarized Darker.terminal` is the Terminal.app profile I use with the prompt above:
+`terminal-app/Tokyo Night Darker.terminal` is the Terminal.app profile I use, and the default. Its
+16 colours match the prompt's default *tokyo-night* palette, so `ls`, `git diff` and the like look
+consistent with the prompt. The colours come from
+[tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" terminal colours, on a
+black background. As with Solarized below, bright black is changed: Tokyo Night's `#414868`
+nearly vanishes on black, so it uses the comment grey `#565F89` instead. The selection is
+`#33467C`, and text and cursor are `#C0CAF5`. Everything else (font, size, transparency) is
+copied from Solarized Darker.
+
+`terminal-app/Solarized Darker.terminal` was the first profile I used with the prompt, and is kept
+as a fallback:
 Solarized colours on a black background, with MesloLGM Nerd Font 12 pt so the prompt's icons
 render. Two colours differ from stock Solarized, because it assumes its own dark blue background
 rather than black. Bright black is Solarized's base01 grey (`#586E75`) instead of the background
@@ -168,7 +178,7 @@ as a fallback. Solarized Darker differs from it in:
 
 ### Install
 
-Install MesloLGM Nerd Font (`brew install --cask font-meslo-lg-nerd-font`), then double-click the
+Install MesloLGM Nerd Font (`brew install --cask font-meslo-lg-nerd-font`), then double-click a
 `.terminal` file. Terminal imports it and opens a window with it. To make it the default, go to
 Terminal ▸ Settings ▸ Profiles, select it, and click **Default**.
 
