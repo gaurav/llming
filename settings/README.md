@@ -153,32 +153,29 @@ compared.
 
 ## Terminal.app profile
 
-`terminal-app/Tokyo Night Darker.terminal` is the Terminal.app profile I use, and the default. Its
-16 colours match the prompt's default *tokyo-night* palette, so `ls`, `git diff` and the like look
-consistent with the prompt. The colours come from
-[tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" terminal colours, on a black
-background. As with Solarized below, bright black is changed: Tokyo Night's `#414868` nearly
-vanishes on black, so it uses the comment grey `#565F89` instead. The selection is `#33467C`. Text
-is neutral light grey (`#D0D0D0`, bold white), not Tokyo Night's lavender `#C0CAF5`, which tinted
-everything blue and was harder to read. Only the accents are coloured. Everything else (font, size,
-transparency) is copied from Solarized Darker.
-
-`terminal-app/Solarized Darker.terminal` was the first profile I used with the prompt, and is kept
-as a fallback:
+`terminal-app/Solarized Darker.terminal` is the Terminal.app profile I use, and the default:
 Solarized colours on a black background, with MesloLGM Nerd Font 12 pt so the prompt's icons
-render. Two colours differ from stock Solarized, because it assumes its own dark blue background
-rather than black. Bright black is Solarized's base01 grey (`#586E75`) instead of the background
-tone, which vanished on black. The selection is a lighter teal (`#2E4F5A`) so selected text
-stands out. The window opens at 120×32, because line 1 of the prompt hides its right side when it
-doesn't fit, which happened often at the default 80 columns. Inactive windows turn slightly
-see-through and blurred.
+render. What I like about it is that text stays neutral grey, and colour only appears where it
+means something (red executables, cyan directories, and so on). Two colours differ from stock
+Solarized, because it assumes its own dark blue background rather than black. Bright black is
+Solarized's base01 grey (`#586E75`) instead of the background tone, which vanished on black. The
+selection is a lighter teal (`#2E4F5A`) so selected text stands out. The window opens at 120×32,
+because line 1 of the prompt hides its right side when it doesn't fit, which happened often at the
+default 80 columns. Inactive windows turn slightly see-through and blurred.
 
-`terminal-app/Solarized Dark.terminal` is the profile it was derived from, kept for comparison and
-as a fallback. Solarized Darker differs from it in:
+`terminal-app/Solarized Dark.terminal` is the profile it was derived from, kept for comparison.
+Solarized Darker differs from it in:
 
 - the black background, replacing Solarized's `#042029`
 - inactive windows at 70% opacity, not 50%
 - the window size, cursor, bright black and selection colours described above
+
+`terminal-app/Tokyo Night Darker.terminal` was tried as a match for the prompt's *tokyo-night*
+palette, and Solarized Darker won. It uses
+[tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" colours on black.
+Tokyo Night's lavender text (`#C0CAF5`) tinted everything blue and was harder to read. Even with
+that changed to neutral grey (`#D0D0D0`), Solarized Darker was preferred. It also changes bright
+black (`#565F89`) and the selection (`#33467C`). Everything else is copied from Solarized Darker.
 
 ### Install
 
@@ -194,6 +191,7 @@ Terminal ▸ Settings ▸ Profiles, select it, and click **Default**.
 
 ### Next steps
 
-- Decide whether to keep the Solarized profiles now that Tokyo Night Darker is the default.
-- Give Tokyo Night Darker a better name if it drifts from Tokyo Night. If I switch prompt palette,
-  make a matching Terminal profile the same way (see `CLAUDE.md`).
+- Decide whether to keep Tokyo Night Darker and Solarized Dark, now that Solarized Darker is the
+  default again.
+- Consider a *solarized* prompt palette, so the prompt matches the terminal the way *tokyo-night*
+  was meant to.
