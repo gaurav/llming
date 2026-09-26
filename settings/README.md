@@ -16,8 +16,8 @@ and is hard to configure by hand, while oh-my-posh is one JSON file. The
 be rebuilt in p10k or in whatever tool comes next.
 
 ```text
-╭─  ~/Developer/llming   main ⇡1 +1 !2 ?1 ··················· ✘ 1  4s   14:02:11  ─╮
-╰─ ❯
+╭─ ~/D/llming/settings   main ⇡1 +1 !2 ?1 ······ took 2m 10s, finished 2:03:43am   ✘ 1   3.9.6 ─╮
+╰─ ▸
 ```
 
 It's not used on every machine yet. Machines where p10k already works keep it for now.
@@ -51,7 +51,14 @@ Terminal.app needs one set as the profile's font (I use MesloLGS Nerd Font:
   `git status` before every prompt. That's quick in the repos I use, but it might not be in a huge
   one. The fix is the top-level `"async": true`, which draws the prompt at once and fills in
   slow segments afterwards.
-- **Durations are rounded.** A command that takes 3600.5 s shows as `1h`.
+- **The Python version can be the wrong one in uv projects.** The segment asks pyenv, then
+  whichever `python3` is on the `PATH`. It never looks at a project's `.venv`, so a uv project
+  pinned to another Python shows the system version instead.
+- **The Java segment is untested.** There is no JDK on this machine yet, and macOS's
+  `/usr/bin/java` placeholder may pop up an "install Java" dialog when the prompt runs it. That
+  only happens in a folder with Java files.
+- **On a narrow window, line 1's right side disappears** when it doesn't fit beside the left side.
+  The red `▸` still shows that a command failed.
 - **Testing changes from a shell that already runs oh-my-posh** needs care: see `CLAUDE.md`.
 
 ### Preferences
@@ -60,54 +67,67 @@ These are what to reproduce, whatever the tool.
 
 **Line 1, left**, opening with a `╭─` frame:
 
-1. The OS icon.
-2. A lightning bolt, only when running as root.
-3. The full current path, with `~` for home.
-4. Git: branch, then `⇣n` behind / `⇡n` ahead, `*n` stashes, `+n` staged, `!n` unstaged, `?n`
-   untracked. Each count is hidden when it is zero.
+1. A lightning bolt, only when running as root.
+2. The current path, with `~` for home. Past 30 columns, the leading folders shrink to their first
+   letter (`~/D/llming/settings/oh-my-posh`). The current folder is bold.
+3. Git: branch, then `⇣n` behind / `⇡n` ahead, `*n` stashes, `+n` staged, `!n` unstaged, `?n`
+   untracked. Each count is hidden when it is zero. The branch is green when the tree is clean and
+   amber when there are changes.
 
-The segments share one dark grey-blue background, divided by thin powerline separators (Nerd
-Font U+E0B1 on the left side, U+E0B3 on the right). The left group ends in a solid powerline
-arrow (U+E0B0), and the right group begins with its mirror image (U+E0B2).
+The segments share one dark slate background, divided by thin powerline separators (Nerd Font
+U+E0B1 on the left side, U+E0B3 on the right). The left group ends in a solid powerline arrow
+(U+E0B0), and the right group begins with its mirror image (U+E0B2).
 
-**The gap** between the two sides is filled with dots (`·`) in that same grey-blue.
+**The gap** between the two sides is filled with dots (`·`) in a lighter grey-blue, the same as the
+frame.
 
 **Line 1, right**, from left to right:
 
-1. `✘ n`, the exit code, only after a failed command.
-2. The previous command's duration, only if it took **3 seconds or more**. It uses the largest
-   units that fit: `4s`, `2m 5s`, `1h`.
-3. `user@host`, only over SSH or as root.
-4. A 24-hour `HH:MM:SS` clock.
+1. How long the previous command took, which is always shown instead of a clock. A quick command
+   shows just a dim duration (`450ms`). One taking **3 seconds or more** shows in amber, with its
+   finish time: `took 2m 10s, finished 2:03:43am`.
+2. `✘ n`, the exit code, only after a failed command.
+3. The Python, Node or Java version, only inside a project in that language, with no virtualenv
+   name.
+4. `user@host`, only over SSH or as root.
 
-A `─╮` frame closes the right side.
+A `─╮` frame closes the right side. If line 1 doesn't fit the window, the right side is hidden.
 
-**Line 2**: `╰─ ❯`. The `❯` is yellow-green, and red after a failed command. The cursor goes after
-it.
+**Line 2**: `╰─ ▸`, a small filled triangle (a full-height `❯` is too tall). It is green, and red
+after a failed command. The cursor goes after it.
 
-**Transient prompt**: once a command runs, its two-line prompt collapses to just `❯ command`, so
+**Transient prompt**: once a command runs, its two-line prompt collapses to just `▸ command`, so
 the scrollback holds commands and output rather than repeated status lines.
 
 **Colours**:
 
-| Colour               | Hex       | Used for                                                  |
-| -------------------- | --------- | --------------------------------------------------------- |
-| grey-blue            | `#546E7A` | segment background, frame, filler dots                    |
-| cyan                 | `#26C6DA` | OS icon, path, clock, separators                          |
-| yellow-green         | `#D4E157` | git branch and ahead/behind, `❯`, `user@host`             |
-| amber                | `#FFD54F` | staged and unstaged counts, duration, root bolt           |
-| light blue           | `#81D4FA` | untracked count                                           |
-| red                  | `#FF5252` | exit code, `❯` after a failure                            |
+| Colour     | Hex       | Used for                                                 |
+| ---------- | --------- | -------------------------------------------------------- |
+| slate      | `#37474F` | segment background                                       |
+| grey-blue  | `#546E7A` | frame, filler dots                                       |
+| grey       | `#78909C` | separators                                               |
+| soft cyan  | `#80DEEA` | path                                                     |
+| near-white | `#ECEFF1` | current folder, `user@host`                              |
+| green      | `#9CCC65` | clean git branch, staged count, `▸`                      |
+| amber      | `#FFD54F` | changed git branch, unstaged count, slow duration, root  |
+| dim grey   | `#90A4AE` | quick duration                                           |
+| light blue | `#81D4FA` | untracked count                                          |
+| red        | `#FF6E6E` | exit code, `▸` after a failure                           |
+| brand      | various   | Python `#FFE873`, Node `#8CC84B`, Java `#F89820`         |
 
-**In p10k**, `p10k configure` gets close with these choices: *Classic* style, *Unicode*, *Dark*
-colour, *24-hour* time, *Angled* separators, *Sharp* heads, *Flat* tails, *Two lines*, *Dotted*
-connection, *Full* frame, *Transient prompt: Yes*. The status segment and 3 s duration
-threshold are p10k's defaults already.
+**In p10k**, `p10k configure` gets the layout close with these choices: *Classic* style,
+*Unicode*, *Angled* separators, *Sharp* heads, *Flat* tails, *Two lines*, *Dotted* connection,
+*Full* frame, *Transient prompt: Yes*, and no time. The rest needs `~/.p10k.zsh` edits:
+
+- `POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=0` to always show the duration.
+- `POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='▸'` for the triangle.
+- `POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique` for path shortening. It is close to, but not
+  the same as, the first-letter shortening here.
+- The colours above.
 
 ### Next steps
 
-- Try path shortening. The `powerlevel` path style with a `max_width` (both are options on the
-  `path` segment) should truncate deep paths the way p10k does.
+- Find the theme a real name to replace `gaurav-custom`.
 - Bring over the `~/.p10k.zsh` from the Terminal.app machines, so both versions sit side by side.
-- Add language segments (Python virtualenv, Node version) to the right side if I miss them. p10k
-  shows these by default.
+- Once a JDK or a Python version manager is installed, check that the Java and Python segments
+  report the right versions.

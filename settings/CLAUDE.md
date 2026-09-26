@@ -45,13 +45,26 @@ as text. A JSON syntax error doesn't fail: it exits 0 and renders the default th
   arrows and frame drawn by `text` segments on a transparent background. Powerline style
   would put an arrow between every pair of segments. p10k classic uses thin separators within a
   group instead.
-- **On the right, each optional segment carries its own trailing `\ue0b3` separator**, and the
-  clock, which is always present, is last. That way a hidden segment never leaves a doubled or
-  dangling separator.
+- **On the right, `executiontime` is first and always renders** (`always_enabled`, threshold 0),
+  and every segment after it starts with its own leading `\ue0b3` separator. That way a hidden
+  segment never leaves a doubled or dangling separator. Anything placed before `executiontime`, or
+  a change that lets it hide, breaks this.
+- The "took …, finished …" wording is decided in the template (`if ge .Ms 3000`), not by the
+  segment's `threshold`. The finish time is sprig's `now`, which works inside any template, and
+  Go's `3:04:05pm` layout.
+- `executiontime` uses `"style": "austin"`: `450ms`, `4.2s`, `2m 10s`, `1h 2m 5s`. To compare
+  the other styles, render each one at a few `--execution-time` values. The names don't tell you
+  much.
 - `status` appears twice. On the right it has the default `always_enabled: false`, so it only
-  renders after a failure. On line 2 it has `always_enabled: true` and exists to colour the `❯`
+  renders after a failure. On line 2 it has `always_enabled: true` and exists to colour the `▸`
   through `foreground_templates`.
-- `executiontime` uses `"style": "round"` for p10k-like `4s` / `2m 5s`, and a 3000 ms `threshold`.
+- The right-aligned block has `"overflow": "hide"`. Without it, a line 1 that doesn't fit spills
+  the right side onto a wrapped line.
+- The path uses `"style": "powerlevel"` with `max_width` 30. `right_format` bolds and colours the
+  last folder. The `display_root` option is off, so outside `~`, the leading `/` is dropped
+  (`o/h/C/…`).
+- The language segments use `display_mode: files`, so they only run in project folders. Python has
+  `fetch_virtual_env: false`, because I don't want the venv name shown.
 
 ### Shell side
 
