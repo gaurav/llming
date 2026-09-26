@@ -142,3 +142,48 @@ Check `git status` for anything new after installing a plugin.
 
 `~/.vim/vimrc` is only read when `~/.vimrc` doesn't exist. If an edit to `vim/vimrc` has no
 effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim loaded.
+
+## Claude Code
+
+`~/.claude/statusline.sh` is a symlink to `claude-code/statusline.sh`, so edits through either path
+are the same file. Claude Code runs it after each message, passing a JSON payload on stdin.
+[The status line docs](https://code.claude.com/docs/en/statusline) list its fields; the ones used
+here are `workspace.current_dir`, `context_window.used_percentage` and `.total_input_tokens`,
+`rate_limits.{five_hour,seven_day}.{used_percentage,resets_at}` (`resets_at` in epoch seconds),
+`model.display_name` and `effort.level`.
+
+**Test with a fake payload**, not by waiting for Claude Code to redraw:
+
+```bash
+N=$(date +%s)
+jq -n --argjson now "$N" '{workspace: {current_dir: "'"$PWD"'"},
+  context_window: {used_percentage: 42, total_input_tokens: 84000},
+  rate_limits: {five_hour: {used_percentage: 4, resets_at: ($now + 13920)},
+                seven_day: {used_percentage: 20, resets_at: ($now + 277200)}},
+  model: {display_name: "Opus 5.5"}, effort: {level: "high"}}' \
+  | bash claude-code/statusline.sh | cat -v
+```
+
+`cat -v` shows the escape codes, which is the only way to check colours without a human looking.
+Strip them with `perl -pe 's/\e\[[0-9;]*m//g'` to read the text. For git states, make throwaway
+repos (a bare remote plus clones that are clean, dirty, ahead and behind) and point
+`current_dir` at each.
+
+The `statusline-setup` agent that `/statusline` launches has no shell, so it can't run the script.
+Test its edits from the main session.
+
+### Colours and glyphs
+
+- **Solarized's *bright* ANSI colours are mostly greys** (bright green, yellow and blue) or other
+  hues (bright red is orange, bright magenta is violet). Only bright white is a brighter version of
+  its base colour. Use 24-bit colour for a lighter tint instead.
+- **Don't brighten with bold.** The profile has `UseBrightBold` and `UseBoldFonts` off, so bold
+  does nothing visible in Terminal.app, and a terminal with bright-bold on would shift the hue.
+- **Check a glyph's vertical position before using it.** Many geometric shapes (`◆`, `●`, `■`,
+  `▰`) sit well below the middle of capital letters in Meslo. `♦`, `•` and `◦` are centred.
+  Measure with fontTools:
+  `uv run --with fonttools python` → load `~/Library/Fonts/MesloLGMNerdFont-Regular.ttf`, draw the
+  glyph into a `BoundsPen`, and compare its vertical centre with `H`'s. A glyph missing from the
+  font renders from a fallback font, at whatever size and height that font uses.
+- Keep glyphs as `$'\xNN'` byte escapes with the character named in a comment, as in the
+  oh-my-posh JSON.
