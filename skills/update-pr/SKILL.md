@@ -237,7 +237,11 @@ What follows from it being the always-visible part:
   one line at the end of the relevant paragraph: "This PR gathers several fixes to the queue pane.
   Closes #12. Closes #14." Repeat the keyword for every issue — GitHub only closes the issue
   directly after `Closes` / `Fixes` / `Resolves`, so "Closes #12, #14" leaves #14 open. A PR that
-  closes no issue just doesn't mention one — don't invent a reference to fill the slot.
+  closes no issue just doesn't mention one — don't invent a reference to fill the slot. The keyword
+  is also the *only* way this work closes an issue someone else wrote: the `github-issues` skill
+  rules out closing one directly, so an issue this PR resolves gets a keyword here, never a
+  `gh issue close`. It only fires if the PR merges into the default branch; for a PR based on
+  anything else, see that skill's *Closing an issue*.
 
 Cover, in the sections below it, in whatever structure suits the change:
 
@@ -390,8 +394,11 @@ raising directly — either it should be done now, or it wasn't really blocking.
 call, ask.
 
 Don't file issues unprompted: list the ones you'd file with a one-line summary each, and wait for
-the user to pick. That listing goes to the user in chat, not into the body. Once filed, replace the
-checkbox with a link to the issue so the description stays a complete account of what's outstanding.
+the user to pick. Check each against the existing issues first, the way the `github-issues` skill
+describes — one that is already tracked is a link rather than a new issue, and that skill says
+whether the existing issue may be edited to cover it or only commented on. That listing goes to the
+user in chat, not into the body. Once filed, replace the checkbox with a link to the issue so the
+description stays a complete account of what's outstanding.
 
 **A list of issues in the body is a link, not a list.** Past three or four, link the milestone or an
 issue search and name only the two or three a reviewer actually needs to know about. Summarising
