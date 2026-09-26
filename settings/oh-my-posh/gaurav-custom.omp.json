@@ -17,37 +17,40 @@
         {
           "type": "root",
           "style": "plain",
-          "background": "#546E7A",
+          "background": "#37474F",
           "foreground": "#FFD54F",
-          "template": " \uf0e7 <#26C6DA>\ue0b1</>"
+          "template": " \uf0e7 <#78909C>\ue0b1</>"
         },
         {
           "type": "path",
           "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#26C6DA",
+          "background": "#37474F",
+          "foreground": "#80DEEA",
           "options": {
             "style": "powerlevel",
             "max_width": 30,
             "home_icon": "~",
-            "right_format": "<b>%s</b>"
+            "right_format": "<b><#ECEFF1>%s</></b>"
           },
           "template": " {{ .Path }} "
         },
         {
           "type": "git",
           "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#D4E157",
+          "background": "#37474F",
+          "foreground": "#9CCC65",
           "options": {
             "branch_icon": "\ue0a0 "
           },
-          "template": "<#26C6DA>\ue0b1</> {{ .HEAD }}{{ if gt .Behind 0 }} \u21e3{{ .Behind }}{{ end }}{{ if gt .Ahead 0 }} \u21e1{{ .Ahead }}{{ end }}{{ if gt .StashCount 0 }} *{{ .StashCount }}{{ end }}{{ if .Staging.Changed }} <#FFD54F>+{{ add .Staging.Added .Staging.Modified .Staging.Deleted .Staging.Moved }}</>{{ end }}{{ if .Working.Changed }}{{ if gt (add .Working.Modified .Working.Deleted) 0 }} <#FFD54F>!{{ add .Working.Modified .Working.Deleted }}</>{{ end }}{{ if gt .Working.Untracked 0 }} <#81D4FA>?{{ .Working.Untracked }}</>{{ end }}{{ end }} "
+          "template": "<#78909C>\ue0b1</> {{ .HEAD }}{{ if gt .Behind 0 }} \u21e3{{ .Behind }}{{ end }}{{ if gt .Ahead 0 }} \u21e1{{ .Ahead }}{{ end }}{{ if gt .StashCount 0 }} *{{ .StashCount }}{{ end }}{{ if .Staging.Changed }} <#9CCC65>+{{ add .Staging.Added .Staging.Modified .Staging.Deleted .Staging.Moved }}</>{{ end }}{{ if .Working.Changed }}{{ if gt (add .Working.Modified .Working.Deleted) 0 }} <#FFD54F>!{{ add .Working.Modified .Working.Deleted }}</>{{ end }}{{ if gt .Working.Untracked 0 }} <#81D4FA>?{{ .Working.Untracked }}</>{{ end }}{{ end }} ",
+          "foreground_templates": [
+            "{{ if or .Working.Changed .Staging.Changed }}#FFD54F{{ end }}"
+          ]
         },
         {
           "type": "text",
           "style": "plain",
-          "foreground": "#546E7A",
+          "foreground": "#37474F",
           "template": "\ue0b0"
         }
       ]
@@ -60,14 +63,14 @@
         {
           "type": "text",
           "style": "plain",
-          "foreground": "#546E7A",
+          "foreground": "#37474F",
           "template": "\ue0b2"
         },
         {
           "type": "executiontime",
           "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#B0BEC5",
+          "background": "#37474F",
+          "foreground": "#90A4AE",
           "foreground_templates": [
             "{{ if ge .Ms 3000 }}#FFD54F{{ end }}"
           ],
@@ -81,47 +84,47 @@
         {
           "type": "status",
           "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#FF5252",
-          "template": "<#26C6DA>\ue0b3</> \u2718 {{ .Code }} "
+          "background": "#37474F",
+          "foreground": "#FF6E6E",
+          "template": "<#78909C>\ue0b3</> \u2718 {{ .Code }} "
         },
         {
           "type": "python",
           "style": "plain",
-          "background": "#546E7A",
+          "background": "#37474F",
           "foreground": "#FFE873",
           "options": {
             "display_mode": "files",
             "fetch_virtual_env": false
           },
-          "template": "<#26C6DA>\ue0b3</> \ue73c {{ .Full }} "
+          "template": "<#78909C>\ue0b3</> \ue73c {{ .Full }} "
         },
         {
           "type": "node",
           "style": "plain",
-          "background": "#546E7A",
+          "background": "#37474F",
           "foreground": "#8CC84B",
           "options": {
             "display_mode": "files"
           },
-          "template": "<#26C6DA>\ue0b3</> \ue718 {{ .Full }} "
+          "template": "<#78909C>\ue0b3</> \ue718 {{ .Full }} "
         },
         {
           "type": "java",
           "style": "plain",
-          "background": "#546E7A",
+          "background": "#37474F",
           "foreground": "#F89820",
           "options": {
             "display_mode": "files"
           },
-          "template": "<#26C6DA>\ue0b3</> \ue738 {{ .Full }} "
+          "template": "<#78909C>\ue0b3</> \ue738 {{ .Full }} "
         },
         {
           "type": "session",
           "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#D4E157",
-          "template": "{{ if or .SSHSession .Root }}<#26C6DA>\ue0b3</> {{ .UserName }}@{{ .HostName }} {{ end }}"
+          "background": "#37474F",
+          "foreground": "#ECEFF1",
+          "template": "{{ if or .SSHSession .Root }}<#78909C>\ue0b3</> {{ .UserName }}@{{ .HostName }} {{ end }}"
         },
         {
           "type": "text",
@@ -145,9 +148,9 @@
         {
           "type": "status",
           "style": "plain",
-          "foreground": "#D4E157",
+          "foreground": "#9CCC65",
           "foreground_templates": [
-            "{{ if gt .Code 0 }}#FF5252{{ end }}"
+            "{{ if gt .Code 0 }}#FF6E6E{{ end }}"
           ],
           "options": {
             "always_enabled": true
@@ -158,9 +161,9 @@
     }
   ],
   "transient_prompt": {
-    "foreground": "#D4E157",
+    "foreground": "#9CCC65",
     "foreground_templates": [
-      "{{ if gt .Code 0 }}#FF5252{{ end }}"
+      "{{ if gt .Code 0 }}#FF6E6E{{ end }}"
     ],
     "template": "\u25b8 "
   }
