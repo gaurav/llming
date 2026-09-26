@@ -39,6 +39,9 @@ Claude Code's sessions, memory and settings, so it can't be a link to this direc
   [`settings/README.md`](../README.md#terminalapp-profile)). Most of them are the terminal's own
   ANSI colours, so they follow whichever profile is in use. The model colours are 24-bit, so the
   terminal must support that.
+- **Two yellows mean different things in a quota.** A yellow percentage means over half of it is
+  used. A yellow countdown means it's being used faster than time is passing. Both can show at
+  once. Pace colouring is on trial, and may yet be dropped or get its own colour or symbol.
 - **The branch colour runs `git status` on every update.** That's quick in the repos I use, but
   might not be in a huge one.
 - **Without a reset time, the quota clock shows a nonsense time** (the start of 1970, in local
@@ -67,6 +70,11 @@ maximum: the percentage already says it.
 **Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with a day in place of the
 time (`until Tue 8pm (3d 5h)`). The percentage is what's **left**, not what's used.
 
+**Pace**: the countdown in brackets turns yellow when I'm using a quota faster than its window is
+passing, so at this rate it would run out before the reset. Precisely: when the percentage used is
+more than 10 points above the percentage of the window gone. Without the margin it would fire on
+the first few messages of every window. Otherwise the countdown is dimmed like the rest.
+
 **Model and effort**: `Opus 5.5 [high]`. The model name is coloured by family, in lighter tints of
 the Solarized colours (the originals were too dark): Opus pink `#E86AA0`, Sonnet blue `#62A4E6`,
 Fable violet `#9696EB`, Haiku in plain text, anything else dimmed. `[high]` is my usual effort
@@ -90,4 +98,5 @@ Tried and rejected:
 
 ## Next steps
 
+- Decide whether pace colouring is worth keeping, and whether it needs its own colour.
 - Check the branch segment's speed in a large repo.

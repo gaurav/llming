@@ -73,6 +73,29 @@ pct_color() {
     }'
 }
 
+pace_color() {
+  # yellow when the quota's used_percentage is running more than 10 points ahead of how much
+  # of the window has elapsed (the margin keeps early-window noise, e.g. 3% used 5 minutes in,
+  # from flagging as burning); dim otherwise, including when resets_at is missing or past.
+  local used=$1 resets_at=$2 window=$3
+  if [ -z "$resets_at" ]; then
+    echo "$c_dim"
+    return
+  fi
+  awk -v used="$used" -v resets_at="$resets_at" -v window="$window" -v now="$now" \
+    -v y="$c_yellow" -v d="$c_dim" \
+    'BEGIN {
+      remaining = resets_at - now;
+      if (remaining < 0) { print d; exit }
+      elapsed = window - remaining;
+      if (elapsed < 0) elapsed = 0;
+      if (elapsed > window) elapsed = window;
+      elapsed_pct = elapsed * 100 / window;
+      if (used + 0 > elapsed_pct + 10) print y;
+      else print d;
+    }'
+}
+
 # ---- branch, coloured by git state ----
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // empty')
 status_output=$(git -C "$cwd" --no-optional-locks status --porcelain=v2 --branch 2>/dev/null)
@@ -128,14 +151,16 @@ if [ -n "$five_pct" ]; then
   five_remaining=$(awk -v p="$five_pct" 'BEGIN{printf "%.0f", 100 - p}')
   five_left=$(fmt_duration $((five_reset - now)))
   five_clock=$(fmt_clock "$five_reset")
-  quota_seg="${c_sep}5h:${c_reset} ${five_color}${five_remaining}%${c_reset} ${c_dim}until ${five_clock} (${five_left})${c_reset}"
+  five_pace=$(pace_color "$five_pct" "$five_reset" 18000)
+  quota_seg="${c_sep}5h:${c_reset} ${five_color}${five_remaining}%${c_reset} ${c_dim}until ${five_clock} ${c_reset}${five_pace}(${five_left})${c_reset}"
 fi
 if [ -n "$week_pct" ]; then
   week_color=$(pct_color "$week_pct")
   week_remaining=$(awk -v p="$week_pct" 'BEGIN{printf "%.0f", 100 - p}')
   week_left=$(fmt_duration $((week_reset - now)))
   week_clock=$(fmt_clock_day "$week_reset")
-  week_seg="${c_sep}7d:${c_reset} ${week_color}${week_remaining}%${c_reset} ${c_dim}until ${week_clock} (${week_left})${c_reset}"
+  week_pace=$(pace_color "$week_pct" "$week_reset" 604800)
+  week_seg="${c_sep}7d:${c_reset} ${week_color}${week_remaining}%${c_reset} ${c_dim}until ${week_clock} ${c_reset}${week_pace}(${week_left})${c_reset}"
   if [ -n "$quota_seg" ]; then
     quota_seg="${quota_seg}${sep}${week_seg}"
   else
