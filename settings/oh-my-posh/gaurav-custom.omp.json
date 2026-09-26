@@ -27,8 +27,10 @@
           "background": "#546E7A",
           "foreground": "#26C6DA",
           "options": {
-            "style": "full",
-            "home_icon": "~"
+            "style": "powerlevel",
+            "max_width": 30,
+            "home_icon": "~",
+            "right_format": "<b>%s</b>"
           },
           "template": " {{ .Path }} "
         },
