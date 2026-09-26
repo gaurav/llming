@@ -228,10 +228,14 @@ the next run can notice they predate three commits. Test counts are in the first
 suite has exactly 221 tests, or that a PR added 33, was almost never useful, and keeping the figure
 exact was a steady source of churn. Only a failure or a skip is worth an exact number.
 **Cross-references:** every `#N` gets re-checked, after a paragraph on how two other PRs related to
-this one survived several rounds past both merging. **Claims about the code:** a description saying
-a validator "now runs on every `.base` file" was written from intent, and a review found it walking
-half of them. Nothing in the diff flags a sentence like that, so each load-bearing claim is
-confirmed against the code as it stands or cut down to what can be.
+this one survived several rounds past both merging — unless the round was too small to change the
+body, because a lookup per reference on every small run was mostly wasted and I'd rather accept the
+odd issue going stale unnoticed. The exception is a reference whose state the body asserts, such as
+"stacked on #33": that changes when other work lands, not when this PR does, so a quiet PR says
+nothing about it. **Claims about the code:** a description saying a validator "now runs on every
+`.base` file" was written from intent, and a review found it walking half of them. Nothing in the
+diff flags a sentence like that, so each load-bearing claim is confirmed against the code as it
+stands or cut down to what can be.
 
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced

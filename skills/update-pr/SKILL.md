@@ -93,8 +93,33 @@ becomes prose in the new body, a record in the repo, or both, so they are input 
 rather than something to tidy afterwards. Step 7 says what each kind turns into — read it before
 writing anything.
 
-**Re-check every `#N` the old body cites.** A claim about another PR or issue is true when written
-and then quietly stops being true, and nothing in the diff reveals it — you have to ask:
+**Re-check every `#N` the old body cites, unless the PR has barely moved since it was written.** A
+claim about another PR or issue is true when written and then quietly stops being true, and nothing
+in the diff reveals it — you have to ask. But asking costs a lookup per reference, and most runs of
+this skill follow a round too small to have changed much, so first find when the body was last
+edited and what has landed since:
+
+```bash
+gh api graphql -f o=<owner> -f r=<repo> -F n=<N> -f query='
+  query($o: String!, $r: String!, $n: Int!) {
+    repository(owner: $o, name: $r) { pullRequest(number: $n) { lastEditedAt createdAt } }
+  }' --jq '.data.repository.pullRequest | .lastEditedAt // .createdAt'
+git log --oneline --since=<that timestamp> <base-remote>/<baseRefName>..HEAD
+```
+
+`lastEditedAt` is the body's last edit (`createdAt` stands in when it was never edited). `updatedAt`
+looks like the same thing and is not: it moves on every comment, label and push.
+
+If that shows a few commits, none changing what the PR does, and the diff you just read means this
+run's rewrite will touch no more than a sentence or two, skip the per-reference check and say so in
+Step 8. Anything more, or any doubt, and check every reference. Two kinds are checked either way:
+
+- **A reference whose state the body asserts** — "stacked on #33", "waits for #N", "once that
+  merges, drop this". Its state changes when other work lands, not when this PR does, so a quiet PR
+  is no evidence about it.
+- **Any `#N` this run adds.**
+
+To check one:
 
 ```bash
 gh pr view "$PR" --json body -q .body \
@@ -471,11 +496,12 @@ If pulling an item into this PR means new code, that's new work — do it, then 
 
 ### Step 8 — Summary
 
-Short. The new title, what changed in the description, **what you put into the repo and where**,
-the body's character count, the checkbox decisions (dissolved and into what / unticked again /
-dropped / deferred / blocking / a sign-off still waiting on who and when), any
-issues you're proposing to file, and confirmation of the push. If the body is over budget, say what
-the extra length is buying — a budget nobody reports is a budget nobody keeps.
+Short. The new title, what changed in the description, **what you put into the repo and where**, the
+body's character count, whether cross-references were re-checked (and if not, the commits and date
+that said so), the checkbox decisions (dissolved and into what / unticked again / dropped / deferred
+/ blocking / a sign-off still waiting on who and when), any issues you're proposing to file, and
+confirmation of the push. If the body is over budget, say what the extra length is buying — a budget
+nobody reports is a budget nobody keeps.
 
 ### Notes
 
