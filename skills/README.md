@@ -222,14 +222,16 @@ a property of *my* reader and not of GitHub, in case the tool changes and the ru
 
 Three things in the old body are treated as stale until checked, because a skill designed to run
 repeatedly will otherwise re-assert them forever, each run's confidence borrowed from the one
-before. **Numbers:** anything a reader could recount from the diff gets approximated, and the ones
-that *are* the claim — test results, benchmarks, versions — say where and at which commit they were
-measured, so the next run can notice they predate three commits. **Cross-references:** every `#N`
-gets re-checked, after a paragraph on how two other PRs related to this one survived several rounds
-past both merging. **Claims about the code:** a description saying a validator "now runs on every
-`.base` file" was written from intent, and a review found it walking half of them. Nothing in the
-diff flags a sentence like that, so each load-bearing claim is confirmed against the code as it
-stands or cut down to what can be.
+before. **Numbers:** anything a reader could recount gets approximated, and the ones that *are* the
+claim — test outcomes, benchmarks, versions — say where and at which commit they were measured, so
+the next run can notice they predate three commits. Test counts are in the first group: knowing the
+suite has exactly 221 tests, or that a PR added 33, was almost never useful, and keeping the figure
+exact was a steady source of churn. Only a failure or a skip is worth an exact number.
+**Cross-references:** every `#N` gets re-checked, after a paragraph on how two other PRs related to
+this one survived several rounds past both merging. **Claims about the code:** a description saying
+a validator "now runs on every `.base` file" was written from intent, and a review found it walking
+half of them. Nothing in the diff flags a sentence like that, so each load-bearing claim is
+confirmed against the code as it stands or cut down to what can be.
 
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced

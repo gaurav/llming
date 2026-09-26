@@ -277,13 +277,21 @@ functions renamed — are noise that has to be maintained. "Adds over a hundred 
 several files", "about forty call sites" says the same thing and cannot go stale. An agent reading
 the PR later can recount them exactly in one command if it ever matters.
 
-Be precise where the number *is* the claim and recounting it means re-running something: test
-passes and failures, a benchmark, a measured size or duration, a version. Those earn their
-precision — and they pay for it, because a precise number carries a provenance obligation: say
-where it came from and at which commit (`3419 tests, 0 failures — measured end to end on fee66028`)
-so the next run of this skill can tell whether it still holds. A number you would not bother
-sourcing is a number to approximate instead — or to leave out. Under the budget a figure has to
-earn both its precision and its line.
+**Test counts are approximated too.** How many tests the suite holds, and how many this PR added,
+are counts like any other: nobody needs to know the suite now has 221 tests or that 33 of them are
+new, and an exact figure changes with every commit that touches a test, so each run of this skill
+has to re-measure it or let it go stale. "Adds a few dozen tests", "the suite is now over 220
+tests" says everything a reviewer uses. What a test run establishes is its *outcome*, and that is
+the claim: everything passes, or it doesn't.
+
+Be precise where the number *is* the claim and recounting it means re-running something: a
+benchmark, a measured size or duration, a version, and any test that fails or is skipped — name
+those, since "a few tests fail" hides exactly what a reviewer needs. Those earn their precision —
+and they pay for it, because a precise claim carries a provenance obligation: say where it came
+from and at which commit (`all 3,400-odd tests pass, run end to end on fee66028`; `2 failures,
+both in test_export — on fee66028`) so the next run of this skill can tell whether it still holds.
+A number you would not bother sourcing is a number to approximate instead — or to leave out. Under
+the budget a figure has to earn both its precision and its line.
 
 ### Rewrite, don't append
 
