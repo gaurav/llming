@@ -19,7 +19,7 @@ be rebuilt in p10k or in whatever tool comes next.
 
 ```text
 ╭─ ~/D/llming/settings   main ⇡1 +1 !2 ?1 ······ took 2m 10s, finished 2:03:43am   ✘ 1   3.9.6 ─╮
-╰─ ▸
+╰─ ▶
 ```
 
 It's not used on every machine yet. Machines where p10k already works keep it for now.
@@ -60,7 +60,7 @@ Terminal.app needs one set as the profile's font (I use MesloLGS Nerd Font:
   `/usr/bin/java` placeholder may pop up an "install Java" dialog when the prompt runs it. That
   only happens in a folder with Java files.
 - **On a narrow window, line 1's right side disappears** when it doesn't fit beside the left side.
-  The red `▸` still shows that a command failed.
+  The red `▶` still shows that a command failed.
 - **Testing changes from a shell that already runs oh-my-posh** needs care: see `CLAUDE.md`.
 
 ### Preferences
@@ -96,34 +96,42 @@ frame.
 
 A `─╮` frame closes the right side. If line 1 doesn't fit the window, the right side is hidden.
 
-**Line 2**: `╰─ ▸`, a small filled triangle (a full-height `❯` is too tall). It is green, and red
-after a failed command. The cursor goes after it.
+**Line 2**: `╰─ ▶`, a filled triangle. `❯` was too tall, and the small `▸` hard to spot. It is
+orange, a colour used nowhere else so the live prompt stands out, and red after a failed command.
+The cursor goes after it.
 
-**Transient prompt**: once a command runs, its two-line prompt collapses to just `▸ command`, so
-the scrollback holds commands and output rather than repeated status lines.
+**Transient prompt**: once a command runs, its two-line prompt collapses to just `▶ command` in dim
+grey (muted red if it failed). The scrollback holds commands and output rather than repeated
+status lines, and only the live prompt is bright.
 
 **Colours**:
 
+Text on the bar is at least 7:1 contrast against it (the red exit code 5.8:1, the separators
+5:1).
+
 | Colour     | Hex       | Used for                                                 |
 | ---------- | --------- | -------------------------------------------------------- |
-| slate      | `#37474F` | segment background                                       |
+| slate      | `#263238` | segment background                                       |
 | grey-blue  | `#546E7A` | frame, filler dots                                       |
-| grey       | `#78909C` | separators                                               |
-| soft cyan  | `#80DEEA` | path                                                     |
-| near-white | `#ECEFF1` | current folder, `user@host`                              |
-| green      | `#9CCC65` | clean git branch, staged count, `▸`                      |
+| grey       | `#90A4AE` | separators                                               |
+| light cyan | `#A5ECF5` | path                                                     |
+| white      | `#FFFFFF` | current folder, `user@host`                              |
+| green      | `#AED581` | clean git branch, staged count                           |
 | amber      | `#FFD54F` | changed git branch, unstaged count, slow duration, root  |
-| dim grey   | `#90A4AE` | quick duration                                           |
-| light blue | `#81D4FA` | untracked count                                          |
-| red        | `#FF6E6E` | exit code, `▸` after a failure                           |
-| brand      | various   | Python `#FFE873`, Node `#8CC84B`, Java `#F89820`         |
+| light grey | `#B0BEC5` | quick duration                                           |
+| light blue | `#B3E5FC` | untracked count                                          |
+| red        | `#FF8A80` | exit code                                                |
+| orange     | `#FFA726` | live `▶`                                                 |
+| red        | `#FF5252` | live `▶` after a failure                                 |
+| dim grey   | `#78909C` | `▶` in the scrollback (`#E57373` if it failed)           |
+| brand      | various   | Python `#FFE873`, Node `#9CCC65`, Java `#FFB74D`         |
 
 **In p10k**, `p10k configure` gets the layout close with these choices: *Classic* style,
 *Unicode*, *Angled* separators, *Sharp* heads, *Flat* tails, *Two lines*, *Dotted* connection,
 *Full* frame, *Transient prompt: Yes*, and no time. The rest needs `~/.p10k.zsh` edits:
 
 - `POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=0` to always show the duration.
-- `POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='▸'` for the triangle.
+- `POWERLEVEL9K_PROMPT_CHAR_OK_VIINS_CONTENT_EXPANSION='▶'` for the triangle.
 - `POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique` for path shortening. It is close to, but not
   the same as, the first-letter shortening here.
 - The colours above.

@@ -56,7 +56,7 @@ as text. A JSON syntax error doesn't fail: it exits 0 and renders the default th
   the other styles, render each one at a few `--execution-time` values. The names don't tell you
   much.
 - `status` appears twice. On the right it has the default `always_enabled: false`, so it only
-  renders after a failure. On line 2 it has `always_enabled: true` and exists to colour the `▸`
+  renders after a failure. On line 2 it has `always_enabled: true` and exists to colour the `▶`
   through `foreground_templates`.
 - The right-aligned block has `"overflow": "hide"`. Without it, a line 1 that doesn't fit spills
   the right side onto a wrapped line.
