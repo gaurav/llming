@@ -408,10 +408,9 @@ done. So every ticked box is dissolved, by kind:
   the user who did it and when**, then write that down — in the abstract when it is part of why the
   PR can merge ("Reviewed by … on …"), or in a section of its own when the verification is itself a
   claim of the PR (Step 6). Then record it in the repo (Step 5) where the repo has a place for it: a
-  line in the changelog if it keeps one ("Verified by …"), or an SOP if the check is one that
-  changes of this kind will need again ("changes that … should be verified by …, as was done in
-
-## N"). Don't create a changelog to hold it
+  line in the changelog if it keeps one ("Verified by …"), or an SOP if changes of this kind will
+  need the check again ("changes that … should be verified by …, as in #N"). Don't create a
+  changelog to hold it.
 
 **Never tick a box yourself.** Work you did goes straight to prose by the rules above, and a
 sign-off is not yours to give. That keeps a tick meaning one thing — a person says so — which is
