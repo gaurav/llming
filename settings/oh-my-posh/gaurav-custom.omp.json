@@ -149,23 +149,23 @@
         {
           "type": "status",
           "style": "plain",
-          "foreground": "#9CCC65",
+          "foreground": "#FFA726",
           "foreground_templates": [
-            "{{ if gt .Code 0 }}#FF6E6E{{ end }}"
+            "{{ if gt .Code 0 }}#FF5252{{ end }}"
           ],
           "options": {
             "always_enabled": true
           },
-          "template": " \u25b8"
+          "template": " \u25b6"
         }
       ]
     }
   ],
   "transient_prompt": {
-    "foreground": "#9CCC65",
+    "foreground": "#78909C",
     "foreground_templates": [
-      "{{ if gt .Code 0 }}#FF6E6E{{ end }}"
+      "{{ if gt .Code 0 }}#E57373{{ end }}"
     ],
-    "template": "\u25b8 "
+    "template": "\u25b6 "
   }
 }
