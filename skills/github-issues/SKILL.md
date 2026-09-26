@@ -1,6 +1,6 @@
 ---
 name: github-issues
-description: Rules for changing a GitHub issue — when to edit an issue rather than comment on it, whose issues must never be edited, and how someone else's issue may be closed. Use before filing, editing, retitling, relabelling, closing, reopening or commenting on any GitHub issue, and whenever an issue turns out to be out of date, superseded or partly done.
+description: Rules for changing a GitHub issue — when to edit an issue rather than comment on it, whose issues must never be edited, and when and how an issue may be closed. Use before filing, editing, retitling, relabelling, closing, reopening or commenting on any GitHub issue, and whenever an issue turns out to be out of date, superseded or partly done.
 ---
 
 # github-issues
@@ -43,6 +43,9 @@ A match turns "file an issue" into "change an issue", and the rest of this skill
 it if it is the user's, comment if it is not, reopen it if it was closed and the matter is live
 again. A second issue about the same thing is the duplicate problem below, made on purpose.
 
+Whether a new issue goes on a milestone, and which one, is decided by the `github-milestones`
+skill — load it before filing.
+
 ## The issue is the user's own, and out of date
 
 Edit the body so it is accurate. Do not append a comment that contradicts it, and do not narrate
@@ -73,13 +76,14 @@ than adding to it, so when the size is a close call, ask.
 
 Never edit the body or the title. Not when the repository belongs to the user, not with admin
 rights, not when the correction is obviously right. Leave a comment instead. Closing it is
-restricted too, and has its own section below.
+restricted too — see *Closing an issue*.
 
 Triage is fine: labels, assignees, the milestone, the project. It is what write access is for, it
 is easy to undo, and it shows in the issue's timeline, so an author who thinks their bug has been
 filed as unimportant can see that and say so. Reopening is fine on the same grounds, for an issue
 or an unmerged pull request: the worst a wrong reopen does is put something back on the list, where
-it gets looked at again — the opposite of what a wrong close does.
+it gets looked at again — the opposite of what a wrong close does. Which milestone is the right one
+is a separate question, answered by the `github-milestones` skill.
 
 Write access is permission to administer the repository; it is not permission to rewrite what
 someone else wrote. The same goes for the issues of a bot or of a former colleague whose account is
@@ -87,23 +91,55 @@ inactive — nobody is around to disagree with the edit, which is a reason for m
 
 ## Closing an issue
 
-Never close anyone else's issue directly — no `gh issue close`, no close button, not as a
-duplicate, not as superseded, not as already fixed. A direct close is a silent one: if it is wrong,
-nobody is placed to notice, and the bug is ignored until someone rediscovers it.
+Whoever wrote the issue, the best way to close it is a closing keyword — `Closes #N` — in the
+description of the pull request that resolves it. The claim that the issue is done then sits in
+front of a reviewer next to the change that is supposed to have done it, the close happens only
+when that PR merges, and the issue links to the PR that closed it. A direct close has none of that:
+if it is wrong, nobody is placed to notice, and the issue is ignored until someone rediscovers it.
 
-The way to close someone else's issue is a closing keyword — `Closes #N` — in the description of
-the pull request that resolves it. The claim that the issue is done then sits in front of a
-reviewer next to the change that is supposed to have done it, the close happens only when that PR
-merges, and the issue links to the PR that closed it. If there is no PR — the issue looks
-obsolete, or fixed by something already merged — comment saying so and leave it open for its author
-or the user to close.
+GitHub only acts on the keyword when the PR merges into the repository's default branch
+(`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`). In a stacked PR or one aimed at
+a release branch it closes nothing, so the keyword belongs on the PR that will eventually land on
+the default branch; if there is none yet, tell the user the issue will need closing later.
 
-With duplicates, the issue that stays open is the most useful one, whoever wrote it. Never close
-the user's own issue in favour of a thinner one merely because theirs is the one that may be
-closed. Comment on the other issue suggesting it be closed in favour of the better one, with a
-link, and leave the decision to its author or the user — or, if the case is clear-cut, ask the user
-whether to close it now.
+Being asked to do the work that finishes an issue is not being asked to close it — the rules below
+still decide how. Being told to close it is.
 
-The user's own issue may be closed directly, on the same terms as a major edit: say why it is
-finished and get agreement first. A closing keyword in a PR is still the better route when a PR
-exists.
+### The user's own issue
+
+- **The work is in an unmerged PR — add the keyword, without asking.** Put `Closes #N` in that PR's
+  description and tell the user in a line. That holds when it is a different PR from the one you
+  are working on: an issue whose last item landed on another branch closes through that branch's
+  PR. Never close the issue directly while the work is unmerged — if the PR is abandoned, the issue
+  stays closed and nobody notices. A PR someone else opened is their text, as an issue would be:
+  comment on it suggesting the keyword instead.
+- **The work is already merged — close it with a comment.** This is the catch-up case: something
+  finished the issue and nobody connected the two. If it came in through one of the user's own PRs
+  that should have said `Fixes #N` and didn't, add the keyword to that PR's description so the fix
+  names its issue — but GitHub only acts on the keyword at merge, so the issue still has to be
+  closed by hand. Close it with a comment naming the commit or PR that finished it and why that
+  finishes it, then tell the user in a line: the report is easy to miss, and the comment is the
+  record. Go ahead when the case is straightforward — the issue asks for one thing and the merged
+  change visibly does it. When it isn't — several asks, a fix you are inferring rather than seeing
+  — say what you found and ask the user to confirm first. An issue that is only partly done gets a
+  minor edit saying so, not a close.
+- **Any other reason — ask first.** Obsolete, won't-do, superseded, a duplicate: these are judgement
+  calls, and a wrong one hides the issue. Say why it should close and let the user decide. Only in
+  a very obvious case — the code or feature the issue is about no longer exists — close it with a
+  comment giving the reason and tell the user in a line.
+
+### Anyone else's issue
+
+Never close it directly — no `gh issue close`, no close button, not as a duplicate, not as
+superseded, not as already fixed. The closing keyword is the only route. If there is no PR — the
+issue looks obsolete, or fixed by something already merged — comment saying so and leave it open
+for its author or the user to close. Adding a keyword to a merged PR is not a way around this: it
+closes nothing.
+
+### Duplicates
+
+The issue that stays open is the most useful one, whoever wrote it. Never close the user's own
+issue in favour of a thinner one merely because theirs is the one that may be closed. Comment on
+the other issue suggesting it be closed in favour of the better one, with a link, and leave the
+decision to its author or the user — or, if the case is clear-cut, ask the user whether to close it
+now.

@@ -74,15 +74,21 @@ decide whether it may be edited to cover the finding or only commented on.
 
 A deferred issue is filed without asking first, unlike the follow-ups `update-pr` and `wrap` only
 offer, and what earns it that is that it explains itself: whoever opens it cold can see what was
-flagged, where, and in which change. So the body carries all of it, not a summary of it:
+flagged, where, and in which change. So the body carries all of it, not a summary of it (`$PR`,
+`$OWNER` and `$REPO` are set in Step 1, and the numbered steps referred to here start below):
 
 - the PR (`#NNN`) and a link to Copilot's comment — the thread's `url` from Step 2, or for a
   suppressed comment the PR plus the `path:line` it named;
-- a permalink to the lines at the PR's head commit, not at the branch, which moves —
-  `https://github.com/OWNER/REPO/blob/<sha>/<path>#L<line>`, with the sha from
-  `gh pr view "$PR" --repo "$OWNER/$REPO" --json headRefOid -q .headRefOid`;
+- a permalink to the lines **as Copilot saw them**:
+  `https://github.com/OWNER/REPO/blob/<commit>/<path>#L<orig_start_line>-L<orig_line>`, from the
+  thread's own `commit` and lines in Step 2, or just `#L<orig_line>` when `orig_start_line` is null
+  (a single-line comment). Not the branch, which moves, and not its head either — an outdated
+  thread's lines are by definition no longer where the head has them, so a head permalink points at
+  unrelated code, which is worse than no link. A suppressed comment has no thread to take a commit
+  from: use the `commit_id` of the review it came from in Step 2b, for the same reason — it may
+  predate later pushes;
 - **the code fragment itself, in a fenced block.** A permalink only renders as code inside its own
-  repository, and an outdated thread has no `line` to link to at all, so paste the lines as well;
+  repository, so paste the lines as well;
 - what Copilot claimed, what you found when you checked it, and why it didn't fit this PR.
 
 If you do defer, open the issue, reply to the thread linking it (`Tracked in #NNN.`), and flag it in
@@ -124,7 +130,10 @@ query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
         pageInfo{ hasNextPage endCursor }
         nodes{
           id isResolved isOutdated path line
-          comments(first:100){ nodes{ author{login} body databaseId url } }
+          comments(first:100){
+            nodes{ author{login} body databaseId url
+                   originalCommit{oid} originalStartLine originalLine }
+          }
         }
       }
     }
@@ -137,6 +146,9 @@ query($owner:String!,$repo:String!,$pr:Int!,$endCursor:String){
    top_comment_db_id: .comments.nodes[0].databaseId,
    path, line, outdated: .isOutdated,
    url: .comments.nodes[0].url,
+   commit: .comments.nodes[0].originalCommit.oid,
+   orig_start_line: .comments.nodes[0].originalStartLine,
+   orig_line: .comments.nodes[0].originalLine,
    comments: [.comments.nodes[] | {author: (.author.login // "ghost"), body}]}'
 ```
 
@@ -180,7 +192,7 @@ comments live in the review body's `<details>` blocks, so read the bodies:
 ```bash
 gh api --paginate "/repos/$OWNER/$REPO/pulls/$PR/reviews" \
   --jq '.[] | select((.user.login // "") | ascii_downcase | startswith("copilot"))
-        | "=== \(.submitted_at) ===\n\(.body)"'
+        | "=== \(.submitted_at) \(.commit_id) ===\n\(.body)"'
 ```
 
 Don't trim that command: reviews page **oldest first**, and an unguarded `.user.login` errors on a
@@ -189,7 +201,9 @@ deleted account. Both failures print nothing, which reads exactly like "no suppr
 Copilot labels these blocks inconsistently — `Comments suppressed due to low confidence (N)` and
 `Suppressed comments (N)` are both current — so scan for `<summary>` lines containing *suppressed*
 rather than matching one exact heading. Each entry gives a `path:line` and a quoted code snippet;
-that is enough to find the code, and there is no thread id to carry forward.
+that is enough to find the code, and there is no thread id to carry forward. Carry the review's
+`commit_id` with each one instead: it is the commit Copilot read, which a deferred issue's permalink
+needs.
 
 - **Later reviews supersede earlier ones.** Copilot re-reviews on each push, so a suppressed comment
   from the first review may already be fixed. Check the *current* file before acting, exactly as
