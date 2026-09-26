@@ -144,12 +144,25 @@ compared.
 ### Next steps
 
 - Find the theme a real name to replace `gaurav-custom`.
-- Live with *tokyo-night* for a while. It was the clear first pick, but if it stops working for
-  me, *charcoal* and *gruvbox* were the runners-up to try next (`export POSH_PALETTE=charcoal`).
 - Check the git segment's speed in a large repo. If it lags, set the top-level `"async": true`.
 - Bring over the `~/.p10k.zsh` from the Terminal.app machines, so both versions sit side by side.
 - Once a JDK or a Python version manager is installed, check that the Java and Python segments
   report the right versions.
+
+### Current choice, and ideas to try later
+
+The current setup is the *tokyo-night* prompt palette in the **Solarized Darker** Terminal.app
+profile. It may well be good enough to keep. If not, these are the ideas to try, probably each in
+its own PR:
+
+- **A *solarized* prompt palette**: neutral grey text on a dark bar, with Solarized's accent
+  colours for errors, git changes and slow commands, and the orange `▶` kept. It would match the
+  terminal the way *tokyo-night* was meant to match Tokyo Night Darker.
+- **Neutral text in *tokyo-night***: keep its accents, but replace its lavender text (`#C0CAF5`)
+  with neutral grey. Lavender text is what made the Tokyo Night Terminal profile harder to read,
+  and the same tint is on the prompt's bar.
+- **The runners-up**: *charcoal* (already neutral text) and *gruvbox* were the next favourites
+  after *tokyo-night*. `export POSH_PALETTE=charcoal` tries one in the current window.
 
 ## Terminal.app profile
 
@@ -193,5 +206,5 @@ Terminal ▸ Settings ▸ Profiles, select it, and click **Default**.
 
 - Decide whether to keep Tokyo Night Darker and Solarized Dark, now that Solarized Darker is the
   default again.
-- Consider a *solarized* prompt palette, so the prompt matches the terminal the way *tokyo-night*
-  was meant to.
+- A prompt palette to match this profile: see
+  [ideas to try later](#current-choice-and-ideas-to-try-later).
