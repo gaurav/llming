@@ -46,7 +46,7 @@ as text. A JSON syntax error doesn't fail: it exits 0 and renders the default th
   would put an arrow between every pair of segments. p10k classic uses thin separators within a
   group instead.
 - **On the right, `executiontime` is first and always renders** (`always_enabled`, threshold 0),
-  and every segment after it starts with its own leading `\ue0b3` separator. That way a hidden
+  and every segment after it starts with its own leading `\u2039` (`‹`) separator. That way a hidden
   segment never leaves a doubled or dangling separator. Anything placed before `executiontime`, or
   a change that lets it hide, breaks this.
 - The "took …, finished …" wording is decided in the template (`if ge .Ms 3000`), not by the

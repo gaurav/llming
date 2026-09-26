@@ -76,9 +76,10 @@ These are what to reproduce, whatever the tool.
    untracked. Each count is hidden when it is zero. The branch is green when the tree is clean and
    amber when there are changes.
 
-The segments share one dark slate background, divided by thin powerline separators (Nerd Font
-U+E0B1 on the left side, U+E0B3 on the right). The left group ends in a solid powerline arrow
-(U+E0B0), and the right group begins with its mirror image (U+E0B2).
+The segments share one dark slate background. They are divided by small text-height angles, `›`
+on the left and `‹` on the right (U+203A and U+2039). The full-height Nerd Font powerline arrows
+looked too big. The left group ends in a solid powerline arrow (U+E0B0), and the right group
+begins with its mirror image (U+E0B2).
 
 **The gap** between the two sides is filled with dots (`·`) in a lighter grey-blue, the same as the
 frame.
