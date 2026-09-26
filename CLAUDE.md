@@ -7,8 +7,8 @@ This repository holds three unrelated kinds of thing, and the conventions below 
   `git branch -a` before concluding a tool is missing.
 - **Coding agent skills** — everything under `skills/`, kept here so it can be shared across
   machines. These are prose instructions for an agent, not programs.
-- **Settings** — config files for the tools I use, under `settings/` (so far only the zsh prompt),
-  kept here so a setup that works on one machine can be recreated on another.
+- **Settings** — config files for the tools I use, under `settings/` (`settings/README.md` lists
+  them), kept here so a setup that works on one machine can be recreated on another.
 
 ## Markdown
 
