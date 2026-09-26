@@ -156,11 +156,12 @@ compared.
 `terminal-app/Tokyo Night Darker.terminal` is the Terminal.app profile I use, and the default. Its
 16 colours match the prompt's default *tokyo-night* palette, so `ls`, `git diff` and the like look
 consistent with the prompt. The colours come from
-[tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" terminal colours, on a
-black background. As with Solarized below, bright black is changed: Tokyo Night's `#414868`
-nearly vanishes on black, so it uses the comment grey `#565F89` instead. The selection is
-`#33467C`, and text and cursor are `#C0CAF5`. Everything else (font, size, transparency) is
-copied from Solarized Darker.
+[tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" terminal colours, on a black
+background. As with Solarized below, bright black is changed: Tokyo Night's `#414868` nearly
+vanishes on black, so it uses the comment grey `#565F89` instead. The selection is `#33467C`. Text
+is neutral light grey (`#D0D0D0`, bold white), not Tokyo Night's lavender `#C0CAF5`, which tinted
+everything blue and was harder to read. Only the accents are coloured. Everything else (font, size,
+transparency) is copied from Solarized Darker.
 
 `terminal-app/Solarized Darker.terminal` was the first profile I used with the prompt, and is kept
 as a fallback:
