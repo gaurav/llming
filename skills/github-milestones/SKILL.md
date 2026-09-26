@@ -52,10 +52,11 @@ closed. Closing it is part of that outward-facing step: ask first, as for the re
 
 ## Putting an issue on a milestone
 
-Every issue should end up in a bucket, but that is the user's triage to do, not yours. Leave a new
-or untouched issue unmilestoned unless it is *clearly* Critical or clearly needed for a particular
-release — the user's triage workflow picks up anything without a milestone. A guessed bucket hides
-an issue from that workflow, which is worse than no bucket.
+Every issue should end up on a milestone — a bucket, or a release it is needed for — but that is
+the user's triage to do, not yours. Leave a new or untouched issue unmilestoned unless it is
+*clearly* Critical or clearly needed for a particular release — the user's triage workflow picks up
+anything without a milestone. A guessed bucket hides an issue from that workflow, which is worse
+than no bucket.
 
 ```bash
 gh issue edit <N> --repo <owner>/<repo> --milestone "<title>"
