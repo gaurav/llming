@@ -135,8 +135,8 @@ ctx_seg=""
 if [ -n "$ctx_used" ]; then
   ctx_color=$(pct_color "$ctx_used")
   ctx_k_used=$(awk -v v="$ctx_in" 'BEGIN{printf "%.0f", v/1000}')
-  ctx_seg=$(printf '%sctx%s %s%.0f%%%s %s(%sk)%s' \
-    "$c_sep" "$c_reset" "$ctx_color" "$ctx_used" "$c_reset" "$c_dim" "$ctx_k_used" "$c_reset")
+  ctx_used_round=$(awk -v v="$ctx_used" 'BEGIN{printf "%.0f", v}')
+  ctx_seg="${c_sep}ctx${c_reset} ${c_dim}${ctx_k_used}k${c_reset} ${c_dim}(${c_reset}${ctx_color}${ctx_used_round}%${c_reset}${c_dim})${c_reset}"
 fi
 
 # ---- rate limits (5h / 7d) ----

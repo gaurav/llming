@@ -12,7 +12,7 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
 <!-- rumdl-disable MD013 -->
 
 ```text
-main ⇡1 ♦ ctx 42% (84k) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until Tue 8pm (3d 5h) ♦ Opus 5.5 [high]
+main ⇡1 ♦ ctx 84k (42%) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until Tue 8pm (3d 5h) ♦ Opus 5.5 [high]
 ```
 
 <!-- rumdl-enable MD013 -->
@@ -81,8 +81,8 @@ is working:
 
 No PR number: Claude Code already shows it.
 
-**Context**: `ctx 42% (84k)`, the share of the context window used, then the tokens used. No
-maximum: the percentage already says it.
+**Context**: `ctx 84k (42%)`, the tokens used, then the share of the context window that is,
+rounded to a whole percent. No maximum: the percentage already says it.
 
 **Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with a day in place of the
 time (`until Tue 8pm (3d 5h)`). The percentage is what's **left**, not what's used.
@@ -99,9 +99,9 @@ level, so it takes the model's colour. **Any other level is bright white**, so a
 stands out.
 
 **Colours**, by role. The headers (`ctx`, `5h:`, `7d:`) and the `♦` are bright white. Supporting
-text (`(84k)`, `until …`) is dimmed. Every percentage is coloured by how much has been **used**:
-green under 50%, yellow to 75%, orange to 90%, red above. That's true even where the number
-shown is what's left, so the colour warns as the quota runs out.
+text (`84k`, the brackets, `until …`) is dimmed. Every percentage is coloured by how much has been
+**used**: green under 50%, yellow to 75%, orange to 90%, red above. That's true even where the
+number shown is what's left, so the colour warns as the quota runs out.
 
 Tried and rejected:
 
