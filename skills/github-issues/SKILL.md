@@ -97,6 +97,11 @@ front of a reviewer next to the change that is supposed to have done it, the clo
 when that PR merges, and the issue links to the PR that closed it. A direct close has none of that:
 if it is wrong, nobody is placed to notice, and the issue is ignored until someone rediscovers it.
 
+GitHub only acts on the keyword when the PR merges into the repository's default branch
+(`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`). In a stacked PR or one aimed at
+a release branch it closes nothing, so the keyword belongs on the PR that will eventually land on
+the default branch; if there is none yet, tell the user the issue will need closing later.
+
 Being asked to do the work that finishes an issue is not being asked to close it — the rules below
 still decide how. Being told to close it is.
 

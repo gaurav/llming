@@ -240,7 +240,8 @@ What follows from it being the always-visible part:
   closes no issue just doesn't mention one — don't invent a reference to fill the slot. The keyword
   is also the *only* way this work closes an issue someone else wrote: the `github-issues` skill
   rules out closing one directly, so an issue this PR resolves gets a keyword here, never a
-  `gh issue close`.
+  `gh issue close`. It only fires if the PR merges into the default branch; for a PR based on
+  anything else, see that skill's *Closing an issue*.
 
 Cover, in the sections below it, in whatever structure suits the change:
 
