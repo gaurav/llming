@@ -1,4 +1,4 @@
-This repository holds two unrelated kinds of thing, and the conventions below differ for each:
+This repository holds three unrelated kinds of thing, and the conventions below differ for each:
 
 - **One-off scripts** — small tools solving a single problem, each in its own top-level directory
   (`lookup-mesh-tree-numbers/`, `calendar-cleanup/`). Not worth a repo apiece. Most live on their
@@ -7,6 +7,8 @@ This repository holds two unrelated kinds of thing, and the conventions below di
   `git branch -a` before concluding a tool is missing.
 - **Coding agent skills** — everything under `skills/`, kept here so it can be shared across
   machines. These are prose instructions for an agent, not programs.
+- **Settings** — config files for the tools I use, under `settings/` (so far only the zsh prompt),
+  kept here so a setup that works on one machine can be recreated on another.
 
 ## Markdown
 
@@ -29,7 +31,7 @@ Two settings are deliberate and worth knowing before you fight them:
 
 ## README.md and CLAUDE.md
 
-Both kinds of thing here are documented by a pair of files, and the split between them is the same
+Each kind of thing here is documented by a pair of files, and the split between them is the same
 in each case.
 
 `README.md` is the primary documentation, written for a human. It is allowed to get quite long, as
@@ -92,3 +94,16 @@ Reach for a script only when nothing installed does the job. If a skill does nee
   `~/.claude/skills/...` — the same skill gets used as a personal, project, and plugin skill.
 - Skip click, logging, and tqdm. An agent invokes these non-interactively and reads stdout; plain
   arguments and plain output are easier for it to consume than a CLI framework's.
+
+## Settings
+
+Each tool gets a subdirectory of `settings/` named after the tool, holding its config files. It is
+installed by symlinking that subdirectory into wherever the tool reads from
+(`ln -s ~/Developer/llming/settings/oh-my-posh ~/.config/oh-my-posh`), the same way skills are.
+Like skills, settings have no CLI, `data/` directory, or run log.
+
+`settings/` has one `README.md`/`CLAUDE.md` pair, with a section per tool, like
+`skills/README.md`. The README is written so each setup can be recreated **without** the config
+file. Not every machine uses the same tools, so the README records the preferences themselves in
+plain words. The config file is one way of expressing those preferences. Edits to a machine's
+startup files (`~/.zshrc`) are not committed: the README shows the lines to add instead.

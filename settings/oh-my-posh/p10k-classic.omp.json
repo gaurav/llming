@@ -1,0 +1,147 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 4,
+  "final_space": true,
+  "console_title_template": "{{ .Folder }}",
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#546E7A",
+          "template": "\u256d\u2500"
+        },
+        {
+          "type": "os",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#26C6DA",
+          "template": " {{ .Icon }} <#26C6DA>\ue0b1</>"
+        },
+        {
+          "type": "root",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#FFD54F",
+          "template": " \uf0e7 <#26C6DA>\ue0b1</>"
+        },
+        {
+          "type": "path",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#26C6DA",
+          "options": {
+            "style": "full",
+            "home_icon": "~"
+          },
+          "template": " {{ .Path }} "
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#D4E157",
+          "options": {
+            "branch_icon": "\ue0a0 "
+          },
+          "template": "<#26C6DA>\ue0b1</> {{ .HEAD }}{{ if gt .Behind 0 }} \u21e3{{ .Behind }}{{ end }}{{ if gt .Ahead 0 }} \u21e1{{ .Ahead }}{{ end }}{{ if gt .StashCount 0 }} *{{ .StashCount }}{{ end }}{{ if .Staging.Changed }} <#FFD54F>+{{ add .Staging.Added .Staging.Modified .Staging.Deleted .Staging.Moved }}</>{{ end }}{{ if .Working.Changed }}{{ if gt (add .Working.Modified .Working.Deleted) 0 }} <#FFD54F>!{{ add .Working.Modified .Working.Deleted }}</>{{ end }}{{ if gt .Working.Untracked 0 }} <#81D4FA>?{{ .Working.Untracked }}</>{{ end }}{{ end }} "
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#546E7A",
+          "template": "\ue0b0"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "filler": "<#546E7A>\u00b7</>",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#546E7A",
+          "template": "\ue0b2"
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#FF5252",
+          "template": " \u2718 {{ .Code }} <#26C6DA>\ue0b3</>"
+        },
+        {
+          "type": "executiontime",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#FFD54F",
+          "options": {
+            "threshold": 3000,
+            "style": "round"
+          },
+          "template": " {{ .FormattedMs }} \uf252 <#26C6DA>\ue0b3</>"
+        },
+        {
+          "type": "session",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#D4E157",
+          "template": "{{ if or .SSHSession .Root }} {{ .UserName }}@{{ .HostName }} <#26C6DA>\ue0b3</>{{ end }}"
+        },
+        {
+          "type": "time",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#26C6DA",
+          "options": {
+            "time_format": "15:04:05"
+          },
+          "template": " {{ .CurrentDate | date .Format }} \uf017 "
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#546E7A",
+          "template": "\u2500\u256e"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#546E7A",
+          "template": "\u2570\u2500"
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "#D4E157",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#FF5252{{ end }}"
+          ],
+          "options": {
+            "always_enabled": true
+          },
+          "template": " \u276f"
+        }
+      ]
+    }
+  ],
+  "transient_prompt": {
+    "foreground": "#D4E157",
+    "foreground_templates": [
+      "{{ if gt .Code 0 }}#FF5252{{ end }}"
+    ],
+    "template": "\u276f "
+  }
+}
