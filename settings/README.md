@@ -145,6 +145,13 @@ stands out. The window opens at 120×32, because line 1 of the prompt hides its 
 doesn't fit, which happened often at the default 80 columns. Inactive windows turn slightly
 see-through and blurred.
 
+`terminal-app/Solarized Dark.terminal` is the profile it was derived from, kept for comparison and
+as a fallback. Solarized Darker differs from it in:
+
+- the black background, replacing Solarized's `#042029`
+- inactive windows at 70% opacity, not 50%
+- the window size, cursor, bright black and selection colours described above
+
 ### Install
 
 Install MesloLGM Nerd Font (`brew install --cask font-meslo-lg-nerd-font`), then double-click the
