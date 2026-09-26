@@ -86,6 +86,37 @@
           "template": "<#26C6DA>\ue0b3</> \u2718 {{ .Code }} "
         },
         {
+          "type": "python",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#FFE873",
+          "options": {
+            "display_mode": "files",
+            "fetch_virtual_env": false
+          },
+          "template": "<#26C6DA>\ue0b3</> \ue73c {{ .Full }} "
+        },
+        {
+          "type": "node",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#8CC84B",
+          "options": {
+            "display_mode": "files"
+          },
+          "template": "<#26C6DA>\ue0b3</> \ue718 {{ .Full }} "
+        },
+        {
+          "type": "java",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#F89820",
+          "options": {
+            "display_mode": "files"
+          },
+          "template": "<#26C6DA>\ue0b3</> \ue738 {{ .Full }} "
+        },
+        {
           "type": "session",
           "style": "plain",
           "background": "#546E7A",
