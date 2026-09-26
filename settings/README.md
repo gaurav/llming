@@ -100,9 +100,10 @@ A `─╮` frame closes the right side. If line 1 doesn't fit the window, the ri
 orange, a colour used nowhere else so the live prompt stands out, and red after a failed command.
 The cursor goes after it.
 
-**Transient prompt**: once a command runs, its two-line prompt collapses to just `▶ command` in dim
-grey (muted red if it failed). The scrollback holds commands and output rather than repeated
-status lines, and only the live prompt is bright.
+**Transient prompt**: once a command runs, its two-line prompt collapses to just `▶ command` in
+muted green (muted red if it failed). The scrollback holds commands and output rather than repeated
+status lines, and only the live prompt is bright, while the colour still makes old prompts easy to
+find.
 
 **Colours**:
 
@@ -123,7 +124,7 @@ Text on the bar is at least 7:1 contrast against it (the red exit code 5.8:1, th
 | red        | `#FF8A80` | exit code                                                |
 | orange     | `#FFA726` | live `▶`                                                 |
 | red        | `#FF5252` | live `▶` after a failure                                 |
-| dim grey   | `#78909C` | `▶` in the scrollback (`#E57373` if it failed)           |
+| muted green | `#86A86E` | `▶` in the scrollback (`#E57373` if it failed)          |
 | brand      | various   | Python `#FFE873`, Node `#9CCC65`, Java `#FFB74D`         |
 
 **In p10k**, `p10k configure` gets the layout close with these choices: *Classic* style,

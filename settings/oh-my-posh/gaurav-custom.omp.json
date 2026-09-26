@@ -162,7 +162,7 @@
     }
   ],
   "transient_prompt": {
-    "foreground": "#78909C",
+    "foreground": "#86A86E",
     "foreground_templates": [
       "{{ if gt .Code 0 }}#E57373{{ end }}"
     ],
