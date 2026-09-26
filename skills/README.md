@@ -114,10 +114,11 @@ file exists. Once it does, the copy in the skill should shrink to a pointer.
 
 Two restraints matter more than the scheme itself. First, an agent shouldn't milestone an issue
 unless the milestone is obvious. My triage picks up anything without a milestone, and a guessed
-bucket hides the issue from that triage. Second, due dates get suggested, never edited, and only
-when something really is urgent, or when an urgency date on a bucket has outlived its urgency.
-Without that second rule, every session that lists milestones turns into a report on which ones
-are overdue.
+bucket hides the issue from that triage. Second, due dates get suggested, never edited, and a date
+in the past is not in itself worth mentioning. Without that second rule, every session that lists
+milestones turns into a report on which ones are overdue. It names what to leave out rather than
+the few cases worth raising, because a list of the only allowed cases silences whatever it forgot —
+its first draft would have stayed quiet about a hard deadline slipping past with issues still open.
 
 It is a separate skill rather than more of `github-issues`, even though the two meet whenever an
 issue is filed. `github-issues` fires at one moment, *about to change an issue*, and is partly an

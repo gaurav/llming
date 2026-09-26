@@ -74,11 +74,15 @@ skill allows on anyone's issue.
 
 ## Nudging about a due date
 
-Suggest a due-date change and let the user make it; don't edit the milestone yourself. Speak up in
-two cases only:
+Suggest a due-date change and let the user make it; don't edit the milestone yourself. A date being
+in the past is not by itself worth mentioning — most are soft. What is worth mentioning:
 
 - **A milestone really is urgent** and its date doesn't show it: a hard deadline mentioned in an
   issue or in conversation, Critical issues accumulating ahead of a release, an upstream contact
   that has to happen soon. Say which milestone, what date, and what the evidence was.
+- **A hard deadline is at risk** — close or already passed, with issues still open.
 - **An urgency date has outlived the urgency** — a bucket still carrying a deadline that has passed
   and no longer matters. Suggest removing it.
+
+This is about due dates only. Anything else that looks wrong with a milestone, raise as you would
+anywhere else.
