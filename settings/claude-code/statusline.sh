@@ -44,11 +44,17 @@ fmt_duration() {
   fi
 }
 
+fmt_epoch() {
+  # epoch, format -> local time. BSD/macOS date takes the epoch with -r, GNU date with -d @;
+  # GNU reads -r as a file to take the time from, so it fails here and falls through.
+  date -r "$1" "$2" 2>/dev/null || date -d "@$1" "$2" 2>/dev/null
+}
+
 fmt_clock() {
   # epoch -> "3:05pm" (short form)
   local epoch=$1
   local t
-  t=$(date -r "$epoch" '+%I:%M%p' 2>/dev/null | sed 's/AM$/am/; s/PM$/pm/')
+  t=$(fmt_epoch "$epoch" '+%I:%M%p' | sed 's/AM$/am/; s/PM$/pm/')
   # strip a leading zero on the hour
   echo "${t#0}"
 }
@@ -57,7 +63,7 @@ fmt_clock_day() {
   # epoch -> "Fri 3am"
   local epoch=$1
   local t
-  t=$(date -r "$epoch" '+%a %I%p' 2>/dev/null | sed 's/AM$/am/; s/PM$/pm/')
+  t=$(fmt_epoch "$epoch" '+%a %I%p' | sed 's/AM$/am/; s/PM$/pm/')
   echo "$t" | sed -E 's/ 0/ /'
 }
 
