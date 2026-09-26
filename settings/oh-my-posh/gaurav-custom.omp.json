@@ -132,7 +132,7 @@
           "options": {
             "always_enabled": true
           },
-          "template": " \u276f"
+          "template": " \u25b8"
         }
       ]
     }
@@ -142,6 +142,6 @@
     "foreground_templates": [
       "{{ if gt .Code 0 }}#FF5252{{ end }}"
     ],
-    "template": "\u276f "
+    "template": "\u25b8 "
   }
 }
