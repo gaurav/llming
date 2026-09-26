@@ -1,9 +1,29 @@
 `README.md` has the install steps and each tool's settings in words. This file has the specifics.
 
+## Checking installed copies against the repo
+
+Settings are installed as copies, so a machine's copy and this repo drift apart. **Before changing a
+tool here, and before committing, diff the two:**
+
+| Tool        | Repo                          | Installed copy                  |
+| ----------- | ----------------------------- | ------------------------------- |
+| oh-my-posh  | `oh-my-posh/`                 | `~/.config/oh-my-posh/`         |
+| Vim         | `vim/vimrc`                   | `~/.vim/vimrc`                  |
+| Claude Code | `claude-code/statusline.sh`   | `~/.claude/statusline.sh`       |
+| Terminal    | `terminal-app/*.terminal`     | Terminal's preferences (below)  |
+
+`diff -r oh-my-posh ~/.config/oh-my-posh` from `settings/`, and so on. For each difference, ask the
+user which way it should go: bring the repo's version over, keep the machine's change only on that
+machine, or commit it here. **This repo is public.** Before committing anything from a machine,
+read all of it for tokens, hostnames, usernames, home-directory paths, internal tool or project
+names, and anything else that shouldn't be published, and remove them. The first copy of the
+status line had a comment naming a tool the user hadn't published.
+
 ## oh-my-posh
 
-The config is `oh-my-posh/gaurav-custom.omp.json`. `~/.config/oh-my-posh` is a symlink to the
-`oh-my-posh/` directory (not to `settings/`), so `~/.zshrc` points at a stable path.
+The config is `oh-my-posh/gaurav-custom.omp.json`, installed as a copy in `~/.config/oh-my-posh/`,
+which is the path `~/.zshrc` points at. Editing the repo copy doesn't change the live prompt: copy
+it over, or preview it with `--config` as below.
 
 ### Previewing a change
 
@@ -136,17 +156,15 @@ That's how `Tokyo Night Darker` was made from `Solarized Darker`.
 
 ## Vim
 
-`~/.vim` is a symlink to `vim/`, so anything Vim writes into `~/.vim` lands in the repo. `pack/`
-(cloned plugins) and `.netrwhist` (the file browser's history) are gitignored for that reason.
-Check `git status` for anything new after installing a plugin.
-
-`~/.vim/vimrc` is only read when `~/.vimrc` doesn't exist. If an edit to `vim/vimrc` has no
+`~/.vim/vimrc` is only read when `~/.vimrc` doesn't exist. If an edit to `~/.vim/vimrc` has no
 effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim loaded.
 
 ## Claude Code
 
-`~/.claude/statusline.sh` is a symlink to `claude-code/statusline.sh`, so edits through either path
-are the same file. Claude Code runs it after each message, passing a JSON payload on stdin.
+`claude-code/statusline.sh` is installed as a copy at `~/.claude/statusline.sh`, which is where
+`/statusline` and its agent edit it. Changes made that way have to be copied back here, which is
+the main way this one drifts. Claude Code runs it after each message, passing a JSON payload on
+stdin.
 [The status line docs](https://code.claude.com/docs/en/statusline) list its fields; the ones used
 here are `workspace.current_dir`, `context_window.used_percentage` and `.total_input_tokens`,
 `rate_limits.{five_hour,seven_day}.{used_percentage,resets_at}` (`resets_at` in epoch seconds),

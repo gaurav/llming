@@ -97,10 +97,14 @@ Reach for a script only when nothing installed does the job. If a skill does nee
 
 ## Settings
 
-Each tool gets a subdirectory of `settings/` named after the tool, holding its config files. It is
-installed by symlinking that subdirectory into wherever the tool reads from
-(`ln -s ~/Developer/llming/settings/oh-my-posh ~/.config/oh-my-posh`), the same way skills are.
-Like skills, settings have no CLI, `data/` directory, or run log.
+Each tool gets a subdirectory of `settings/` named after the tool, holding its config files. Like
+skills, settings have no CLI, `data/` directory, or run log.
+
+**Settings are installed by copying, not symlinking**, unlike skills. Each machine can then
+customise its copy. It also means a shell or editor that starts many times a day doesn't depend on
+this checkout: a broken branch, a half-finished rebase or a moved repo would otherwise break every
+new terminal. The cost is that copies drift, so `settings/CLAUDE.md` says how to check them against
+the repo.
 
 `settings/` has one `README.md`/`CLAUDE.md` pair, with a section per tool, like `skills/README.md`.
 A tool with more to say can have its own `README.md` in its subdirectory instead (`settings/vim/`),

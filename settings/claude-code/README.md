@@ -15,7 +15,7 @@ main ⇡1 ♦ ctx 42% (84k) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until 
 ## Install
 
 ```bash
-ln -s ~/Developer/llming/settings/claude-code/statusline.sh ~/.claude/statusline.sh
+cp ~/Developer/llming/settings/claude-code/statusline.sh ~/.claude/statusline.sh
 ```
 
 Then add this to `~/.claude/settings.json`, which isn't committed because it also holds
@@ -29,9 +29,6 @@ permissions and other per-machine settings:
 ```
 
 It needs `jq` and `git`. The status line updates after Claude's next message.
-
-This symlinks the file, not the directory, unlike the other tools here: `~/.claude` also holds
-Claude Code's sessions, memory and settings, so it can't be a link to this directory.
 
 ## Known issues
 

@@ -7,19 +7,18 @@ whichever [Terminal.app profile](../README.md#terminalapp-profile) is in use.
 ## Install
 
 ```bash
-ln -s ~/Developer/llming/settings/vim ~/.vim
+mkdir -p ~/.vim
+cp ~/Developer/llming/settings/vim/vimrc ~/.vim/vimrc
 ```
 
-Vim reads `~/.vim/vimrc`, which the symlink makes this directory's `vimrc`. **Vim only reads it if
-there is no `~/.vimrc`**, so move any existing one out of the way first. If `~/.vim` already
-exists, move whatever is in it (usually `pack/`) into this directory, then delete it and make the
-link. Open a new Vim to see the change.
+**Vim only reads `~/.vim/vimrc` if there is no `~/.vimrc`**, so move any existing one out of the
+way first. Open a new Vim to see the change.
 
 ## Known issues
 
-- **`pack/` isn't committed.** Anything installed as a Vim package is cloned into `pack/` here,
-  and `.gitignore` keeps it out of the repo. A new machine needs the `git clone` from
-  [Colour schemes](#colour-schemes) again.
+- **Plugins aren't in the repo.** Anything installed as a Vim package is cloned into
+  `~/.vim/pack/`, so a new machine needs the `git clone` from [Colour schemes](#colour-schemes)
+  again.
 - **Themes that need 24-bit colour may not work in Terminal.app.** Tokyo Night is one of them: it
   needs `set termguicolors`. Older versions of Terminal.app can't show 24-bit colour, and there
   the theme comes out garish or muddy. Check with the `printf` test in the
@@ -42,10 +41,10 @@ What to reproduce on another machine, with or without this file:
 
 To try one, type `:colorscheme`, a space, and press Tab to cycle through the installed ones. Vim 9
 comes with several, including `habamax`, `lunaperche`, `retrobox`, `sorbet`, `desert` and `slate`.
-To keep one, add `colorscheme <name>` to `vimrc`, after `syntax on`.
+To keep one, add `colorscheme <name>` to `~/.vim/vimrc`, after `syntax on`.
 
-A theme that is a single `.vim` file goes in `colors/` in this directory. A theme on GitHub is
-usually a whole plugin, which goes in `pack/`, where Vim loads it at startup. For example,
+A theme that is a single `.vim` file goes in `~/.vim/colors/`. A theme on GitHub is
+usually a whole plugin, which goes in `~/.vim/pack/`, where Vim loads it at startup. For example,
 [Tokyo Night](https://github.com/ghifarit53/tokyonight-vim), which matches the prompt's
 *tokyo-night* palette:
 

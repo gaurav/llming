@@ -1,9 +1,15 @@
 # settings
 
 Settings for the tools I use, kept here so a setup that works on one machine can be recreated on
-another. Each tool's config files live in a subdirectory named after the tool, which is symlinked
-into wherever that tool reads its config (or imported, for tools like Terminal.app that can't
-read a file in place). So far there are four:
+another. Each tool's config files live in a subdirectory named after the tool, and are copied into
+wherever that tool reads its config (or imported, for tools like Terminal.app). They're copied,
+not symlinked, so each machine can customise its own, and so a broken checkout of this repo can't
+break a new terminal.
+
+**Copies drift.** When working on a tool here, compare its installed copy with this repo first. If
+they differ, decide whether the machine's change is worth keeping here, and strip anything
+private (tokens, hostnames, internal tool names, paths) before committing it. `CLAUDE.md` has the
+commands. So far there are four:
 
 - [`oh-my-posh/`](#shell-prompt-oh-my-posh): my zsh prompt.
 - [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
@@ -34,7 +40,8 @@ It's not used on every machine yet. Machines where p10k already works keep it fo
 
 ```bash
 brew install jandedobbeleer/oh-my-posh/oh-my-posh
-ln -s ~/Developer/llming/settings/oh-my-posh ~/.config/oh-my-posh
+mkdir -p ~/.config/oh-my-posh
+cp ~/Developer/llming/settings/oh-my-posh/* ~/.config/oh-my-posh/
 ```
 
 Then in `~/.zshrc`, set `ZSH_THEME=""` so Oh My Zsh doesn't draw a prompt of its own, and add
