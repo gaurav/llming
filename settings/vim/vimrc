@@ -1,0 +1,9 @@
+" Installed by symlinking settings/vim to ~/.vim, which makes this ~/.vim/vimrc.
+" See settings/vim/README.md.
+
+syntax on
+filetype plugin indent on
+
+" The Terminal.app profiles are dark, and Vim picks colours that read on a light background unless
+" told otherwise.
+set background=dark
