@@ -99,4 +99,7 @@ osascript -e 'tell application "Terminal"' \
 The scriptable properties are the window size, font name and size, antialiasing, and the cursor,
 background, normal text and bold text colours (as 16-bit `{r, g, b}`). **The 16 ANSI colours and
 the selection colour are not scriptable.** Change those in Terminal ▸ Settings, or quit Terminal
-first and then edit the plist.
+and round-trip the whole domain through `defaults`: `defaults export com.apple.Terminal x.plist`,
+edit the colour archive's `NSRGB` string with `plistlib`, then `defaults import com.apple.Terminal
+x.plist`. That goes through the preferences daemon (`cfprefsd`), whereas writing
+`~/Library/Preferences/com.apple.Terminal.plist` directly can be undone by its cached copy.
