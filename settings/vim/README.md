@@ -12,7 +12,8 @@ cp ~/Developer/llming/settings/vim/vimrc ~/.vim/vimrc
 ```
 
 **Vim only reads `~/.vim/vimrc` if there is no `~/.vimrc`**, so move any existing one out of the
-way first. Open a new Vim to see the change.
+way first. Open a new Vim to see the change. If it doesn't show, `:echo $MYVIMRC` in Vim names the
+file it actually loaded.
 
 ## Known issues
 
