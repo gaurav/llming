@@ -15,13 +15,6 @@
           "template": "\u256d\u2500"
         },
         {
-          "type": "os",
-          "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#26C6DA",
-          "template": " {{ .Icon }} <#26C6DA>\ue0b1</>"
-        },
-        {
           "type": "root",
           "style": "plain",
           "background": "#546E7A",
@@ -69,39 +62,33 @@
           "template": "\ue0b2"
         },
         {
+          "type": "executiontime",
+          "style": "plain",
+          "background": "#546E7A",
+          "foreground": "#B0BEC5",
+          "foreground_templates": [
+            "{{ if ge .Ms 3000 }}#FFD54F{{ end }}"
+          ],
+          "options": {
+            "threshold": 0,
+            "always_enabled": true,
+            "style": "austin"
+          },
+          "template": " {{ if ge .Ms 3000 }}took {{ .FormattedMs }}, finished {{ now | date \"3:04:05pm\" }}{{ else }}{{ .FormattedMs }}{{ end }} \uf252 "
+        },
+        {
           "type": "status",
           "style": "plain",
           "background": "#546E7A",
           "foreground": "#FF5252",
-          "template": " \u2718 {{ .Code }} <#26C6DA>\ue0b3</>"
-        },
-        {
-          "type": "executiontime",
-          "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#FFD54F",
-          "options": {
-            "threshold": 3000,
-            "style": "round"
-          },
-          "template": " {{ .FormattedMs }} \uf252 <#26C6DA>\ue0b3</>"
+          "template": "<#26C6DA>\ue0b3</> \u2718 {{ .Code }} "
         },
         {
           "type": "session",
           "style": "plain",
           "background": "#546E7A",
           "foreground": "#D4E157",
-          "template": "{{ if or .SSHSession .Root }} {{ .UserName }}@{{ .HostName }} <#26C6DA>\ue0b3</>{{ end }}"
-        },
-        {
-          "type": "time",
-          "style": "plain",
-          "background": "#546E7A",
-          "foreground": "#26C6DA",
-          "options": {
-            "time_format": "15:04:05"
-          },
-          "template": " {{ .CurrentDate | date .Format }} \uf017 "
+          "template": "{{ if or .SSHSession .Root }}<#26C6DA>\ue0b3</> {{ .UserName }}@{{ .HostName }} {{ end }}"
         },
         {
           "type": "text",
