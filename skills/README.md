@@ -251,11 +251,6 @@ a tick only ever means a person said so. And for a sign-off only a person can gi
 and when rather than inferring it — I checked whether the body's edit history could answer that, and
 it cannot, because every edit made through my `gh` login is recorded as mine, the agent's included.
 
-prcoder's `<!-- prcoder:todo -->` block is deliberately not special-cased, though the block treats a
-line's text as the item's identity and a running prcoder rewrites it within a minute, so dissolving
-a line there can be reverted or bury a queue item. gaurav/prcoder#27 removes the block, and skill
-prose about another tool's internals would have outlived it.
-
 The hard-wrapping rule is the one an agent breaks by reflex, because everything else it reads is
 wrapped at 80 columns and GitHub turns each of those newlines into a line break. The skill says
 don't wrap in the first place, and reaches for `npx prettier --prose-wrap never` only when text has
