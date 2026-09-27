@@ -192,6 +192,10 @@ jq -n --argjson now "$N" '{workspace: {current_dir: "'"$PWD"'"},
   | bash claude-code/statusline.sh | cat -v
 ```
 
+Also try a quota with no `resets_at` (`five_hour: {used_percentage: 4}`). The docs say Claude Code
+sends both fields or drops the window, but the script is meant to show just the percentage, not
+`until  (now)`.
+
 `cat -v` shows the escape codes, which is the only way to check colours without a human looking.
 Strip them with `perl -pe 's/\e\[[0-9;]*m//g'` to read the text. For git states, make throwaway
 repos (a bare remote plus clones that are clean, dirty, ahead and behind) and point
