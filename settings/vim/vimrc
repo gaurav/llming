@@ -1,4 +1,4 @@
-" Installed by symlinking settings/vim to ~/.vim, which makes this ~/.vim/vimrc.
+" Installed by copying it to ~/.vim/vimrc.
 " See settings/vim/README.md.
 
 syntax on
