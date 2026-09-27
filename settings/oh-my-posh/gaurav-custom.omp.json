@@ -127,7 +127,7 @@
           "options": {
             "branch_icon": "\ue0a0 "
           },
-          "template": "<p:sep>\u203a</> {{ .HEAD }}{{ if gt .Behind 0 }} \u21e3{{ .Behind }}{{ end }}{{ if gt .Ahead 0 }} \u21e1{{ .Ahead }}{{ end }}{{ if gt .StashCount 0 }} *{{ .StashCount }}{{ end }}{{ if .Staging.Changed }} <p:ok>+{{ add .Staging.Added .Staging.Modified .Staging.Deleted .Staging.Moved }}</>{{ end }}{{ if .Working.Changed }}{{ if gt (add .Working.Modified .Working.Deleted) 0 }} <p:warn>!{{ add .Working.Modified .Working.Deleted }}</>{{ end }}{{ if gt .Working.Untracked 0 }} <p:info>?{{ .Working.Untracked }}</>{{ end }}{{ end }} "
+          "template": "<p:sep>\u203a</> {{ .HEAD }}{{ if gt .Behind 0 }} \u21e3{{ .Behind }}{{ end }}{{ if gt .Ahead 0 }} \u21e1{{ .Ahead }}{{ end }}{{ if gt .StashCount 0 }} *{{ .StashCount }}{{ end }}{{ if gt .Working.Unmerged 0 }} <p:error>~{{ .Working.Unmerged }}</>{{ end }}{{ $staged := add .Staging.Added .Staging.Modified .Staging.Deleted .Staging.Moved }}{{ if gt $staged 0 }} <p:ok>+{{ $staged }}</>{{ end }}{{ $unstaged := add .Working.Added .Working.Modified .Working.Deleted }}{{ if gt $unstaged 0 }} <p:warn>!{{ $unstaged }}</>{{ end }}{{ if gt .Working.Untracked 0 }} <p:info>?{{ .Working.Untracked }}</>{{ end }} "
         },
         {
           "type": "text",

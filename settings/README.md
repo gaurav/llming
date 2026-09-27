@@ -88,8 +88,9 @@ when the prompt collapses (see *Transient prompt*), and a new window doesn't sta
 1. A lightning bolt, only when running as root.
 2. The current path, with `~` for home. Past 30 columns, the leading folders shrink to their first
    letter (`~/D/llming/settings/oh-my-posh`). The current folder is bold.
-3. Git: branch, then `⇣n` behind / `⇡n` ahead, `*n` stashes, `+n` staged, `!n` unstaged, `?n`
-   untracked. Each count is hidden when it is zero.
+3. Git: branch, then `⇣n` behind / `⇡n` ahead, `*n` stashes, `~n` files with merge conflicts,
+   `+n` staged, `!n` unstaged (including files added with `git add -N`), `?n` untracked. Each
+   count is hidden when it is zero.
 
 The segments share one background bar. They are divided by small text-height angles, `›`
 on the left and `‹` on the right (U+203A and U+2039). The full-height Nerd Font powerline arrows
@@ -130,7 +131,7 @@ worth noticing:
 | `sep`      | the `›` / `‹` separators                                            |
 | `frame`    | `╭─`, `─╮`, `╰─` and the filler dots                                |
 | `prompt`   | the live `▶`                                                        |
-| `error`    | exit code, live `▶` after a failure                                 |
+| `error`    | exit code, live `▶` after a failure, conflict count                 |
 | `warn`     | slow duration, unstaged count, root bolt                            |
 | `ok`       | staged count                                                        |
 | `info`     | untracked count                                                     |

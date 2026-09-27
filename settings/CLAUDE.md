@@ -101,6 +101,12 @@ goes with it.
   through `foreground_templates`.
 - The right-aligned block has `"overflow": "hide"`. Without it, a line 1 that doesn't fit spills
   the right side onto a wrapped line.
+- **In the git segment, `.Staging.Changed` and `.Working.Changed` don't mean a count is nonzero.**
+  A merge conflict sets both, but oh-my-posh counts it only in `.Staging.Unmerged` and
+  `.Working.Unmerged` (one per file in each), not in `Added`/`Modified`. Guarding on `Changed`
+  printed `+0` during a merge, so each count is guarded on its own sum instead. `.Working.Added` is
+  a file added with `git add -N`, counted under `!`. To see what oh-my-posh reports for a repo
+  state, render a throwaway config whose git template prints every field.
 - The path uses `"style": "powerlevel"` with `max_width` 30. `right_format` bolds and colours the
   last folder. The `display_root` option is off, so outside `~`, the leading `/` is dropped
   (`o/h/C/…`).
