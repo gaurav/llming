@@ -1,6 +1,7 @@
 " Installed by copying it to ~/.vim/vimrc.
 " See settings/vim/README.md.
 
+set mouse=a
 syntax on
 filetype plugin indent on
 
