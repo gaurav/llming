@@ -1,8 +1,8 @@
 # Vim
 
-My Vim setup. It's small: syntax highlighting on, and colours chosen for a dark terminal. There's no
-colour scheme, so Vim draws with the terminal's own 16 colours. That means it already matches
-whichever [Terminal.app profile](../README.md#terminalapp-profile) is in use.
+My Vim setup. It's small: Vim's own defaults, the mouse on, and colours chosen for a dark terminal.
+There's no colour scheme, so Vim draws with the terminal's own 16 colours. That means it already
+matches whichever [Terminal.app profile](../README.md#terminalapp-profile) is in use.
 
 ## Install
 
@@ -29,10 +29,13 @@ file it actually loaded.
 
 What to reproduce on another machine, with or without this file:
 
-- **Syntax highlighting on** (`syntax on`).
-- **File-type detection, with per-language plugins and indentation** (`filetype plugin indent
-  on`). This makes highlighting work for more files, and makes indentation follow each
-  language's rules.
+- **Vim's own defaults** (`source $VIMRUNTIME/defaults.vim`). These are what a Vim with no vimrc
+  gets: it reopens a file where you left off, searches as you type, keeps 5 lines of context
+  around the cursor, and turns on syntax highlighting and file-type detection, plugins and
+  indentation. **Vim stops loading them as soon as any vimrc exists**, so a vimrc has to ask for
+  them. macOS's `/usr/bin/vim` (what `GIT_EDITOR` often points to) also turns them off in its system
+  vimrc, which is what the `unlet! skip_defaults_vim` before it undoes.
+- **Mouse on in every mode** (`set mouse=a`), for scrolling and clicking to move the cursor.
 - **A dark background** (`set background=dark`). Every Terminal.app profile I use is dark. Without
   this line Vim assumes a light background and some colours are too dim to read.
 - **No colour scheme.** Vim's default draws with the terminal's 16 ANSI colours, so it picks up
