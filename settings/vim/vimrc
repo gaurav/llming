@@ -1,8 +1,12 @@
 " Installed by copying it to ~/.vim/vimrc.
 " See settings/vim/README.md.
 
-syntax on
-filetype plugin indent on
+" Start from Vim's own defaults.vim, which Vim stops loading as soon as any vimrc exists. macOS's
+" /usr/bin/vim also switches it off in its system vimrc, hence the unlet.
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+
+set mouse=a
 
 " The Terminal.app profiles are dark, and Vim picks colours that read on a light background unless
 " told otherwise.
