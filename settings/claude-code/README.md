@@ -114,8 +114,5 @@ Tried and rejected:
 
 ## Next steps
 
-- Copy `user-CLAUDE.md` back over `~/.claude/CLAUDE.md` on the machine it came from. That copy is
-  unwrapped and this one is wrapped at 100 columns, so until then a diff between them shows every
-  line changed although the text is the same.
 - Decide whether pace colouring is worth keeping, and whether it needs its own colour.
 - Check the branch segment's speed in a large repo.
