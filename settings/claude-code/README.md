@@ -12,7 +12,7 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
 <!-- rumdl-disable MD013 -->
 
 ```text
-main ⇡1 ♦ ctx 84k (42%) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until Tue 8pm (3d 5h) ♦ Opus 5.5 [high]
+main ⇡1 ♦ ctx 84k (42%) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until Tue 8:00pm (3d 5h) ♦ Opus 5.5 [high]
 ```
 
 <!-- rumdl-enable MD013 -->
@@ -80,10 +80,12 @@ is working:
 No PR number: Claude Code already shows it.
 
 **Context**: `ctx 84k (42%)`, the tokens used, then the share of the context window that is,
-rounded to a whole percent. No maximum: the percentage already says it.
+rounded to a whole percent. No maximum: the percentage already says it. Without a token count, or
+with one small enough to round to `0k`, just the percentage (`ctx 42%`), since a count of `0k` would
+be wrong: every session has some context.
 
-**Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with a day in place of the
-time (`until Tue 8pm (3d 5h)`). The percentage is what's **left**, not what's used. Without a
+**Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with the day before the
+time (`until Tue 8:00pm (3d 5h)`). The percentage is what's **left**, not what's used. Without a
 reset time, just the percentage.
 
 **Pace**: the countdown in brackets turns yellow when I'm using a quota faster than its window is
