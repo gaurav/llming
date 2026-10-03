@@ -60,11 +60,8 @@ fmt_clock() {
 }
 
 fmt_clock_day() {
-  # epoch -> "Fri 3am"
-  local epoch=$1
-  local t
-  t=$(fmt_epoch "$epoch" '+%a %I%p' | sed 's/AM$/am/; s/PM$/pm/')
-  echo "$t" | sed -E 's/ 0/ /'
+  # epoch -> "Fri 3:05pm"
+  echo "$(fmt_epoch "$1" '+%a') $(fmt_clock "$1")"
 }
 
 pct_color() {
