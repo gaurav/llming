@@ -169,8 +169,8 @@ imperative, understandable to someone who wasn't in the conversation.
 
 - Rewrite it whenever the PR's scope has moved past it. That's the common case after a round of
   work, not the exception.
-- A title that still describes the change is a fine outcome: leave it, and say so in Step 8, so
-  the user can tell it was considered rather than skipped.
+- A title that still comprehensively describes the change is a fine outcome: leave it, and say
+  so in Step 8, so the user can tell it was considered rather than skipped.
 - Never leave a placeholder — "Initial implementation of X", "WIP", "Fixes for review comments",
   or anything naming the branch or the stage of work rather than the change.
 
