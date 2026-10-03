@@ -6,8 +6,9 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
   the context window is, how much of the 5-hour and 7-day quotas is left, and which model and
   effort level are running.
 - `user-CLAUDE.md`, the instructions I give Claude Code in every session on every machine: use
-  several commits where they help, write PRs with the `update-pr` skill, and leave merging a PR to
-  me, after a human has reviewed it. Installed as `~/.claude/CLAUDE.md`.
+  several commits where they help, write PRs with the `update-pr` skill, leave merging a PR to me,
+  after a human has reviewed it, and read a page I will act on from the site or my browser save,
+  never through a fetch proxy. Installed as `~/.claude/CLAUDE.md`.
 
 <!-- rumdl-disable MD013 -->
 
