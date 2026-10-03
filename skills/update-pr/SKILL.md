@@ -494,7 +494,7 @@ retitled. A milestone link *is* a complete account.
 
 If pulling an item into this PR means new code, that's new work — do it, then run Steps 2–6 again.
 
-### Step 8 — Summary
+## Step 8 — Summary
 
 Short. The new title, what changed in the description, **what you put into the repo and where**, the
 body's character count, whether cross-references were re-checked (and if not, the commits and date
