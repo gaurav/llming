@@ -6,8 +6,8 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
   the context window is, how much of the 5-hour and 7-day quotas is left, and which model and
   effort level are running.
 - `user-CLAUDE.md`, the instructions I give Claude Code in every session on every machine: use
-  several commits where they help, and write PRs with the `update-pr` skill. Installed as
-  `~/.claude/CLAUDE.md`.
+  several commits where they help, write PRs with the `update-pr` skill, and leave merging a PR to
+  me, after a human has reviewed it. Installed as `~/.claude/CLAUDE.md`.
 
 <!-- rumdl-disable MD013 -->
 
@@ -114,8 +114,5 @@ Tried and rejected:
 
 ## Next steps
 
-- Copy `user-CLAUDE.md` back over `~/.claude/CLAUDE.md` on the machine it came from. That copy is
-  unwrapped and this one is wrapped at 100 columns, so until then a diff between them shows every
-  line changed although the text is the same.
 - Decide whether pace colouring is worth keeping, and whether it needs its own colour.
 - Check the branch segment's speed in a large repo.
