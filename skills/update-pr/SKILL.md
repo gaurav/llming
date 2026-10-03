@@ -151,10 +151,10 @@ gh pr edit "$PR" --title "..."
 This comes before the description because you cannot link to a doc you have not written.
 
 **First, read what the repo already says**: the README, `docs/`, the agent files, and the comments
-next to the files Step 3 listed. Anything already documented gets a link from the description — a
-path or a heading anchor — not a restatement. Open the files rather than grepping: every repo lays
-out its docs differently, and a grep that finds nothing looks exactly like a repo that documents
-nothing.
+next to the files Step 3 listed. Anything already documented gets a link from the description, not a
+restatement (Step 6 says how to write the link). Open the files rather than grepping: every repo
+lays out its docs differently, and a grep that finds nothing looks exactly like a repo that
+documents nothing.
 
 **Then record what is durable and missing.** Durable means still true after this merges and needed
 then: how the thing works, a gotcha, a convention, a non-goal, a procedure someone will repeat, a
@@ -276,6 +276,13 @@ never collapsed — collapsing only moves the accretion below the fold.
 gh pr edit "$PR" --body-file <path>   # a file, so markdown survives shell quoting
 wc -m <path>                          # characters; `wc -c` counts bytes and overcounts em dashes
 ```
+
+**Link to repo files by full URL, pinned to the head commit's short SHA**:
+`https://github.com/<owner>/<repo>/blob/<short-sha>/docs/Design.md#heading`. The full 40-character
+SHA works too, but every link spends it against the budget. A relative link such as
+`[docs/Design.md](docs/Design.md)` resolves against the PR's own URL, not the repo, and lands on
+GitHub's "open a pull request" page for a branch of that name. A branch link breaks once the branch
+is deleted after merging; a commit link doesn't, and the next run of this skill re-pins it.
 
 **Don't hard-wrap the body**, including text carried over from the old one. GitHub renders a newline
 inside a paragraph as a line break, so write each paragraph and each bullet as one line however
