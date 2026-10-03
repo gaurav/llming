@@ -139,9 +139,15 @@ ctx_in=$(echo "$input" | jq -r '.context_window.total_input_tokens // empty')
 ctx_seg=""
 if [ -n "$ctx_used" ]; then
   ctx_color=$(pct_color "$ctx_used")
-  ctx_k_used=$(awk -v v="$ctx_in" 'BEGIN{printf "%.0f", v/1000}')
   ctx_used_round=$(awk -v v="$ctx_used" 'BEGIN{printf "%.0f", v}')
-  ctx_seg="${c_sep}ctx${c_reset} ${c_dim}${ctx_k_used}k${c_reset} ${c_dim}(${c_reset}${ctx_color}${ctx_used_round}%${c_reset}${c_dim})${c_reset}"
+  # a session always has some context (a system prompt at least), so a missing or zero count
+  # means it wasn't reported: show just the percentage, not "0k"
+  if [ -n "$ctx_in" ] && [ "$ctx_in" != "0" ]; then
+    ctx_k_used=$(awk -v v="$ctx_in" 'BEGIN{printf "%.0f", v/1000}')
+    ctx_seg="${c_sep}ctx${c_reset} ${c_dim}${ctx_k_used}k${c_reset} ${c_dim}(${c_reset}${ctx_color}${ctx_used_round}%${c_reset}${c_dim})${c_reset}"
+  else
+    ctx_seg="${c_sep}ctx${c_reset} ${ctx_color}${ctx_used_round}%${c_reset}"
+  fi
 fi
 
 # ---- rate limits (5h / 7d) ----

@@ -80,7 +80,8 @@ is working:
 No PR number: Claude Code already shows it.
 
 **Context**: `ctx 84k (42%)`, the tokens used, then the share of the context window that is,
-rounded to a whole percent. No maximum: the percentage already says it.
+rounded to a whole percent. No maximum: the percentage already says it. Without a token count, just
+the percentage (`ctx 42%`), since a count of `0k` would be wrong: every session has some context.
 
 **Quotas**: `5h: 96% until 6:10pm (3h 52m)`, then the same for `7d:` with the day before the
 time (`until Tue 8:00pm (3d 5h)`). The percentage is what's **left**, not what's used. Without a
