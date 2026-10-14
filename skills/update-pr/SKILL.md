@@ -25,14 +25,42 @@ git log --oneline HEAD..<base-remote>/<baseRefName>  # how far the base has move
 
 **No PR for this branch?** Who decided to run this skill settles what happens next:
 
-- **The user did** — they typed `/update-pr`, or asked for a PR — so they want one. Carry on, and
-  open it in Step 6, as a draft. Until then there is no title, body or checkbox to read, and the
-  base is the default branch (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`)
-  unless the user named another.
+- **The user did** — they typed `/update-pr`, or asked for a PR to be opened — so they want one.
+  Carry on, and open it in Step 6, as a draft. Until then there is no title, body or checkbox to
+  read.
+- **The user asked to update a PR** that turns out not to exist ("update the PR", "refresh the
+  description"): the request assumed one, so the checkout may be the wrong branch, or the PR lives
+  on another. Say so and stop rather than open a second one.
 - **You did**, after a round of work: say so and stop. A PR is a record on GitHub that outlives the
   decision to open it — the branch may be folded into another PR or stay a branch — so ask first.
 
-The fetch, upstream and diverged-head checks below apply either way.
+Before carrying on to open one, settle three things, and stop and ask if any is unclear. On the
+default branch itself there is nothing to open: say so and stop.
+
+```bash
+gh repo view --json parent -q '.parent | if . then .owner.login + "/" + .name else empty end'
+gh pr list --repo <base repo> --head <branch> --state all --json number,state,url   # had one before?
+gh repo view <base repo> --json defaultBranchRef -q .defaultBranchRef.name
+gh pr list --repo <base repo> --state open --json headRefName --jq '.[].headRefName' \
+  | while read -r b; do   # open PRs this branch is stacked on
+      r="<base-remote>/$b"
+      if git merge-base --is-ancestor "$r" HEAD 2>/dev/null \
+         && ! git merge-base --is-ancestor "$r" <base-remote>/<default>; then echo "$b"; fi
+    done
+```
+
+- **The base repo** is the parent the first line prints on a fork checkout, and this repo when it
+  prints nothing. Pass it as `--repo` to every `gh` call that follows; without it, `gh` answers for
+  the fork.
+- **The branch has had a PR before**, now closed or merged: report it and ask. Reopening it, or a
+  fresh PR for the commits since, is the user's call.
+- **The base branch** is the one the user named, else the base repo's default branch (`<default>`)
+  — unless the loop prints a branch, which means this one is stacked on another open PR. A PR
+  against the default branch would then carry that PR's commits too, so ask which base to use. The
+  loop only sees head branches on `<base-remote>`; on a fork, run it against your own remote too.
+
+The base branch then stands in for `<baseRefName>` in every command below. The fetch, upstream and
+diverged-head checks apply either way.
 
 **If the PR was passed explicitly, check the checkout matches it**: compare
 `git branch --show-current` with `headRefName`. Step 2 commits the working tree and pushes to the

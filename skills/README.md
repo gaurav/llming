@@ -267,8 +267,10 @@ Opening a PR is the one thing the skill does differently depending on who starte
 version said "no PR? stop and ask", because a PR is a record on GitHub that outlives the decision:
 a branch the agent made on its own initiative may end up folded into an earlier PR, or never need
 one. Agents read that as *never* create a PR, and asked me to confirm after I had typed `/update-pr`
-myself. The distinction that was missing is who decided. If I ran the skill, or asked for a PR, the
-decision is made; an agent that chose to run it after a round of work still asks. Either way the PR
+myself. The distinction that was missing is who decided. If I typed `/update-pr`, or asked for a
+PR, the decision is made; an agent that chose to run it after a round of work still asks. So does
+one I asked to *update* a PR that turns out not to exist: that request assumed a PR, so the likelier
+story is the wrong branch checked out, and a second PR is the wrong fix. Either way the PR
 is created as a draft and stays one, because I review every PR myself before it is marked ready,
 and a draft keeps anyone else from picking it up meanwhile. Those two rules are ambient — a session
 can open a PR with no skill firing at all — so they live in the user `CLAUDE.md` under `settings/`,
