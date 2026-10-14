@@ -10,6 +10,9 @@ if filereadable(expand('$VIMRUNTIME/defaults.vim'))
   source $VIMRUNTIME/defaults.vim
 endif
 
+" defaults.vim only turns the mouse on in every mode when $TERM contains "xterm". Anywhere else,
+" such as tmux or screen, it leaves out the command line (mouse=nvi), and without defaults.vim
+" there's no mouse at all. Not redundant, so keep it.
 set mouse=a
 
 " The Terminal.app profiles are dark, and Vim picks colours that read on a light background unless
