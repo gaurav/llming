@@ -169,6 +169,25 @@ That's how `Tokyo Night Darker` was made from `Solarized Darker`.
 `~/.vim/vimrc` is only read when `~/.vimrc` doesn't exist. If an edit to `~/.vim/vimrc` has no
 effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim loaded.
 
+**If Vim acts as if `defaults.vim` never ran** (`scrolloff=0`, no restore-cursor, no `incsearch`),
+`skip_defaults_vim` is set. macOS's system vimrc (`/usr/share/vim/vimrc`) sets it, and
+`defaults.vim` quietly does nothing, so the `unlet!` has to come before the `source`.
+`:scriptnames` shows whether `defaults.vim` was loaded at all. Homebrew's Vim has no system vimrc,
+so a vimrc that works there can still fail in `/usr/bin/vim`, which is what `git commit` often
+opens. Check both.
+
+**To check the vimrc without a human at a terminal**, copy it into a throwaway `$HOME` under
+`data/` and run Vim under a pty, writing options to a file:
+
+```bash
+H=$PWD/data/vim-check/home   # with the vimrc copied to $H/.vim/vimrc
+HOME=$H TERM=tmux-256color script -q /dev/null /usr/bin/vim \
+  -c "redir! > $H/out.txt | silent set mouse? ttymouse? scrolloff? | redir END | qa!" </dev/null
+```
+
+`vim -es` won't do: silent Ex mode skips the vimrc. Vary `TERM`, because `defaults.vim` and Vim's
+own `ttymouse` detection both branch on it.
+
 ## Claude Code
 
 `claude-code/statusline.sh` is installed as a copy at `~/.claude/statusline.sh`, which is where
