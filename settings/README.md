@@ -13,7 +13,8 @@ commands. So far there are four:
 
 - [`oh-my-posh/`](#shell-prompt-oh-my-posh): my zsh prompt.
 - [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
-- [`vim/`](vim/README.md): my Vim setup, with syntax highlighting in the terminal's colours.
+- [`vim/`](vim/README.md): my Vim setup: Vim's own defaults, the mouse on, and the terminal's
+  colours.
 - [`claude-code/`](claude-code/README.md): my Claude Code status line (git branch, context and
   quota use, model), and the instructions every Claude Code session gets.
 

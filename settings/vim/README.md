@@ -1,8 +1,8 @@
 # Vim
 
-My Vim setup. It's small: syntax highlighting on, and colours chosen for a dark terminal. There's no
-colour scheme, so Vim draws with the terminal's own 16 colours. That means it already matches
-whichever [Terminal.app profile](../README.md#terminalapp-profile) is in use.
+My Vim setup. It's small: Vim's own defaults, the mouse on, and colours chosen for a dark terminal.
+There's no colour scheme, so Vim draws with the terminal's own 16 colours. That means it already
+matches whichever [Terminal.app profile](../README.md#terminalapp-profile) is in use.
 
 ## Install
 
@@ -17,6 +17,10 @@ file it actually loaded.
 
 ## Known issues
 
+- **Dragging selects in Vim, not in the terminal.** With the mouse on, a drag makes a Visual
+  selection, so ⌘C copies whatever the terminal last selected instead. To select as the terminal,
+  hold Fn while dragging in Terminal.app (or turn off View ▸ Allow Mouse Reporting, ⌘R), or Shift
+  in Ghostty.
 - **Plugins aren't in the repo.** Anything installed as a Vim package is cloned into
   `~/.vim/pack/`, so a new machine needs the `git clone` from [Colour schemes](#colour-schemes)
   again.
@@ -29,10 +33,29 @@ file it actually loaded.
 
 What to reproduce on another machine, with or without this file:
 
-- **Syntax highlighting on** (`syntax on`).
-- **File-type detection, with per-language plugins and indentation** (`filetype plugin indent
-  on`). This makes highlighting work for more files, and makes indentation follow each
-  language's rules.
+- **Vim's own defaults** (`source $VIMRUNTIME/defaults.vim`). These are what a Vim with no vimrc
+  gets. **Vim stops loading them as soon as any vimrc exists**, so a vimrc has to ask for them.
+  macOS's `/usr/bin/vim` (what `GIT_EDITOR` often points to) also turns them off in its system
+  vimrc, which is what the `unlet! skip_defaults_vim` before it undoes. In Vim 9.1 they:
+  - reopen a file where you left off;
+  - search as you type (`incsearch`), without leaving matches highlighted;
+  - keep 5 lines of context around the cursor (`scrolloff=5`);
+  - show the cursor position (`ruler`), and `@@@` for a last line that doesn't fit
+    (`display=truncate`);
+  - wait only 100 ms after Esc for the rest of a key code (`ttimeout ttimeoutlen=100`);
+  - treat numbers with a leading 0 as decimal, not octal, for CTRL-A and CTRL-X;
+  - turn on syntax highlighting, and file-type detection, plugins and indentation;
+  - turn the mouse on (`mouse=a` in an xterm-like terminal, `mouse=nvi` elsewhere);
+  - **make `Q` format text (`gq`)** instead of entering Ex mode (`gQ` still does that);
+  - make CTRL-U in Insert mode undoable on its own;
+  - add a `:DiffOrig` command, which diffs the buffer against the file on disk.
+
+  Older Vims' `defaults.vim` also turned on `showcmd`, `wildmenu` and a 200-line `history`, which
+  9.1 has from the start.
+- **Mouse on in every mode** (`set mouse=a`), for scrolling and clicking to move the cursor. Set
+  even though the defaults set it, because they leave the command line out in tmux and screen.
+  There, the vimrc also switches to the SGR mouse protocol (`set ttymouse=sgr`), so clicks work
+  past column 223.
 - **A dark background** (`set background=dark`). Every Terminal.app profile I use is dark. Without
   this line Vim assumes a light background and some colours are too dim to read.
 - **No colour scheme.** Vim's default draws with the terminal's 16 ANSI colours, so it picks up
@@ -42,7 +65,8 @@ What to reproduce on another machine, with or without this file:
 
 To try one, type `:colorscheme`, a space, and press Tab to cycle through the installed ones. Vim 9
 comes with several, including `habamax`, `lunaperche`, `retrobox`, `sorbet`, `desert` and `slate`.
-To keep one, add `colorscheme <name>` to `~/.vim/vimrc`, after `syntax on`.
+To keep one, add `colorscheme <name>` at the end of `~/.vim/vimrc`, after `set background=dark`.
+Many schemes read `background` when they load, so set it first.
 
 A theme that is a single `.vim` file goes in `~/.vim/colors/`. A theme on GitHub is
 usually a whole plugin, which goes in `~/.vim/pack/`, where Vim loads it at startup. For example,

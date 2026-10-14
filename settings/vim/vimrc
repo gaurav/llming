@@ -1,8 +1,25 @@
 " Installed by copying it to ~/.vim/vimrc.
 " See settings/vim/README.md.
 
-syntax on
-filetype plugin indent on
+" Start from Vim's own defaults.vim, which Vim stops loading as soon as any vimrc exists. macOS's
+" /usr/bin/vim also switches it off in its system vimrc, hence the unlet. Vims older than 8.0, and
+" some minimal builds, have no defaults.vim, and sourcing a missing file stops every startup with
+" an error.
+unlet! skip_defaults_vim
+if filereadable(expand('$VIMRUNTIME/defaults.vim'))
+  source $VIMRUNTIME/defaults.vim
+endif
+
+" defaults.vim only turns the mouse on in every mode when $TERM contains "xterm". Anywhere else,
+" such as tmux or screen, it leaves out the command line (mouse=nvi), and without defaults.vim
+" there's no mouse at all. Not redundant, so keep it.
+set mouse=a
+
+" Vim only picks the SGR mouse protocol by itself for terminals it recognises, and tmux isn't one,
+" so there clicks past column 223 go astray. tmux understands SGR, so ask for it.
+if has('mouse_sgr') && &term =~ '^\(tmux\|screen\)'
+  set ttymouse=sgr
+endif
 
 " The Terminal.app profiles are dark, and Vim picks colours that read on a light background unless
 " told otherwise.
