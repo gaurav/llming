@@ -59,7 +59,7 @@ repo's commit conventions, in **multiple commits** where they'd be useful.
 
 **Ask when unsure.** Files you didn't touch, unrelated edits, a debug script, a change that looks
 like it belongs to different work — name them and ask rather than sweeping them in or silently
-leaving them behind.
+leaving them behind. Uncertainty here is cheap to resolve and expensive to get wrong.
 
 Then push to the head branch. If the push fails on a non-fast-forward, stop and report — don't
 force-push without asking.
