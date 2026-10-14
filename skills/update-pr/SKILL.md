@@ -327,6 +327,9 @@ A new PR is **always a draft**: the user reviews every PR before marking it read
 never runs `gh pr ready`. It is created once, with the finished title and body, not created with a
 placeholder and edited — and not with `--fill`, which takes the title from the commit log, which is
 what Step 4 exists to avoid. On a fork checkout add `--repo <base repo> --head <you>:<branch>`.
+From then on the PR exists: `$PR` is its number, and every later write, including a second pass
+through Steps 2–6 from Step 7, is `gh pr edit`. A second `gh pr create` fails, since the branch
+already has a PR.
 
 **Link to repo files by full URL, pinned to the head commit's short SHA**:
 `https://github.com/<owner>/<repo>/blob/<short-sha>/docs/Design.md#heading`. The full 40-character
@@ -408,7 +411,8 @@ replace the checkbox with a link. Past three or four issues, link the milestone 
 and name only the two or three a reviewer needs; a list restates titles GitHub already renders, and
 goes stale.
 
-If pulling an item into this PR means new code, do it, then run Steps 2–6 again.
+If pulling an item into this PR means new code, do it, then run Steps 2–6 again — editing the PR,
+not creating it, if Step 6 just did.
 
 ## Step 8 — Summary
 
