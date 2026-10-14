@@ -22,8 +22,9 @@ refuses or challenges scripted fetches (a 403, 429 or 503, or a 200 "checking yo
 try it directly once, then ask me to save it from my browser and read that copy. Don't route such
 text through a third-party fetch proxy (Jina Reader and the like) or read it from an archived copy
 (the Wayback Machine, a search engine's cache): a clause misread through someone else's rendering,
-or read from an out-of-date snapshot, is worse than a delay. A site that turns every script away has
-said it doesn't want scripted visitors, so don't keep trying user agents or headers either. A proxy
-is fine for bulk background reading (news coverage, mirrors, discussion threads) where saving each
-page by hand is tedious and nothing read there decides anything on its own. Say where a fact was
-read from.
+or read from an out-of-date snapshot, is worse than a delay. Say where a fact was read from.
+
+A site that turns every script away has said it doesn't want scripted visitors, so don't keep trying
+user agents or headers, and don't send a proxy in your place. A proxy is fine for bulk background
+reading (news coverage, mirrors, discussion threads) from sites that don't turn scripts away, where
+saving each page by hand is tedious and nothing read there decides anything on its own.
