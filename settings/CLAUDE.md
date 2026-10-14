@@ -194,7 +194,9 @@ jq -n --argjson now "$N" '{workspace: {current_dir: "'"$PWD"'"},
 
 Also try a quota with no `resets_at` (`five_hour: {used_percentage: 4}`). The docs say Claude Code
 sends both fields or drops the window, but the script is meant to show just the percentage, not
-`until  (now)`.
+`until  (now)`. Likewise try a context window with no `total_input_tokens`, a zero one, or one
+small enough to round to `0k` (`total_input_tokens: 400`): each should show `ctx 42%`, not
+`ctx 0k (42%)`.
 
 `cat -v` shows the escape codes, which is the only way to check colours without a human looking.
 Strip them with `perl -pe 's/\e\[[0-9;]*m//g'` to read the text. For git states, make throwaway

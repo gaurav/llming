@@ -60,11 +60,8 @@ fmt_clock() {
 }
 
 fmt_clock_day() {
-  # epoch -> "Fri 3am"
-  local epoch=$1
-  local t
-  t=$(fmt_epoch "$epoch" '+%a %I%p' | sed 's/AM$/am/; s/PM$/pm/')
-  echo "$t" | sed -E 's/ 0/ /'
+  # epoch -> "Fri 3:05pm"
+  echo "$(fmt_epoch "$1" '+%a') $(fmt_clock "$1")"
 }
 
 pct_color() {
@@ -142,9 +139,17 @@ ctx_in=$(echo "$input" | jq -r '.context_window.total_input_tokens // empty')
 ctx_seg=""
 if [ -n "$ctx_used" ]; then
   ctx_color=$(pct_color "$ctx_used")
-  ctx_k_used=$(awk -v v="$ctx_in" 'BEGIN{printf "%.0f", v/1000}')
   ctx_used_round=$(awk -v v="$ctx_used" 'BEGIN{printf "%.0f", v}')
-  ctx_seg="${c_sep}ctx${c_reset} ${c_dim}${ctx_k_used}k${c_reset} ${c_dim}(${c_reset}${ctx_color}${ctx_used_round}%${c_reset}${c_dim})${c_reset}"
+  # a session always has some context (a system prompt at least), so a missing or zero count
+  # means it wasn't reported: show just the percentage, not "0k". Test the rounded count, not the
+  # raw one, so a count small enough to round to "0k" (500 or under) gets the same treatment.
+  ctx_k_used=""
+  [ -n "$ctx_in" ] && ctx_k_used=$(awk -v v="$ctx_in" 'BEGIN{printf "%.0f", v/1000}')
+  if [ -n "$ctx_k_used" ] && [ "$ctx_k_used" != "0" ]; then
+    ctx_seg="${c_sep}ctx${c_reset} ${c_dim}${ctx_k_used}k${c_reset} ${c_dim}(${c_reset}${ctx_color}${ctx_used_round}%${c_reset}${c_dim})${c_reset}"
+  else
+    ctx_seg="${c_sep}ctx${c_reset} ${ctx_color}${ctx_used_round}%${c_reset}"
+  fi
 fi
 
 # ---- rate limits (5h / 7d) ----

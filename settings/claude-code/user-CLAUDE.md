@@ -13,3 +13,6 @@ it ready, so never run `gh pr ready`.
 
 An approach that was tried and failed belongs in the commit messages, or, if someone is likely to
 try it again, in the code or docs, so they don't go the same wrong way.
+
+Don't merge a pull request that no human has reviewed: the merge is mine to make, after a review.
+Suggesting that two PRs be combined, so one long session can review both, is fine.
