@@ -20,8 +20,10 @@ Suggesting that two PRs be combined, so one long session can review both, is fin
 When a page carrying facts I will act on (a deadline, an eligibility rule, a price, a licence term)
 refuses or challenges scripted fetches (a 403, 429 or 503, or a 200 "checking your browser" page),
 try it directly once, then ask me to save it from my browser and read that copy. Don't route such
-text through a third-party fetch proxy (Jina Reader and the like): a clause misread through someone
-else's rendering is worse than a delay. A site that turns every script away has said it doesn't want
-scripted visitors, so don't keep trying user agents or headers either. A proxy is fine for bulk
-background reading (news coverage, mirrors, discussion threads) where saving each page by hand is
-tedious and nothing read there decides anything on its own. Say where a fact was read from.
+text through a third-party fetch proxy (Jina Reader and the like) or read it from an archived copy
+(the Wayback Machine, a search engine's cache): a clause misread through someone else's rendering,
+or read from an out-of-date snapshot, is worse than a delay. A site that turns every script away has
+said it doesn't want scripted visitors, so don't keep trying user agents or headers either. A proxy
+is fine for bulk background reading (news coverage, mirrors, discussion threads) where saving each
+page by hand is tedious and nothing read there decides anything on its own. Say where a fact was
+read from.
