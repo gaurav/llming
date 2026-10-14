@@ -99,8 +99,9 @@ like it belongs to different work — name them and ask rather than sweeping the
 leaving them behind. Uncertainty here is cheap to resolve and expensive to get wrong.
 
 Then push to the head branch. If the push fails on a non-fast-forward, stop and report — don't
-force-push without asking. A branch with no upstream gets one here (`git push -u <remote> <branch>`)
-when the user asked for a PR: the request implies the push.
+force-push without asking. A branch with no upstream gets one as it is pushed: for an existing PR,
+`git push -u <head-remote> HEAD:<headRefName>`, where `<head-remote>` is the head repo's remote (on
+a fork, yours); for a new one, `git push -u <remote> <branch>`, which the request for a PR implies.
 
 ## Step 3 — Read what the PR actually contains
 
