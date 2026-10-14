@@ -23,6 +23,11 @@ git log --oneline HEAD..@{u}                       # remote head commits you don
 git log --oneline HEAD..<base-remote>/<baseRefName>  # how far the base has moved under you
 ```
 
+**A closed or merged PR is not this round's.** `gh pr view` returns one for a branch whose PR has
+already merged, so check `state` before going on: editing that PR rewrites a record that has
+shipped, and pushing adds commits it will never merge. Report it and ask — reopening it, or a fresh
+PR for the commits since, is the user's call.
+
 **No PR for this branch?** Who decided to run this skill settles what happens next:
 
 - **The user did** — they typed `/update-pr`, or asked for a PR to be opened — so they want one.
@@ -49,10 +54,10 @@ gh pr list --repo <base repo> --state open --limit 1000 --json headRefName --jq 
 ```
 
 - **The base repo** is the parent the first line prints on a fork checkout, and this repo when it
-  prints nothing. Pass it as `--repo` to every `gh` call that follows; without it, `gh` answers for
-  the fork.
-- **The branch has had a PR before**, now closed or merged: report it and ask. Reopening it, or a
-  fresh PR for the commits since, is the user's call.
+  prints nothing. Pass it as `--repo` to every `gh pr`, `gh issue` and `gh repo` call that follows;
+  without it, `gh` answers for the fork. `gh api` has no `--repo` flag: name the base repo in its
+  owner and repo variables, or its path, instead.
+- **The branch has had a PR before**, now closed or merged: as above, report it and ask.
 - **The base branch** is the one the user named, else the base repo's default branch (`<default>`)
   — unless the loop prints a branch, which means this one is stacked on another open PR. A PR
   against the default branch would then carry that PR's commits too, so ask which base to use.
