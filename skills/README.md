@@ -18,6 +18,7 @@ isn't recoverable from the skill itself.
   the code.
 - **update-pr** — keeps the PR honest about what shipped: rewrites the title and description against
   the diff each round, and moves anything durable into the repo so the description stays short.
+  Opens the PR, as a draft, when I ask for one.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped, and
   checks first whether a previous run already did.
 
@@ -261,6 +262,21 @@ The hard-wrapping rule is the one an agent breaks by reflex, because everything 
 wrapped at 80 columns and GitHub turns each of those newlines into a line break. The skill says
 don't wrap in the first place, and reaches for `npx prettier --prose-wrap never` only when text has
 to survive verbatim — the root `CLAUDE.md` has the story of the unwrapper script it replaced.
+
+Opening a PR is the one thing the skill does differently depending on who started it. The first
+version said "no PR? stop and ask", because a PR is a record on GitHub that outlives the decision:
+a branch the agent made on its own initiative may end up folded into an earlier PR, or never need
+one. Agents read that as *never* create a PR, and asked me to confirm after I had typed `/update-pr`
+myself. The distinction that was missing is who decided. If I typed `/update-pr`, or asked for a
+PR, the decision is made; an agent that chose to run it after a round of work still asks. So does
+one I asked to *update* a PR that turns out not to exist: that request assumed a PR, so the likelier
+story is the wrong branch checked out, and a second PR is the wrong fix. Either way the PR
+is created as a draft and stays one, because I review every PR myself before it is marked ready,
+and a draft keeps anyone else from picking it up meanwhile. Those two rules are ambient — a session
+can open a PR with no skill firing at all — so they live in the user `CLAUDE.md` under `settings/`,
+and the skill carries only the mechanics. A separate `github-pr` skill to collect how I do PRs
+didn't seem worth it: there is no moment with a name that `update-pr` doesn't already own, and
+whatever lands in a PR description is cheap to overwrite with another run of it.
 
 ## wrap
 

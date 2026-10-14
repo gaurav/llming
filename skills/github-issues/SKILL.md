@@ -100,7 +100,9 @@ if it is wrong, nobody is placed to notice, and the issue is ignored until someo
 GitHub only acts on the keyword when the PR merges into the repository's default branch
 (`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`). In a stacked PR or one aimed at
 a release branch it closes nothing, so the keyword belongs on the PR that will eventually land on
-the default branch; if there is none yet, tell the user the issue will need closing later.
+the default branch; if there is none yet, tell the user the issue will need closing later. Don't
+open a PR to carry the keyword: whether a branch gets a PR is the user's call, and when they want
+one the `update-pr` skill opens it, as a draft.
 
 Being asked to do the work that finishes an issue is not being asked to close it — the rules below
 still decide how. Being told to close it is.
