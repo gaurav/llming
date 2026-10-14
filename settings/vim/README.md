@@ -34,12 +34,28 @@ file it actually loaded.
 What to reproduce on another machine, with or without this file:
 
 - **Vim's own defaults** (`source $VIMRUNTIME/defaults.vim`). These are what a Vim with no vimrc
-  gets: it reopens a file where you left off, searches as you type, keeps 5 lines of context
-  around the cursor, and turns on syntax highlighting and file-type detection, plugins and
-  indentation. **Vim stops loading them as soon as any vimrc exists**, so a vimrc has to ask for
-  them. macOS's `/usr/bin/vim` (what `GIT_EDITOR` often points to) also turns them off in its system
-  vimrc, which is what the `unlet! skip_defaults_vim` before it undoes.
-- **Mouse on in every mode** (`set mouse=a`), for scrolling and clicking to move the cursor.
+  gets. **Vim stops loading them as soon as any vimrc exists**, so a vimrc has to ask for them.
+  macOS's `/usr/bin/vim` (what `GIT_EDITOR` often points to) also turns them off in its system
+  vimrc, which is what the `unlet! skip_defaults_vim` before it undoes. In Vim 9.1 they:
+  - reopen a file where you left off;
+  - search as you type (`incsearch`), without leaving matches highlighted;
+  - keep 5 lines of context around the cursor (`scrolloff=5`);
+  - show the cursor position (`ruler`), and `@@@` for a last line that doesn't fit
+    (`display=truncate`);
+  - wait only 100 ms after Esc for the rest of a key code (`ttimeout ttimeoutlen=100`);
+  - treat numbers with a leading 0 as decimal, not octal, for CTRL-A and CTRL-X;
+  - turn on syntax highlighting, and file-type detection, plugins and indentation;
+  - turn the mouse on (`mouse=a` in an xterm-like terminal, `mouse=nvi` elsewhere);
+  - **make `Q` format text (`gq`)** instead of entering Ex mode (`gQ` still does that);
+  - make CTRL-U in Insert mode undoable on its own;
+  - add a `:DiffOrig` command, which diffs the buffer against the file on disk.
+
+  Older Vims' `defaults.vim` also turned on `showcmd`, `wildmenu` and a 200-line `history`, which
+  9.1 has from the start.
+- **Mouse on in every mode** (`set mouse=a`), for scrolling and clicking to move the cursor. Set
+  even though the defaults set it, because they leave the command line out in tmux and screen.
+  There, the vimrc also switches to the SGR mouse protocol (`set ttymouse=sgr`), so clicks work
+  past column 223.
 - **A dark background** (`set background=dark`). Every Terminal.app profile I use is dark. Without
   this line Vim assumes a light background and some colours are too dim to read.
 - **No colour scheme.** Vim's default draws with the terminal's 16 ANSI colours, so it picks up
