@@ -106,9 +106,12 @@ a fork, yours); for a new one, `git push -u <remote> <branch>`, which the reques
 ## Step 3 — Read what the PR actually contains
 
 ```bash
-gh pr diff --name-only                               # what's touched
-git log --oneline <base-remote>/<baseRefName>..HEAD  # the base ref you fetched, not the local one
+git diff --name-only <base-remote>/<baseRefName>...HEAD  # what's touched, as the PR diff shows it
+git log --oneline <base-remote>/<baseRefName>..HEAD      # the base ref you fetched, not the local one
 ```
+
+Three dots in the diff, two in the log: the diff starts from the merge base, as GitHub's does, and
+works before a PR exists, which `gh pr diff` does not.
 
 Read the existing title and body from Step 1, and the linked issues. Base the rewrite on the diff,
 not on your memory of the session — the session includes work that never landed.
@@ -118,7 +121,9 @@ this run as a `- [x]` (Step 7), so the rest are input to Steps 5 and 6, not some
 afterwards. Read Step 7 before writing anything.
 
 Then treat three kinds of claim in the old body as unverified until checked. This skill runs
-repeatedly, and each run would otherwise re-assert the last one's.
+repeatedly, and each run would otherwise re-assert the last one's. A new PR has no old body and no
+`$PR` yet: skip the `lastEditedAt` lookup and the body grep below, check each `#N` you are about to
+write with the per-reference commands, and hold the claims you write to the same standard.
 
 **`#N` references.** A claim about another PR or issue stops being true when other work lands, and
 nothing in the diff shows it. Checking costs a lookup per reference, so first see what has landed
