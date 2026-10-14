@@ -75,14 +75,18 @@ done
 `update-pr` commits, pushes and edits a PR, so its test runs need a real PR they cannot change. What
 worked, when it was tightened against prcoder#109: each run gets its own clone whose `origin` is a
 local bare copy of the repo, so pushes land nowhere real, and a stand-in `gh` first on `PATH` that
-passes reads through to GitHub and records every write (`pr edit`, issue changes, `api` with a
-method, fields or a mutation) to a file instead. The stand-in also serves a planted title and body
+passes reads through to GitHub and records every write (`pr edit`, issue changes, an `api` call
+that writes) to a file instead. The stand-in also serves a planted title and body
 for a scenario, so one live PR can be tested in several states. Grade the recorded body, not the
 agent's report of it.
 
 - **`gh` can't infer the PR once `origin` is a local path.** `gh pr view` with no number fails with
   `none of the git remotes … point to a known GitHub host`, so the stand-in has to add the PR
   number and `--repo` itself.
+- **Tell an `api` write by what it does, not by its flags.** A GraphQL call is a write only if its
+  query is a `mutation`, and a REST call only if its effective method isn't GET. Fields don't
+  decide it: `update-pr`'s Step 3 sends `-f`/`-F` to `graphql` for a read-only lookup, and
+  `--method GET` can carry fields too. Record those, and the run never sees the answers it needs.
 - **Shell state doesn't persist between a subagent's Bash calls**, so the `PATH` prefix goes on
   every command. Give it in the prompt as a literal prefix, and afterwards check that the live PR's
   title and body are byte-for-byte what they were.
