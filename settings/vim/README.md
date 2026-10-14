@@ -45,7 +45,8 @@ What to reproduce on another machine, with or without this file:
 
 To try one, type `:colorscheme`, a space, and press Tab to cycle through the installed ones. Vim 9
 comes with several, including `habamax`, `lunaperche`, `retrobox`, `sorbet`, `desert` and `slate`.
-To keep one, add `colorscheme <name>` to `~/.vim/vimrc`, after `syntax on`.
+To keep one, add `colorscheme <name>` at the end of `~/.vim/vimrc`, after `set background=dark`.
+Many schemes read `background` when they load, so set it first.
 
 A theme that is a single `.vim` file goes in `~/.vim/colors/`. A theme on GitHub is
 usually a whole plugin, which goes in `~/.vim/pack/`, where Vim loads it at startup. For example,
