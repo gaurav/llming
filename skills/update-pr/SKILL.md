@@ -74,8 +74,9 @@ git log --oneline <base-remote>/<baseRefName>..HEAD  # the base ref you fetched,
 Read the existing title and body from Step 1, and the linked issues. Base the rewrite on the diff,
 not on your memory of the session — the session includes work that never landed.
 
-**Note which checkboxes in the old body are ticked.** None survives this run as a `- [x]`, so they
-are input to Steps 5 and 6, not something to tidy afterwards. Read Step 7 before writing anything.
+**Note which checkboxes in the old body are ticked.** Only a sign-off nobody can attribute survives
+this run as a `- [x]` (Step 7), so the rest are input to Steps 5 and 6, not something to tidy
+afterwards. Read Step 7 before writing anything.
 
 Then treat three kinds of claim in the old body as unverified until checked. This skill runs
 repeatedly, and each run would otherwise re-assert the last one's.
@@ -303,8 +304,9 @@ The checkboxes are a live list of what is still owed, in two kinds:
 - **Readiness checks** — evidence that it can merge: "all unit tests pass", "deployed to staging and
   looked at by a person", "reviewed by team XYZ against agreement ABC".
 
-Both stay `- [ ]` while open. **Neither stays a checkbox once it is ticked**: a `- [x]` says only
-that something was once owed, which no reader needs. Dissolve each one by kind:
+Both stay `- [ ]` while open. **Neither stays a checkbox once it is ticked**, but for the one
+exception under *Never tick a box yourself*: a `- [x]` says only that something was once owed,
+which no reader needs. Dissolve each one by kind:
 
 - **A ticked to-do** — confirm it was done, in the diff or wherever it lives (a to-do to update an
   issue is checked against the issue). One that was reverted, or ticked optimistically, goes back to
