@@ -17,6 +17,10 @@ file it actually loaded.
 
 ## Known issues
 
+- **Dragging selects in Vim, not in the terminal.** With the mouse on, a drag makes a Visual
+  selection, so ⌘C copies whatever the terminal last selected instead. To select as the terminal,
+  hold Fn while dragging in Terminal.app (or turn off View ▸ Allow Mouse Reporting, ⌘R), or Shift
+  in Ghostty.
 - **Plugins aren't in the repo.** Anything installed as a Vim package is cloned into
   `~/.vim/pack/`, so a new machine needs the `git clone` from [Colour schemes](#colour-schemes)
   again.
