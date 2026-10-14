@@ -41,11 +41,10 @@ default branch itself there is nothing to open: say so and stop.
 gh repo view --json parent -q '.parent | if . then .owner.login + "/" + .name else empty end'
 gh pr list --repo <base repo> --head <branch> --state all --json number,state,url   # had one before?
 gh repo view <base repo> --json defaultBranchRef -q .defaultBranchRef.name
-gh pr list --repo <base repo> --state open --json headRefName --jq '.[].headRefName' \
-  | while read -r b; do   # open PRs this branch is stacked on
-      r="<base-remote>/$b"
-      if git merge-base --is-ancestor "$r" HEAD 2>/dev/null \
-         && ! git merge-base --is-ancestor "$r" <base-remote>/<default>; then echo "$b"; fi
+gh pr list --repo <base repo> --state open --limit 1000 --json headRefName --jq '.[].headRefName' \
+  | while read -r b; do   # open PRs sharing commits with this branch beyond the default branch
+      mb=$(git merge-base "<base-remote>/$b" HEAD 2>/dev/null) || continue
+      if ! git merge-base --is-ancestor "$mb" <base-remote>/<default>; then echo "$b"; fi
     done
 ```
 
@@ -56,8 +55,10 @@ gh pr list --repo <base repo> --state open --json headRefName --jq '.[].headRefN
   fresh PR for the commits since, is the user's call.
 - **The base branch** is the one the user named, else the base repo's default branch (`<default>`)
   — unless the loop prints a branch, which means this one is stacked on another open PR. A PR
-  against the default branch would then carry that PR's commits too, so ask which base to use. The
-  loop only sees head branches on `<base-remote>`; on a fork, run it against your own remote too.
+  against the default branch would then carry that PR's commits too, so ask which base to use.
+  `gh pr list` stops at 30 PRs without `--limit`, and the parent may be older than that. The loop
+  compares where the branches split, not the parent's tip, which moves on once a child is cut from
+  it. It only sees head branches on `<base-remote>`; on a fork, run it against your own remote too.
 
 The base branch then stands in for `<baseRefName>` in every command below. The fetch, upstream and
 diverged-head checks apply either way.
