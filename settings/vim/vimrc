@@ -15,6 +15,12 @@ endif
 " there's no mouse at all. Not redundant, so keep it.
 set mouse=a
 
+" Vim only picks the SGR mouse protocol by itself for terminals it recognises, and tmux isn't one,
+" so there clicks past column 223 go astray. tmux understands SGR, so ask for it.
+if has('mouse_sgr') && &term =~ '^\(tmux\|screen\)'
+  set ttymouse=sgr
+endif
+
 " The Terminal.app profiles are dark, and Vim picks colours that read on a light background unless
 " told otherwise.
 set background=dark
