@@ -172,6 +172,13 @@ Where it goes if it earns it:
 
 ## update-pr
 
+Shown as `/pr-update` since November 2026. Typed as `/update-pr`, it was lost among Claude Code's
+own `update` and `upgrade` commands. Only the frontmatter `name:` changed. The directory is still
+`update-pr`, and the directory name also invokes a skill, so `/update-pr` keeps working out of
+habit and no install symlink had to move. If the new name sticks, finish the rename with
+`git mv skills/update-pr skills/pr-update` and re-point each machine's symlink. `/update-pr` stops
+working then.
+
 A PR title becomes a line in my release notes. The description gets read during review and again
 when I write that line, and then never — so it is the *worst* place for the *why* of a change to
 survive, and the repo is the right one. Both drift: the title is written when the branch is one

@@ -79,6 +79,12 @@ does and when to use it, so a per-skill README would only restate it. Instead th
 things a `SKILL.md` has no room for because it is written for an agent, not for me. Add a section
 there when adding a skill.
 
+Name a skill noun-first (`pr-update`, `github-issues`), so it groups by subject in the `/` menu
+rather than landing among Claude Code's built-in verbs (`/update`, `/upgrade`, `/review`). The
+frontmatter `name:` sets the command the menu shows, and the directory name still invokes the
+skill. So changing `name:` alone renames a skill while keeping the old name as a hidden alias. That
+is how `skills/update-pr/` became `/pr-update`.
+
 Install a skill onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
 the `SKILL.md` inside it (`ln -s ~/code/llming/skills/update-pr ~/.claude/skills/update-pr`).
 Editing through either path is the same file, so a change made on one machine is live everywhere
