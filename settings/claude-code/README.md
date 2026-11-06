@@ -60,7 +60,7 @@ a machine may already have one with additions of its own, so compare the two fir
   once. Pace colouring is on trial, and may yet be dropped or get its own colour or symbol.
 - **The branch colour runs `git status` on every update.** That's quick in the repos I use, but
   might not be in a huge one.
-- **`user-CLAUDE.md` defers to the [`pr-update`](../../skills/update-pr/SKILL.md) skill** on PR
+- **`user-CLAUDE.md` defers to the [`pr-update`](../../skills/pr-update/SKILL.md) skill** on PR
   titles and descriptions, keeping only a two-line summary for a machine without it. Changing the
   skill's rules means checking that summary still agrees.
 

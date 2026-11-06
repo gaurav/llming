@@ -16,7 +16,7 @@ isn't recoverable from the skill itself.
   untriaged issues alone, and doesn't treat a soft release date that has passed as an alarm.
 - **sync-docs** — a broad use-your-judgement pass that rechecks every documentation claim against
   the code.
-- **update-pr** — keeps the PR honest about what shipped: rewrites the title and description against
+- **pr-update** — keeps the PR honest about what shipped: rewrites the title and description against
   the diff each round, and moves anything durable into the repo so the description stays short.
   Opens the PR, as a draft, when I ask for one.
 - **wrap** — gets what the agent has worked out into the repo before the session is wiped, and
@@ -30,13 +30,13 @@ check the suppressed comments too, expect some comments to be stale (a Claude re
 first and has already fixed things), and close out every thread so the PR is clear for human review
 unless something genuinely needs a person to look again.
 
-No repeat-run check here, and unlike `update-pr` that isn't a decision I had to make — a previous
+No repeat-run check here, and unlike `pr-update` that isn't a decision I had to make — a previous
 run leaves its record on the PR itself. Threads it handled are resolved, and the ones it declined
 carry the reply saying why. So a human can see whether another run is wanted before starting one,
 and an agent that starts one anyway finds most threads already resolved and does almost nothing.
 The state the other two skills have to derive from git is, for this skill, just visible.
 
-It is also the one skill here that files an issue without asking me first. `update-pr` and `wrap`
+It is also the one skill here that files an issue without asking me first. `pr-update` and `wrap`
 offer their follow-ups and wait, because an issue born at the end of a session needs enough context
 written into it to make sense later, and I want to see that before it exists. An issue deferred from
 a Copilot comment starts with that context: a specific comment on a specific line of a specific PR.
@@ -99,7 +99,7 @@ the skill: a session in the first list and not the second is a miss. The first l
 `gh` CLI, so it is a floor, and only sessions started after the install on that machine count. The
 greps, and the ways they have already gone wrong, are in `CLAUDE.md`.
 
-The other skills that touch issues — `copilot-review`, `update-pr` and `wrap` — each point at this
+The other skills that touch issues — `copilot-review`, `pr-update` and `wrap` — each point at this
 one by name at the moment they would file one, which is also where the look-for-an-existing-issue
 check lives, so it is written once. Those pointers are a second route to the rule, and a confound
 for the experiment: a load that happens inside one of those skills says the pointer worked, not the
@@ -170,14 +170,14 @@ Where it goes if it earns it:
    documentation has become unclear or duplicative, and to suggest compressing, reorganising or
    trimming it.
 
-## update-pr
+## pr-update
 
-Shown as `/pr-update` since November 2026. Typed as `/update-pr`, it was lost among Claude Code's
-own `update` and `upgrade` commands. Only the frontmatter `name:` changed. The directory is still
-`update-pr`, and the directory name also invokes a skill, so `/update-pr` keeps working out of
-habit and no install symlink had to move. If the new name sticks, finish the rename with
-`git mv skills/update-pr skills/pr-update` and re-point each machine's symlink. `/update-pr` stops
-working then.
+Called `update-pr` until November 2026. Under that name it was lost among Claude Code's own
+`update` and `upgrade` commands. I still type `/update-pr` out of habit, so on my machines the
+skill is installed under its old name, as
+`ln -s ~/code/llming/skills/pr-update ~/.claude/skills/update-pr`. The `/` menu shows the
+frontmatter `name:`, so it still lists `/pr-update`, and the name of the install link means
+`/update-pr` runs it too. Once the habit is gone, rename the link to `pr-update`.
 
 A PR title becomes a line in my release notes. The description gets read during review and again
 when I write that line, and then never — so it is the *worst* place for the *why* of a change to
@@ -282,7 +282,7 @@ is created as a draft and stays one, because I review every PR myself before it 
 and a draft keeps anyone else from picking it up meanwhile. Those two rules are ambient — a session
 can open a PR with no skill firing at all — so they live in the user `CLAUDE.md` under `settings/`,
 and the skill carries only the mechanics. A separate `github-pr` skill to collect how I do PRs
-didn't seem worth it: there is no moment with a name that `update-pr` doesn't already own, and
+didn't seem worth it: there is no moment with a name that `pr-update` doesn't already own, and
 whatever lands in a PR description is cheap to overwrite with another run of it.
 
 ## wrap
@@ -309,14 +309,14 @@ evidence rather than a verdict, because a clean tree genuinely doesn't prove not
 work may have been committed by hand, or by an earlier run that recorded no lesson. I'd rather be
 told "clean tree, nothing unpushed" and make that call myself.
 
-## Where update-pr, wrap and copilot-review overlap
+## Where pr-update, wrap and copilot-review overlap
 
 All three decide what to fix now and what to file for later. The bar is stated in full in
-`update-pr` and `copilot-review` and paraphrased in `wrap`, and that duplication is deliberate, not
+`pr-update` and `copilot-review` and paraphrased in `wrap`, and that duplication is deliberate, not
 debt waiting to be factored out. A skill is loaded on its own, so a cross-reference to another
 skill's wording isn't reliable at read time — but the real reason is that they are asking different
 questions. `wrap` is *we're out of time, write down whatever you need to pick this up later*, so it
-errs toward capturing everything and deciding nothing. `update-pr` is *this has to be good enough to
+errs toward capturing everything and deciding nothing. `pr-update` is *this has to be good enough to
 review, and if it isn't, say so*. Expect these to drift further apart, and let them.
 
 What they share is the shape of the decision, and it took a second pass to get right. Testing only
@@ -327,18 +327,18 @@ two questions: does it fit here, and if not, does the PR ship a defect without i
 can block, and its bar is deliberately concrete — wrong behaviour under some real circumstance, an
 error path that loses work or data, documentation that misdescribes what shipped — because "is this
 essential?" is a question an agent answers yes to almost every time, and a blocker list everything
-lands on is just a slower issue tracker. `update-pr` and `copilot-review` park a blocker as a
-`- [ ]` in the PR body, where `update-pr`'s checkbox pass re-decides it on every run; `wrap` lists
+lands on is just a slower issue tracker. `pr-update` and `copilot-review` park a blocker as a
+`- [ ]` in the PR body, where `pr-update`'s checkbox pass re-decides it on every run; `wrap` lists
 blockers first and says they block.
 
-`update-pr` and `wrap` also both commit, push and think about follow-up issues, and I often run them
+`pr-update` and `wrap` also both commit, push and think about follow-up issues, and I often run them
 back to back, so having one call the other looks like an obvious cleanup. It isn't: the duplicated
 mechanics are cheap, the judgement is what differs, and that is the part any factoring-out would
 damage. The boundary between them is drawn narrow. `wrap` touches the PR in only two ways, neither a
 rewrite: it says the description looks stale, since its own push is what made it stale, and it
 offers to append its blockers as checkboxes. The second is the one that matters — before it, `wrap`
 would find a blocker and print it to a terminal that was about to be closed, and the PR body is the
-only place at hand that survives the session. Deciding whether a body is *wrong* stays `update-pr`'s
+only place at hand that survives the session. Deciding whether a body is *wrong* stays `pr-update`'s
 job, because it needs the diff read against it and is a worse job done hurriedly at the end of a
 session.
 
@@ -346,7 +346,7 @@ session.
 
 Context dependent, and deliberately broad. Three rough patterns so far:
 
-- **Something I keep doing by hand** (`wrap`, `update-pr`, `copilot-review`). Centralising it makes
+- **Something I keep doing by hand** (`wrap`, `pr-update`, `copilot-review`). Centralising it makes
   it reproducible across machines, and gives me one place where improvements can be recorded and
   tracked over time instead of being reinvented each session.
 - **An experiment** (`sync-docs`) — either about what tasks an LLM can usefully take on, or about
