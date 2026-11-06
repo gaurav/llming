@@ -258,6 +258,18 @@ should still know what the PR is for and whether it is theirs to review.
   reference. The keyword is the *only* way this work closes an issue someone else wrote — the
   `github-issues` skill rules out `gh issue close` — and it fires only on a merge into the default
   branch; for any other base, see that skill's *Closing an issue*.
+- **A keyword closes its issue wherever it appears in the body**, whatever the sentence says.
+  GitHub reads *close*, *fix* or *resolve* in any tense, followed by an issue reference, as this PR
+  closing that issue. "#456 is stacked on this one and fixes #123" closes #123 when *this* PR
+  merges, not when #456 does. When describing what another PR or issue does, use a verb GitHub
+  doesn't read: "#456, stacked on this one, handles #123". Commit messages count too, once they
+  land on the default branch. After posting (Step 6), check what GitHub will actually close:
+
+  ```bash
+  gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[].url'
+  ```
+
+  Each URL should be an issue this PR closes. Reword any that isn't, then post again and re-check.
 
 ### Below the abstract
 
