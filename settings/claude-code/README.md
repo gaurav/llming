@@ -6,7 +6,7 @@ My [Claude Code](https://claude.com/claude-code) setup, in two files:
   the context window is, how much of the 5-hour and 7-day quotas is left, and which model and
   effort level are running.
 - `user-CLAUDE.md`, the instructions I give Claude Code in every session on every machine: use
-  several commits where they help; write PRs with the `update-pr` skill; open a PR only when I ask
+  several commits where they help; write PRs with the `pr-update` skill; open a PR only when I ask
   for one, and always as a draft; leave merging a PR to me, after a human has reviewed it; and read
   a page I will act on from the site or my browser save, never through a fetch proxy. Installed as
   `~/.claude/CLAUDE.md`.
@@ -60,7 +60,7 @@ a machine may already have one with additions of its own, so compare the two fir
   once. Pace colouring is on trial, and may yet be dropped or get its own colour or symbol.
 - **The branch colour runs `git status` on every update.** That's quick in the repos I use, but
   might not be in a huge one.
-- **`user-CLAUDE.md` defers to the [`update-pr`](../../skills/update-pr/SKILL.md) skill** on PR
+- **`user-CLAUDE.md` defers to the [`pr-update`](../../skills/update-pr/SKILL.md) skill** on PR
   titles and descriptions, keeping only a two-line summary for a machine without it. Changing the
   skill's rules means checking that summary still agrees.
 

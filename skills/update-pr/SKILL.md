@@ -1,9 +1,9 @@
 ---
-name: update-pr
-description: Bring a pull request up to date with the work — commit and push outstanding changes, then rewrite the title and description so they describe what actually shipped, and work through the description's checkboxes. Use when the user says "/update-pr", "update the PR", "refresh the PR description", asks to open a PR for the current branch, or finishes a round of work on a branch with an open PR.
+name: pr-update
+description: Bring a pull request up to date with the work — commit and push outstanding changes, then rewrite the title and description so they describe what actually shipped, and work through the description's checkboxes. Use when the user says "/pr-update", "/update-pr", "update the PR", "refresh the PR description", asks to open a PR for the current branch, or finishes a round of work on a branch with an open PR.
 ---
 
-# update-pr
+# pr-update
 
 The title becomes a changelog line. The description is read twice — in review, and when that line
 is written — and never again. So anything a person or an agent needs at any *other* time goes in
@@ -30,9 +30,9 @@ PR for the commits since, is the user's call.
 
 **No PR for this branch?** Who decided to run this skill settles what happens next:
 
-- **The user did** — they typed `/update-pr`, or asked for a PR to be opened — so they want one.
-  Carry on, and open it in Step 6, as a draft. Until then there is no title, body or checkbox to
-  read.
+- **The user did** — they typed `/pr-update` or `/update-pr`, or asked for a PR to be opened — so
+  they want one. Carry on, and open it in Step 6, as a draft. Until then there is no title, body or
+  checkbox to read.
 - **The user asked to update a PR** that turns out not to exist ("update the PR", "refresh the
   description"): the request assumed one, so the checkout may be the wrong branch, or the PR lives
   on another. Say so and stop rather than open a second one.

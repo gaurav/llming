@@ -119,8 +119,8 @@ Invoking this skill is authorization to commit and push **the work of this sessi
 **If the branch has an open PR, pushing to it is what makes its description stale** — so say so
 before moving on. `gh pr view --json number,url,title,body` and ask only the shallow question: does
 the body still describe what the branch now contains? One line if not, naming the PR and suggesting
-`update-pr`. Do **not** rewrite it, and do not go diff-hunting to decide: judging a description
-against the change is `update-pr`'s Steps 3–5, it is a more careful pass than there is time for
+`pr-update`. Do **not** rewrite it, and do not go diff-hunting to decide: judging a description
+against the change is `pr-update`'s Steps 3–5, it is a more careful pass than there is time for
 here, and doing it badly at the end of a session is worse than saying it needs doing. No PR on the
 branch means skip this silently — plenty of work never gets one.
 
@@ -133,7 +133,7 @@ Naming something as a follow-up is a thinking tool, not a prediction — plenty 
 belong in the current PR once written down, and that's a good outcome, not a scope failure. Write
 each one so it works either way: specific enough to file as an issue, specific enough to just do.
 
-For each, say where it probably belongs, using the same bar as the `copilot-review` and `update-pr`
+For each, say where it probably belongs, using the same bar as the `copilot-review` and `pr-update`
 skills: fold it into the current work when it's small, needs no testing independent of what's
 already there, and is thematically connected; file it otherwise. Anything needing planning or
 discussion becomes an issue, unless deferring it would substantially change this work's code — then
@@ -147,7 +147,7 @@ is not severity: too big to do now is a reason to hand it over, never a reason t
 
 A blocker named only in this summary dies with the session, which is worse than not noticing it —
 it was seen, and then lost. If the work has an open PR, **offer to add the blocking items to its
-description** as `- [ ]` checkboxes; that is where `update-pr` finds them and forces a decision on
+description** as `- [ ]` checkboxes; that is where `pr-update` finds them and forces a decision on
 each the next time it runs. Appending means reading the current description and writing the whole
 thing back with `--body-file`, because `gh pr edit` replaces the body and a freshly composed one
 drops whatever a human wrote.
