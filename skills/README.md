@@ -176,8 +176,11 @@ Called `update-pr` until November 2026. Under that name it was lost among Claude
 `update` and `upgrade` commands. Install it as `pr-update`, like any other skill:
 `ln -s ~/code/llming/skills/pr-update ~/.claude/skills/pr-update`. For a while my machines kept the
 link named `update-pr` to cover the habit of typing the old name. The `/` menu still listed
-`/pr-update`, and the name of the link made `/update-pr` run it too. A machine still set up that
-way should rename the link: `mv ~/.claude/skills/update-pr ~/.claude/skills/pr-update`.
+`/pr-update`, and the name of the link made `/update-pr` run it too. Replace any `update-pr` link,
+whether it is that alias or an install from before the rename that still points at
+`skills/update-pr`:
+`rm ~/.claude/skills/update-pr && ln -s ~/code/llming/skills/pr-update ~/.claude/skills/pr-update`.
+A plain `mv` keeps the link's old target, so it only works for the alias.
 
 A PR title becomes a line in my release notes. The description gets read during review and again
 when I write that line, and then never — so it is the *worst* place for the *why* of a change to
