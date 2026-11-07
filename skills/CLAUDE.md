@@ -13,7 +13,7 @@ edited from end to end without ever opening it.
 
 Prose in a skill is advice an agent weighs; a shell command in a fenced block is something it runs
 and believes the output of. So the bar is different: check that each command actually answers the
-question the sentence above it asks. Three in one block of `update-pr` didn't, and every one failed
+question the sentence above it asks. Three in one block of `pr-update` didn't, and every one failed
 silently rather than erroring — a commit count standing in for a containment test, a `gh` lookup
 resolving against the clone's default repo instead of the PR's base, a grep dropping the
 `owner/repo` qualifier and querying the wrong repository. Each returns a confident answer about
@@ -22,7 +22,7 @@ feeds a decision the agent then acts on.
 
 The mirror image is prose promising a check the commands under it don't perform, or perform and
 then walk past. `wrap`'s step 0 promised a `[origin/x: gone]` marker a plain `git fetch` cannot
-produce; `update-pr`'s step 1 promised to catch a diverged head, first with commands that compared
+produce; `pr-update`'s step 1 promised to catch a diverged head, first with commands that compared
 nothing and then, once they did, with no instruction to stop. Prose reads as true because it
 describes an intention, and an agent following it will narrate the check it was told about rather
 than the one it ran. Read the block as if the surrounding sentences weren't there: what would it
@@ -72,7 +72,7 @@ done
 
 ## Testing a skill that writes to GitHub
 
-`update-pr` commits, pushes and edits a PR, so its test runs need a real PR they cannot change. What
+`pr-update` commits, pushes and edits a PR, so its test runs need a real PR they cannot change. What
 worked, when it was tightened against prcoder#109: each run gets its own clone whose `origin` is a
 local bare copy of the repo, so pushes land nowhere real, and a stand-in `gh` first on `PATH` that
 passes reads through to GitHub and records every write (`pr edit`, issue changes, an `api` call
@@ -85,7 +85,7 @@ agent's report of it.
   number and `--repo` itself.
 - **Tell an `api` write by what it does, not by its flags.** A GraphQL call is a write only if its
   query is a `mutation`, and a REST call only if its effective method isn't GET. Fields don't
-  decide it: `update-pr`'s Step 3 sends `-f`/`-F` to `graphql` for a read-only lookup, and
+  decide it: `pr-update`'s Step 3 sends `-f`/`-F` to `graphql` for a read-only lookup, and
   `--method GET` can carry fields too. Record those, and the run never sees the answers it needs.
 - **Shell state doesn't persist between a subagent's Bash calls**, so the `PATH` prefix goes on
   every command. Give it in the prompt as a literal prefix, and afterwards check that the live PR's

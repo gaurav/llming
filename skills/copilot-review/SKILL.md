@@ -56,7 +56,7 @@ goes:
 - If it doesn't fit here, ask whether **this PR ships a defect without it** — behaviour that is
   wrong under some real circumstance, an error path that loses work or data, or documentation that
   misdescribes what shipped. If so it **blocks this PR**: add it to the description as a `- [ ]`
-  TODO rather than filing it away (see the Notes on editing the body), so the next `update-pr` run
+  TODO rather than filing it away (see the Notes on editing the body), so the next `pr-update` run
   has to decide about it again instead of merging past it. Say so in the summary, and raise it with
   the user — they may want it done now. This test takes precedence over the two bullets below: a
   blocker stays a TODO however much planning it needs, because an issue would let the PR merge.
@@ -72,7 +72,7 @@ Before opening an issue, check that one doesn't already cover the finding, the w
 `github-issues` skill describes. If one does, link it instead of filing a second, and let that skill
 decide whether it may be edited to cover the finding or only commented on.
 
-A deferred issue is filed without asking first, unlike the follow-ups `update-pr` and `wrap` only
+A deferred issue is filed without asking first, unlike the follow-ups `pr-update` and `wrap` only
 offer, and what earns it that is that it explains itself: whoever opens it cold can see what was
 flagged, where, and in which change. So the body carries all of it, not a summary of it (`$PR`,
 `$OWNER` and `$REPO` are set in Step 1, and the numbered steps referred to here start below):
