@@ -83,8 +83,8 @@ Name a skill noun-first (`pr-update`, `github-issues`), so it groups by subject 
 rather than landing among Claude Code's built-in verbs (`/update`, `/upgrade`, `/review`). The
 frontmatter `name:` sets the command the menu shows, and the name of the entry in
 `~/.claude/skills/` also invokes the skill. So installing a renamed skill under its old name keeps
-that name working as a hidden alias. `skills/pr-update/` is installed as `update-pr` on my machines
-for that reason.
+that name working as a hidden alias. `skills/pr-update/` was installed as `update-pr` for a while
+after its rename, for that reason.
 
 Install a skill onto a machine by symlinking the skill **directory** into `~/.claude/skills/`, not
 the `SKILL.md` inside it (`ln -s ~/code/llming/skills/pr-update ~/.claude/skills/pr-update`).
