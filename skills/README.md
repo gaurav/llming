@@ -248,6 +248,15 @@ nothing about it. **Claims about the code:** a description saying a validator "n
 diff flags a sentence like that, so each load-bearing claim is confirmed against the code as it
 stands or cut down to what can be.
 
+Closing keywords got a rule of their own after a description said, roughly, that the PR stacked on
+it fixed an issue. GitHub doesn't parse the sentence. Any *close*, *fix* or *resolve* followed by an
+issue reference counts as this PR closing that issue. So merging the first PR closed an issue that
+belonged to the second. The skill now describes other PRs and issues with verbs GitHub ignores.
+After posting, it checks `gh pr view --json closingIssuesReferences`, the list GitHub will actually
+act on, rather than grepping the body: a grep would have to copy GitHub's parsing rules, and would
+drift from them unnoticed. Read the list's `url` field. Its `repository.nameWithOwner` came back
+null when I tested it on a public PR.
+
 The checkbox pass is the part I'd have skipped by hand. TODO lists in a description rot in both
 directions — items ticked off that got reverted later, items never added because they surfaced
 after the description was written — and the skill forces a decision on each one: do it here, drop
