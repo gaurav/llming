@@ -46,8 +46,11 @@ cp -i ~/Developer/llming/settings/claude-code/user-CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
 Claude Code reads `~/.claude/CLAUDE.md` at the start of every session, in every project, alongside
-the project's own `CLAUDE.md`, so it takes effect in the next session. `-i` asks before overwriting:
-a machine may already have one with additions of its own, so compare the two first.
+the project's own `CLAUDE.md` or `AGENTS.md`, so it takes effect in the next session. The installed
+file keeps the name `CLAUDE.md` even as my repos move to `AGENTS.md`: a project `CLAUDE.md` stops
+Claude Code reading that project's `AGENTS.md`, but the user-level one
+[doesn't count](https://code.claude.com/docs/en/memory#agents-md). `-i` asks before overwriting: a
+machine may already have one with additions of its own, so compare the two first.
 
 ## Known issues
 
