@@ -20,6 +20,9 @@ line-length = 100
 # MD041 wants every file to open with an H1. A CLAUDE.md or SKILL.md opens with instructions, not
 # with a title, so the rule never applies here.
 disable = ["MD041"]
+# Test fixtures are expected tool output, byte-compared by the tests; rewrapping them would break
+# the comparison rather than fix anything.
+exclude = ["**/tests/fixtures/**"]
 
 [tool.rumdl.MD013]
 # Let `rumdl check --fix` rewrap an over-long prose line instead of only reporting it. The default

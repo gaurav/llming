@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "0.3.2",
+  "title": "An Example Study of Something",
+  "description": "Converted from redcap format to HEAL VLMD schema v0.3.2. Study ID: EX00001",
+  "fields": [
+    {
+      "name": "AWAKE",
+      "type": "boolean",
+      "description": "Whether the participant was awake.",
+      "section": "Actigraphy",
+      "constraints": {"enum": ["True", "False"]},
+      "custom": {"Field Note": "Whether the participant was awake."}
+    },
+    {
+      "name": "WEAR",
+      "type": "boolean",
+      "description": "Whether the device was being worn.",
+      "section": "Actigraphy",
+      "constraints": {"enum": ["True", "False"]},
+      "custom": {"Field Note": "Whether the device was being worn."}
+    },
+    {
+      "name": "PAINSCORE",
+      "type": "integer",
+      "description": "worst pain in the last 24 hours",
+      "section": "Questionnaire",
+      "enumLabels": {
+        "0": "No pain", "1": "", "2": "", "3": "", "4": "", "5": "",
+        "6": "", "7": "", "8": "", "9": "", "10": "Worst possible pain"
+      },
+      "constraints": {"enum": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]},
+      "custom": {"Text Validation Type OR Show Slider Number": "integer"}
+    },
+    {
+      "name": "VISITDAT",
+      "type": "string",
+      "description": "date of visit",
+      "section": "Demographics",
+      "custom": {"Text Validation Type OR Show Slider Number": "date_mdy"}
+    },
+    {
+      "name": "site",
+      "type": "string",
+      "description": "Site(blinded)",
+      "section": "Demographics",
+      "custom": {"Section Header": "demographics"}
+    },
+    {
+      "name": "CONSENTDAT",
+      "type": "string",
+      "description": "A variable the LLM tool added.",
+      "section": "Demographics",
+      "custom": {"Text Validation Type OR Show Slider Number": "date_mdy"}
+    }
+  ]
+}
