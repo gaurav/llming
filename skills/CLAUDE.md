@@ -20,6 +20,12 @@ resolving against the clone's default repo instead of the PR's base, a grep drop
 something else. Run them against a real case before committing, especially the ones whose output
 feeds a decision the agent then acts on.
 
+`gh pr view --json` is a trap of the same kind: it picks which subfields to fetch, and `--jq` reads
+a subfield it skipped as `null`, not an error. `closingIssuesReferences` comes back with
+`repository` holding only `id`, `name` and `owner`, so `.repository.nameWithOwner` is null for every
+PR, though GitHub has the value. Hence `pr-update` reads `url`. When a field you need is missing,
+ask for it by name with `gh api graphql`.
+
 The mirror image is prose promising a check the commands under it don't perform, or perform and
 then walk past. `wrap`'s step 0 promised a `[origin/x: gone]` marker a plain `git fetch` cannot
 produce; `pr-update`'s step 1 promised to catch a diverged head, first with commands that compared
