@@ -73,7 +73,13 @@ non-obvious things — not what the code, git history, or existing docs already 
 Where it goes, in order of preference:
 
 1. A `docs/` file for the source/subsystem, referenced from an agent file if it isn't already.
-2. The nearest directory-specific `CLAUDE.md`.
+2. The nearest directory-specific agent file, under the name the repo already uses (`AGENTS.md` or
+   `CLAUDE.md`). Never add a `CLAUDE.md` to a repo that uses `AGENTS.md`: Claude Code then reads
+   it instead of the `AGENTS.md` files, without saying so
+   ([docs](https://code.claude.com/docs/en/memory#agents-md)). A rule goes in a subdirectory's file
+   only if nobody can break it without first opening a file there. Claude Code loads a
+   subdirectory's `AGENTS.md` when it Reads a file in that directory, not when it creates one or
+   runs a command, so a rule guarding one of those stays in the root file.
 3. The root `AGENTS.md` / `CLAUDE.md` — for repo-wide rules, and for information needed to
    understand how the code in this repo works that doesn't belong to any one directory.
 
