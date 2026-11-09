@@ -259,17 +259,12 @@ should still know what the PR is for and whether it is theirs to review.
   `github-issues` skill rules out `gh issue close` — and it fires only on a merge into the default
   branch; for any other base, see that skill's *Closing an issue*.
 - **A keyword closes its issue wherever it appears in the body**, whatever the sentence says.
-  GitHub reads *close*, *fix* or *resolve* in any tense, followed by an issue reference, as this PR
-  closing that issue. "#456 is stacked on this one and fixes #123" closes #123 when *this* PR
-  merges, not when #456 does. When describing what another PR or issue does, use a verb GitHub
-  doesn't read: "#456, stacked on this one, handles #123". Commit messages count too, once they
-  land on the default branch. After posting (Step 6), check what GitHub will actually close:
-
-  ```bash
-  gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[].url'
-  ```
-
-  Each URL should be an issue this PR closes. Reword any that isn't, then post again and re-check.
+  GitHub reads nine words — *close*, *closes*, *closed*, *fix*, *fixes*, *fixed*, *resolve*,
+  *resolves*, *resolved* — followed by an issue reference as this PR closing that issue; "closing"
+  and "fixing" aren't among them. "#456 is stacked on this one and fixes #123" closes #123 when
+  *this* PR merges, not when #456 does. When describing what another PR or issue does, use a verb
+  GitHub doesn't read: "#456, stacked on this one, handles #123". The branch's commit messages count
+  too, once they land on the default branch. *Posting it* below checks what GitHub will close.
 
 ### Below the abstract
 
@@ -348,6 +343,29 @@ what Step 4 exists to avoid. On a fork checkout add `--repo <base repo> --head <
 From then on the PR exists: `$PR` is its number, and every later write, including a second pass
 through Steps 2–6 from Step 7, is `gh pr edit`. A second `gh pr create` fails, since the branch
 already has a PR.
+
+**After every post, check which issues the merge will close:**
+
+```bash
+gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[].url'
+# the keywords in the commits, which that list leaves out; this matches loosely, so read each hit
+git log --format='%h %B' <base-remote>/<baseRefName>..HEAD | grep -iwE 'close[sd]?|fix(e[sd])?|resolve[sd]?'
+```
+
+- **The list should be exactly the issues the abstract says this PR closes.** An issue missing from
+  it stays open after the merge: the keyword is missing or malformed ("Closes #12, #14" leaves
+  #14 out). An extra one is a keyword in a sentence about something else: reword it, post again
+  and re-check. GitHub updates the list a moment after the edit, so if it hasn't changed, wait a
+  few seconds and read it again before rewording further.
+- **An entry no keyword explains was linked by hand** in the PR's *Development* sidebar. Wording
+  can't remove it; leave it and tell the user.
+- **Don't trust the list when the base isn't the default branch.** Keywords act only on a merge into
+  it (`github-issues`, *Closing an issue*), and the list for such a PR is usually empty, though not
+  always. An empty list doesn't mean all clear: the keywords fire if the PR is later retargeted, as
+  a stacked PR is once the one below it merges. Run the `grep` over the body as well
+  (`gh pr view "$PR" --json body --jq .body | grep …`) and read each hit.
+- **A keyword in a commit message** for an issue this PR doesn't close needs the commit reworded,
+  which means a force-push. Tell the user rather than rewriting pushed history yourself.
 
 **Link to repo files by full URL, pinned to the head commit's short SHA**:
 `https://github.com/<owner>/<repo>/blob/<short-sha>/docs/Design.md#heading`. The full 40-character
