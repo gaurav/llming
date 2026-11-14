@@ -1,0 +1,17 @@
+# Map repositories (or entire orgs) to annual review goals.
+#
+# Each entry under [goals] is a goal name mapped to a list of repos or orgs to match.
+# - "org/repo"  — matches exactly that repository
+# - "org"       — matches any repository in that organization
+#
+# Specific repo rules take priority over org-level rules.
+# Rows already having a Goal set manually are never overwritten.
+#
+# Run after editing:
+#   uv run get_github_outputs.py --apply-goals
+
+[goals]
+# "My Goal" = [
+#   "myorg",            # all repos in myorg
+#   "otherapg/specific-repo",  # one specific repo
+# ]
