@@ -11,6 +11,14 @@ it: the branch may end up folded into another PR, or stay a branch. When you do 
 as a **draft** (`gh pr create --draft`) and leave it one. I review every PR myself before marking
 it ready, so never run `gh pr ready`.
 
+Work in the checkout you were started in, switching branches there as needed, even while I have a
+dev server running from it: a server that misbehaves for a minute is less trouble than a second
+checkout. I may be editing in that checkout too, so run `git status` before you switch: if it shows
+changes you didn't make, stop and ask rather than stash them, discard them or carry them onto
+another branch. Use a `git worktree` instead when a repo's own `CLAUDE.md` or `AGENTS.md` asks for
+one, when another agent may be working in the same checkout (you were started as a background or
+scheduled agent, or I've said one is running), or for a big, radical change you want kept apart.
+
 An approach that was tried and failed belongs in the commit messages, or, if someone is likely to
 try it again, in the code or docs, so they don't go the same wrong way.
 
