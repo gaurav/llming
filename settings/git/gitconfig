@@ -1,0 +1,58 @@
+# Git settings shared across machines. Based on Scott Chacon's "How Core Git Developers
+# Configure Git": https://blog.gitbutler.com/how-git-core-devs-configure-git/
+# The headings below are that article's three groups.
+#
+# Installed as a copy at ~/.config/git/shared.gitconfig and included from the top of
+# ~/.gitconfig, so anything a machine sets in its own ~/.gitconfig overrides this file.
+# Name, email and commit signing are set per machine, never here: see README.md.
+
+# Clearly makes Git better
+
+[column]
+    ui = auto
+[branch]
+    sort = -committerdate
+[tag]
+    sort = version:refname
+[init]
+    defaultBranch = main
+[diff]
+    algorithm = histogram
+    colorMoved = plain
+    mnemonicPrefix = true
+    renames = true
+[push]
+    default = simple
+    autoSetupRemote = true
+    followTags = true
+[fetch]
+    prune = true
+    pruneTags = true
+    all = true
+
+# Why not?
+
+[help]
+    autocorrect = prompt
+[commit]
+    verbose = true
+[rerere]
+    enabled = true
+    autoupdate = true
+[core]
+    excludesfile = ~/.gitignore
+[rebase]
+    autoSquash = true
+    autoStash = true
+    updateRefs = true
+
+# A matter of taste. The article leaves these commented out; I have them all on.
+
+[core]
+    fsmonitor = true
+    untrackedCache = true
+[merge]
+    # zdiff3 needs Git 2.35. On an older Git, use diff3.
+    conflictstyle = zdiff3
+[pull]
+    rebase = true
