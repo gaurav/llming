@@ -11,10 +11,12 @@ each machine, as described in [Per-machine setup](#per-machine-setup).
 
 ## Install
 
+Run these from the root of this repository, wherever it is cloned on the computer being set up:
+
 ```bash
 mkdir -p ~/.config/git
-cp ~/Developer/llming/settings/git/gitconfig ~/.config/git/shared.gitconfig
-cp -n ~/Developer/llming/settings/git/gitignore ~/.gitignore
+cp settings/git/gitconfig ~/.config/git/shared.gitconfig
+cp -n settings/git/gitignore ~/.gitignore
 ```
 
 `cp -n` leaves an existing `~/.gitignore` alone. If the machine has one already, add the lines
@@ -46,10 +48,11 @@ This should print `zdiff3`, read from `shared.gitconfig`. Leave out `--global` h
 Git reads `~/.gitconfig` alone and doesn't follow the include, so the shared settings look as if
 they were missing.
 
-To check an installed copy against this repo later:
+To check an installed copy against this repo later, again from the repository's root:
 
 ```bash
-diff ~/Developer/llming/settings/git/gitconfig ~/.config/git/shared.gitconfig
+diff settings/git/gitconfig ~/.config/git/shared.gitconfig
+diff settings/git/gitignore ~/.gitignore
 ```
 
 ## Per-machine setup
