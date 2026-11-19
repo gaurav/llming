@@ -21,10 +21,13 @@ main ⇡1 ♦ ctx 84k (42%) ♦ 5h: 96% until 6:10pm (3h 52m) ♦ 7d: 80% until 
 
 ## Install
 
+Run the commands below from the root of this repository, wherever it is cloned on the computer
+being set up.
+
 The status line:
 
 ```bash
-cp ~/Developer/llming/settings/claude-code/statusline.sh ~/.claude/statusline.sh
+cp settings/claude-code/statusline.sh ~/.claude/statusline.sh
 ```
 
 Then add this to `~/.claude/settings.json`, which isn't committed because it also holds
@@ -42,7 +45,7 @@ It needs `jq` and `git`. The status line updates after Claude's next message.
 My instructions:
 
 ```bash
-cp -i ~/Developer/llming/settings/claude-code/user-CLAUDE.md ~/.claude/CLAUDE.md
+cp -i settings/claude-code/user-CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
 Claude Code reads `~/.claude/CLAUDE.md` at the start of every session, in every project, alongside

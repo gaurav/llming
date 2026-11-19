@@ -41,10 +41,13 @@ It's not used on every machine yet. Machines where p10k already works keep it fo
 
 ### Install
 
+Run the commands below from the root of this repository, wherever it is cloned on the computer
+being set up.
+
 ```bash
 brew install jandedobbeleer/oh-my-posh/oh-my-posh
 mkdir -p ~/.config/oh-my-posh
-cp ~/Developer/llming/settings/oh-my-posh/* ~/.config/oh-my-posh/
+cp settings/oh-my-posh/* ~/.config/oh-my-posh/
 ```
 
 Then in `~/.zshrc`, set `ZSH_THEME=""` so Oh My Zsh doesn't draw a prompt of its own, and add
