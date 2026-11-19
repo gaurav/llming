@@ -9,7 +9,7 @@ break a new terminal.
 **Copies drift.** When working on a tool here, compare its installed copy with this repo first. If
 they differ, decide whether the machine's change is worth keeping here, and strip anything
 private (tokens, hostnames, internal tool names, paths) before committing it. `CLAUDE.md` has the
-commands. So far there are four:
+commands. So far there are five:
 
 - [`oh-my-posh/`](#shell-prompt-oh-my-posh): my zsh prompt.
 - [`terminal-app/`](#terminalapp-profile): my Terminal.app profile.
@@ -17,6 +17,8 @@ commands. So far there are four:
   colours.
 - [`claude-code/`](claude-code/README.md): my Claude Code status line (git branch, context and
   quota use, model), and the instructions every Claude Code session gets.
+- [`git/`](git/README.md): my Git settings (the ones Git's own developers use) and my global
+  ignore file, without the name, email and signing key that each machine sets for itself.
 
 The first two are described in sections below. The others have their own `README.md` in their
 directory.

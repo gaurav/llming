@@ -14,6 +14,8 @@ tool here, and before committing, diff the two:**
 | Vim         | `vim/vimrc`                   | `~/.vim/vimrc`                  |
 | Claude Code | `claude-code/statusline.sh`   | `~/.claude/statusline.sh`       |
 | Claude Code | `claude-code/user-CLAUDE.md`  | `~/.claude/CLAUDE.md`           |
+| Git         | `git/gitconfig`               | `~/.config/git/shared.gitconfig` |
+| Git         | `git/gitignore`               | `~/.gitignore`                  |
 | Terminal    | `terminal-app/*.terminal`     | Terminal's preferences (below)  |
 
 `diff -r oh-my-posh ~/.config/oh-my-posh` from `settings/`, and so on. For each difference, ask the
@@ -187,6 +189,36 @@ HOME=$H TERM=tmux-256color script -q /dev/null /usr/bin/vim \
 
 `vim -es` won't do: silent Ex mode skips the vimrc. Vary `TERM`, because `defaults.vim` and Vim's
 own `ttymouse` detection both branch on it.
+
+## Git
+
+`git/gitconfig` is installed as `~/.config/git/shared.gitconfig` and pulled in by an `[include]`
+at the top of `~/.gitconfig`. It is **not** the machine's `~/.gitconfig`, and must never be
+replaced with a copy of one: that file also holds the name, email, signing key and the signing
+program's path, none of which belong in a public repo. To bring a machine's change back here, copy
+the one setting across.
+
+- **`git config --global` doesn't follow the include.** Naming a file (`--global`, `--file`)
+  turns includes off, so `git config --global --get merge.conflictstyle` prints nothing on a
+  correctly installed machine. Add `--includes`, or drop `--global`.
+- **`git config --global --includes --list --show-origin` names the file each value came from.**
+  Use it to find a setting that is in both files, or one that the machine has and the shared file
+  doesn't. A setting in both is harmless but hides drift, because the machine's copy wins.
+- **The include has to come first.** Git reads the included file where the `[include]` line is,
+  and the last value wins. An include at the bottom of `~/.gitconfig` makes the shared file
+  override the machine's own settings.
+- **A machine set up before `git/` existed has these settings inline in `~/.gitconfig`**, with
+  no include, so there is nothing at `~/.config/git/shared.gitconfig` to diff. Compare values
+  instead: `git config --file git/gitconfig --list` against `git config --global --list`.
+- **`~/.config/git/ignore` is also read**, as Git's default global ignore file, but only while
+  `core.excludesfile` is unset. With the shared file installed, `~/.gitignore` is the only one
+  used, and anything listed only in `~/.config/git/ignore` stops being ignored.
+- **Check a version claim against Git's release notes** (`Documentation/RelNotes/` in
+  [git/git](https://github.com/git/git)) before putting it in the README. The article's own
+  comment on `zdiff3` says "git version < 2.3", where 2.35 is meant.
+- **To test the install steps**, use a throwaway `HOME` (`HOME=$PWD/data/git-check/home`), follow
+  the README there, and read the result with `git config --global --includes --list
+  --show-origin`.
 
 ## Claude Code
 
