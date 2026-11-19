@@ -3,6 +3,10 @@
 Every machine shares these docs, so don't describe one machine's state ("cloned on this machine",
 "no JDK here yet"). Say what holds wherever the settings are installed, or leave it out.
 
+That goes for the checkout's own path too. Write install and check commands relative to the
+repository root (`cp settings/vim/vimrc ~/.vim/vimrc`), with a line saying to run them from
+wherever the repo is cloned, never as `~/Developer/llming/...` or any other machine's path.
+
 ## Checking installed copies against the repo
 
 Settings are installed as copies, so a machine's copy and this repo drift apart. **Before changing a
