@@ -18,7 +18,9 @@ cp -n ~/Developer/llming/settings/git/gitignore ~/.gitignore
 ```
 
 `cp -n` leaves an existing `~/.gitignore` alone. If the machine has one already, add the lines
-from `gitignore` to it by hand.
+from `gitignore` to it by hand. If it has a `~/.config/git/ignore`, move its lines into
+`~/.gitignore` too: Git stops reading that file once the shared settings point it at
+`~/.gitignore`.
 
 Then put this at the **top** of `~/.gitconfig`, above everything else in it:
 
@@ -128,7 +130,9 @@ What to reproduce on another machine, with or without the file. The groups are t
   when it comes up again, staging the result. This helps most when rebasing a branch more than
   once (`rerere.enabled = true`, `rerere.autoupdate = true`).
 - The ignore file for every repository is `~/.gitignore` (`core.excludesfile = ~/.gitignore`).
-  Mine ignores Claude Code's per-machine project settings, `.claude/settings.local.json`.
+  Mine ignores Claude Code's per-machine project settings (`.claude/settings.local.json`), the
+  `.DS_Store` files macOS's Finder leaves in each folder it opens, and JetBrains IDEs' `.idea/`
+  project directories.
 - Rebasing:
   - an interactive rebase puts `fixup!` and `squash!` commits next to the commits they amend
     (`rebase.autoSquash = true`);
@@ -151,6 +155,6 @@ What to reproduce on another machine, with or without the file. The groups are t
 
 - Install this on each machine that still has the settings typed straight into `~/.gitconfig`,
   and delete them there.
-- Add to `gitignore` the other files that never belong in any repository, such as `.DS_Store`.
+- Add to `gitignore` any other files that never belong in any repository, as they turn up.
 - Try the file on a machine with an older Git, and record what it does with the settings it
   doesn't know.
