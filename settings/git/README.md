@@ -88,7 +88,10 @@ These stay in each machine's own `~/.gitconfig`, below the include.
   Git older than 2.54.
 - **`fetch.pruneTags` deletes local tags that the remote doesn't have.** A tag made locally and
   not yet pushed is removed by the next `git fetch`. Push a tag straight after making it, or run
-  that fetch with `--no-prune-tags`.
+  that fetch with `--no-prune-tags`. In a repository with more than one remote, such as a fork
+  with `origin` and `upstream`, it also deletes every tag that only one remote has, on every
+  `git fetch`: tags aren't kept per remote, and `fetch.all` fetches each remote with pruning.
+  Turn it off in that repository with `git config fetch.pruneTags false`.
 - **`git pull` rebases instead of merging** (`pull.rebase`), and stashes uncommitted changes
   first, putting them back afterwards (`rebase.autoStash`). If putting them back conflicts, the
   changes are still in the stash: `git stash list` shows them.
