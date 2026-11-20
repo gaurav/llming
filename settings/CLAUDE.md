@@ -220,6 +220,9 @@ the one setting across.
 - **Check a version claim against Git's release notes** (`Documentation/RelNotes/` in
   [git/git](https://github.com/git/git)) before putting it in the README. The article's own
   comment on `zdiff3` says "git version < 2.3", where 2.35 is meant.
+  The release notes don't name every new setting (`push.autoSetupRemote` isn't in 2.37's). When
+  they don't, compare `Documentation/config/<section>.adoc` (`.txt` before 2.49) at two tags with
+  `gh api 'repos/git/git/contents/<path>?ref=v2.37.0'`.
 - **To test the install steps**, use a throwaway `HOME` (`HOME=$(mktemp -d)`), follow
   the README there, and read the result with `git config --global --includes --list
   --show-origin`.
