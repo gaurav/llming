@@ -52,7 +52,8 @@
     fsmonitor = true
     untrackedCache = true
 [merge]
-    # zdiff3 needs Git 2.35. On an older Git, use diff3.
+    # zdiff3 needs Git 2.35. An older Git stops with an error here even if ~/.gitconfig
+    # overrides it below the include, so use diff3 in that machine's installed copy.
     conflictstyle = zdiff3
 [pull]
     rebase = true

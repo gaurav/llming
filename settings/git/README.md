@@ -77,11 +77,15 @@ These stay in each machine's own `~/.gitconfig`, below the include.
 
 ## Known issues
 
-- **Some settings need a recent Git.** `fetch.all` needs Git 2.44, and an older Git ignores it.
-  Two values are ones an older Git doesn't know: `merge.conflictstyle = zdiff3` before Git 2.35
-  (use `diff3` there), and `help.autocorrect = prompt` before Git 2.34. Override either one below
-  the include on a machine with an old Git. `git --version` shows the version. I haven't tried
-  this file on a Git older than 2.54.
+- **Some settings need a recent Git.** An older Git silently ignores settings it doesn't know:
+  `push.autoSetupRemote` needs Git 2.37, `rebase.updateRefs` 2.38 and `fetch.all` 2.44. Two
+  values are worse, because an older Git stops with an error on them:
+  `merge.conflictstyle = zdiff3` before Git 2.35 breaks merges, rebases and `git pull`, and
+  `help.autocorrect = prompt` before Git 2.34 breaks every mistyped command. Overriding them
+  below the include doesn't help: Git reads the shared file's value first and stops there. On
+  such a machine, leave those lines out of the installed copy (`diff3` works in place of
+  `zdiff3`), or upgrade Git. `git --version` shows the version. I haven't tried this file on a
+  Git older than 2.54.
 - **`fetch.pruneTags` deletes local tags that the remote doesn't have.** A tag made locally and
   not yet pushed is removed by the next `git fetch`. Push a tag straight after making it, or run
   that fetch with `--no-prune-tags`.
