@@ -3,20 +3,26 @@
 Every machine shares these docs, so don't describe one machine's state ("cloned on this machine",
 "no JDK here yet"). Say what holds wherever the settings are installed, or leave it out.
 
+That goes for the checkout's own path too. Write install and check commands relative to the
+repository root (`cp settings/vim/vimrc ~/.vim/vimrc`), with a line saying to run them from
+wherever the repo is cloned, never as `~/Developer/llming/...` or any other machine's path.
+
 ## Checking installed copies against the repo
 
 Settings are installed as copies, so a machine's copy and this repo drift apart. **Before changing a
 tool here, and before committing, diff the two:**
 
-| Tool        | Repo                          | Installed copy                  |
-| ----------- | ----------------------------- | ------------------------------- |
-| oh-my-posh  | `oh-my-posh/`                 | `~/.config/oh-my-posh/`         |
-| Vim         | `vim/vimrc`                   | `~/.vim/vimrc`                  |
-| Claude Code | `claude-code/statusline.sh`   | `~/.claude/statusline.sh`       |
-| Claude Code | `claude-code/user-CLAUDE.md`  | `~/.claude/CLAUDE.md`           |
-| Terminal    | `terminal-app/*.terminal`     | Terminal's preferences (below)  |
+| Tool        | Repo                                  | Installed copy                   |
+| ----------- | ------------------------------------- | -------------------------------- |
+| oh-my-posh  | `settings/oh-my-posh/`                | `~/.config/oh-my-posh/`          |
+| Vim         | `settings/vim/vimrc`                  | `~/.vim/vimrc`                   |
+| Claude Code | `settings/claude-code/statusline.sh`  | `~/.claude/statusline.sh`        |
+| Claude Code | `settings/claude-code/user-CLAUDE.md` | `~/.claude/CLAUDE.md`            |
+| Git         | `settings/git/gitconfig`              | `~/.config/git/shared.gitconfig` |
+| Git         | `settings/git/gitignore`              | `~/.gitignore`                   |
+| Terminal    | `settings/terminal-app/*.terminal`    | Terminal's preferences (below)   |
 
-`diff -r oh-my-posh ~/.config/oh-my-posh` from `settings/`, and so on. For each difference, ask the
+`diff -r settings/oh-my-posh ~/.config/oh-my-posh`, and so on. For each difference, ask the
 user which way it should go: bring the repo's version over, keep the machine's change only on that
 machine, or commit it here. **This repo is public.** Before committing anything from a machine,
 read all of it for tokens, hostnames, usernames, home-directory paths, internal tool or project
@@ -176,17 +182,50 @@ effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim l
 so a vimrc that works there can still fail in `/usr/bin/vim`, which is what `git commit` often
 opens. Check both.
 
-**To check the vimrc without a human at a terminal**, copy it into a throwaway `$HOME` under
-`data/` and run Vim under a pty, writing options to a file:
+**To check the vimrc without a human at a terminal**, copy it into a throwaway `$HOME` made
+by `mktemp -d` and run Vim under a pty, writing options to a file:
 
 ```bash
-H=$PWD/data/vim-check/home   # with the vimrc copied to $H/.vim/vimrc
+H=$(mktemp -d)   # then copy the vimrc to $H/.vim/vimrc
 HOME=$H TERM=tmux-256color script -q /dev/null /usr/bin/vim \
   -c "redir! > $H/out.txt | silent set mouse? ttymouse? scrolloff? | redir END | qa!" </dev/null
 ```
 
 `vim -es` won't do: silent Ex mode skips the vimrc. Vary `TERM`, because `defaults.vim` and Vim's
 own `ttymouse` detection both branch on it.
+
+## Git
+
+`git/gitconfig` is installed as `~/.config/git/shared.gitconfig` and pulled in by an `[include]`
+at the top of `~/.gitconfig`. It is **not** the machine's `~/.gitconfig`, and must never be
+replaced with a copy of one: that file also holds the name, email, signing key and the signing
+program's path, none of which belong in a public repo. To bring a machine's change back here, copy
+the one setting across.
+
+- **`git config --global` doesn't follow the include.** Naming a file (`--global`, `--file`)
+  turns includes off, so `git config --global --get merge.conflictstyle` prints nothing on a
+  correctly installed machine. Add `--includes`, or drop `--global`.
+- **`git config --global --includes --list --show-origin` names the file each value came from.**
+  Use it to find a setting that is in both files, or one that the machine has and the shared file
+  doesn't. A setting in both is harmless but hides drift, because the machine's copy wins.
+- **The include has to come first.** Git reads the included file where the `[include]` line is,
+  and the last value wins. An include at the bottom of `~/.gitconfig` makes the shared file
+  override the machine's own settings.
+- **A machine set up before `git/` existed has these settings inline in `~/.gitconfig`**, with
+  no include, so there is nothing at `~/.config/git/shared.gitconfig` to diff. Compare values
+  instead: `git config --file settings/git/gitconfig --list` against `git config --global --list`.
+- **`~/.config/git/ignore` is also read**, as Git's default global ignore file, but only while
+  `core.excludesfile` is unset. With the shared file installed, `~/.gitignore` is the only one
+  used, and anything listed only in `~/.config/git/ignore` stops being ignored.
+- **Check a version claim against Git's release notes** (`Documentation/RelNotes/` in
+  [git/git](https://github.com/git/git)) before putting it in the README. The article's own
+  comment on `zdiff3` says "git version < 2.3", where 2.35 is meant.
+  The release notes don't name every new setting (`push.autoSetupRemote` isn't in 2.37's). When
+  they don't, compare `Documentation/config/<section>.adoc` (`.txt` before 2.49) at two tags with
+  `gh api 'repos/git/git/contents/<path>?ref=v2.37.0'`.
+- **To test the install steps**, use a throwaway `HOME` (`HOME=$(mktemp -d)`), follow
+  the README there, and read the result with `git config --global --includes --list
+  --show-origin`.
 
 ## Claude Code
 
@@ -208,7 +247,7 @@ jq -n --argjson now "$N" '{workspace: {current_dir: "'"$PWD"'"},
   rate_limits: {five_hour: {used_percentage: 4, resets_at: ($now + 13920)},
                 seven_day: {used_percentage: 20, resets_at: ($now + 277200)}},
   model: {display_name: "Opus 5.5"}, effort: {level: "high"}}' \
-  | bash claude-code/statusline.sh | cat -v
+  | bash settings/claude-code/statusline.sh | cat -v
 ```
 
 Also try a quota with no `resets_at` (`five_hour: {used_percentage: 4}`). The docs say Claude Code

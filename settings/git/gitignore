@@ -1,0 +1,11 @@
+# Ignored in every repository on the machine. Installed as ~/.gitignore, which is where
+# core.excludesfile in the shared gitconfig points.
+
+# Claude Code's per-machine project settings
+**/.claude/settings.local.json
+
+# macOS Finder's per-folder view settings
+.DS_Store
+
+# JetBrains IDE project settings
+.idea/
