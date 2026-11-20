@@ -182,11 +182,11 @@ effect, look for a stray `~/.vimrc` first. `:echo $MYVIMRC` names the file Vim l
 so a vimrc that works there can still fail in `/usr/bin/vim`, which is what `git commit` often
 opens. Check both.
 
-**To check the vimrc without a human at a terminal**, copy it into a throwaway `$HOME` under
-`data/` and run Vim under a pty, writing options to a file:
+**To check the vimrc without a human at a terminal**, copy it into a throwaway `$HOME` made
+by `mktemp -d` and run Vim under a pty, writing options to a file:
 
 ```bash
-H=$PWD/data/vim-check/home   # with the vimrc copied to $H/.vim/vimrc
+H=$(mktemp -d)   # then copy the vimrc to $H/.vim/vimrc
 HOME=$H TERM=tmux-256color script -q /dev/null /usr/bin/vim \
   -c "redir! > $H/out.txt | silent set mouse? ttymouse? scrolloff? | redir END | qa!" </dev/null
 ```
@@ -220,7 +220,7 @@ the one setting across.
 - **Check a version claim against Git's release notes** (`Documentation/RelNotes/` in
   [git/git](https://github.com/git/git)) before putting it in the README. The article's own
   comment on `zdiff3` says "git version < 2.3", where 2.35 is meant.
-- **To test the install steps**, use a throwaway `HOME` (`HOME=$PWD/data/git-check/home`), follow
+- **To test the install steps**, use a throwaway `HOME` (`HOME=$(mktemp -d)`), follow
   the README there, and read the result with `git config --global --includes --list
   --show-origin`.
 
