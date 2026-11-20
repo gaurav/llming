@@ -12,17 +12,17 @@ wherever the repo is cloned, never as `~/Developer/llming/...` or any other mach
 Settings are installed as copies, so a machine's copy and this repo drift apart. **Before changing a
 tool here, and before committing, diff the two:**
 
-| Tool        | Repo                          | Installed copy                  |
-| ----------- | ----------------------------- | ------------------------------- |
-| oh-my-posh  | `oh-my-posh/`                 | `~/.config/oh-my-posh/`         |
-| Vim         | `vim/vimrc`                   | `~/.vim/vimrc`                  |
-| Claude Code | `claude-code/statusline.sh`   | `~/.claude/statusline.sh`       |
-| Claude Code | `claude-code/user-CLAUDE.md`  | `~/.claude/CLAUDE.md`           |
-| Git         | `git/gitconfig`               | `~/.config/git/shared.gitconfig` |
-| Git         | `git/gitignore`               | `~/.gitignore`                  |
-| Terminal    | `terminal-app/*.terminal`     | Terminal's preferences (below)  |
+| Tool        | Repo                                  | Installed copy                   |
+| ----------- | ------------------------------------- | -------------------------------- |
+| oh-my-posh  | `settings/oh-my-posh/`                | `~/.config/oh-my-posh/`          |
+| Vim         | `settings/vim/vimrc`                  | `~/.vim/vimrc`                   |
+| Claude Code | `settings/claude-code/statusline.sh`  | `~/.claude/statusline.sh`        |
+| Claude Code | `settings/claude-code/user-CLAUDE.md` | `~/.claude/CLAUDE.md`            |
+| Git         | `settings/git/gitconfig`              | `~/.config/git/shared.gitconfig` |
+| Git         | `settings/git/gitignore`              | `~/.gitignore`                   |
+| Terminal    | `settings/terminal-app/*.terminal`    | Terminal's preferences (below)   |
 
-`diff -r oh-my-posh ~/.config/oh-my-posh` from `settings/`, and so on. For each difference, ask the
+`diff -r settings/oh-my-posh ~/.config/oh-my-posh`, and so on. For each difference, ask the
 user which way it should go: bring the repo's version over, keep the machine's change only on that
 machine, or commit it here. **This repo is public.** Before committing anything from a machine,
 read all of it for tokens, hostnames, usernames, home-directory paths, internal tool or project
@@ -213,7 +213,7 @@ the one setting across.
   override the machine's own settings.
 - **A machine set up before `git/` existed has these settings inline in `~/.gitconfig`**, with
   no include, so there is nothing at `~/.config/git/shared.gitconfig` to diff. Compare values
-  instead: `git config --file git/gitconfig --list` against `git config --global --list`.
+  instead: `git config --file settings/git/gitconfig --list` against `git config --global --list`.
 - **`~/.config/git/ignore` is also read**, as Git's default global ignore file, but only while
   `core.excludesfile` is unset. With the shared file installed, `~/.gitignore` is the only one
   used, and anything listed only in `~/.config/git/ignore` stops being ignored.
@@ -244,7 +244,7 @@ jq -n --argjson now "$N" '{workspace: {current_dir: "'"$PWD"'"},
   rate_limits: {five_hour: {used_percentage: 4, resets_at: ($now + 13920)},
                 seven_day: {used_percentage: 20, resets_at: ($now + 277200)}},
   model: {display_name: "Opus 5.5"}, effort: {level: "high"}}' \
-  | bash claude-code/statusline.sh | cat -v
+  | bash settings/claude-code/statusline.sh | cat -v
 ```
 
 Also try a quota with no `resets_at` (`five_hour: {used_percentage: 4}`). The docs say Claude Code
