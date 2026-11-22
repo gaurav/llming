@@ -20,10 +20,10 @@ cp settings/git/gitconfig ~/.config/git/shared.gitconfig
 ```
 
 The last line leaves an existing `~/.gitignore` alone. It tests for the file rather than using
-`cp -n`, which newer GNU coreutils warn about or treat as a failure when the file already exists. If the machine has one already, add the lines
-from `gitignore` to it by hand. If it has a `~/.config/git/ignore`, move its lines into
-`~/.gitignore` too: Git stops reading that file once the shared settings point it at
-`~/.gitignore`.
+`cp -n`, which newer GNU coreutils warn about or treat as a failure when the file already exists.
+If the machine has one already, add the lines from `gitignore` to it by hand. If it has a
+`~/.config/git/ignore`, move its lines into `~/.gitignore` too: Git stops reading that file once
+the shared settings point it at `~/.gitignore`.
 
 Then put this at the **top** of `~/.gitconfig`, above everything else in it:
 
