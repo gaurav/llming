@@ -133,7 +133,7 @@ The `.terminal` file here is that one dictionary, extracted as it is:
 
 ```bash
 plutil -extract "Window Settings.Solarized Darker" xml1 \
-  -o "terminal-app/Solarized Darker.terminal" ~/Library/Preferences/com.apple.Terminal.plist
+  -o "settings/terminal-app/Solarized Darker.terminal" ~/Library/Preferences/com.apple.Terminal.plist
 ```
 
 Re-export after every change and commit it. Colours and the font are keyed archives stored as
