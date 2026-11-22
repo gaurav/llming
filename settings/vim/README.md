@@ -6,9 +6,12 @@ matches whichever [Terminal.app profile](../README.md#terminalapp-profile) is in
 
 ## Install
 
+Run the commands below from the root of this repository, wherever it is cloned on the computer
+being set up.
+
 ```bash
 mkdir -p ~/.vim
-cp ~/Developer/llming/settings/vim/vimrc ~/.vim/vimrc
+cp settings/vim/vimrc ~/.vim/vimrc
 ```
 
 **Vim only reads `~/.vim/vimrc` if there is no `~/.vimrc`**, so move any existing one out of the
