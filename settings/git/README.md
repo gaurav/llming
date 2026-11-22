@@ -16,10 +16,11 @@ Run these from the root of this repository, wherever it is cloned on the compute
 ```bash
 mkdir -p ~/.config/git
 cp settings/git/gitconfig ~/.config/git/shared.gitconfig
-cp -n settings/git/gitignore ~/.gitignore
+[ -e ~/.gitignore ] || cp settings/git/gitignore ~/.gitignore
 ```
 
-`cp -n` leaves an existing `~/.gitignore` alone. If the machine has one already, add the lines
+The last line leaves an existing `~/.gitignore` alone. It tests for the file rather than using
+`cp -n`, which newer GNU coreutils warn about or treat as a failure when the file already exists. If the machine has one already, add the lines
 from `gitignore` to it by hand. If it has a `~/.config/git/ignore`, move its lines into
 `~/.gitignore` too: Git stops reading that file once the shared settings point it at
 `~/.gitignore`.
