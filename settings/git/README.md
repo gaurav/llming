@@ -37,7 +37,9 @@ replaces an earlier one. With the include at the top, anything else in `~/.gitco
 the shared settings, which is how one machine can differ from the rest.
 
 If `~/.gitconfig` already has some of these settings, delete them once the include is in place, so
-that each setting comes from one file only.
+that each setting comes from one file only. One needs care first: if it sets `core.excludesfile`
+to another file, such as `~/.gitignore_global`, move that file's lines into `~/.gitignore` before
+deleting the setting, or Git stops ignoring everything listed there.
 
 To check that it worked:
 
