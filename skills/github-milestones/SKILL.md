@@ -80,3 +80,19 @@ in the past is not by itself worth mentioning — most are soft. What is worth m
 
 This is about due dates only. Anything else that looks wrong with a milestone, raise as you would
 anywhere else.
+
+## Writing a due date
+
+When the user asks for a milestone with a due date, or for a new date on one, send `due_on` as
+**noon UTC** on that day and read it back. GitHub keeps only the date, and a midnight-UTC timestamp
+can land on the day before: `2027-01-06T00:00:00Z` was stored as `2027-01-05T00:00:00Z`, while
+`2027-01-06T12:00:00Z` was stored as `2027-01-06T00:00:00Z`, the intended date.
+
+```bash
+gh api repos/<owner>/<repo>/milestones -f title="<title>" -f due_on="<YYYY-MM-DD>T12:00:00Z" \
+  --jq '"\(.number) \(.title) \(.due_on)"'
+gh api -X PATCH repos/<owner>/<repo>/milestones/<N> -f due_on="<YYYY-MM-DD>T12:00:00Z" --jq .due_on
+```
+
+The returned `due_on` reads as midnight UTC on the stored date. If that isn't the date asked for,
+fix it before reporting the milestone as made.
