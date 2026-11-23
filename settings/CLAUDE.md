@@ -20,7 +20,7 @@ tool here, and before committing, diff the two:**
 | Claude Code | `settings/claude-code/user-CLAUDE.md` | `~/.claude/CLAUDE.md`            |
 | Git         | `settings/git/gitconfig`              | `~/.config/git/shared.gitconfig` |
 | Git         | `settings/git/gitignore`              | `~/.gitignore`                   |
-| Terminal    | `settings/terminal-app/*.terminal`    | Terminal's preferences (below)   |
+| Terminal    | `settings/terminal-app/*.terminal`    | Terminal's preferences, [not `diff`](#checking-a-profile-against-the-repo) |
 
 `diff -r settings/oh-my-posh ~/.config/oh-my-posh`, and so on. For each difference, ask the
 user which way it should go: bring the repo's version over, keep the machine's change only on that
@@ -169,6 +169,43 @@ To make a new profile from an existing one without quitting Terminal:
    the bytes change but the values don't.
 
 That's how `Tokyo Night Darker` was made from `Solarized Darker`.
+
+### Checking a profile against the repo
+
+`diff` and `cmp` can't do it. Terminal re-encodes the colour and font archives whenever it stores
+a profile, so an exported profile's bytes differ from the repo's even when every value matches.
+Decode the archives and compare those instead. Read Terminal's settings through
+`defaults export`, not from `~/Library/Preferences/com.apple.Terminal.plist`: right after an
+AppleScript change, the file on disk can still hold the old values while `cfprefsd` has the new
+ones. Run this from the repository root. It prints the name of each setting that differs, and
+nothing if the profile matches:
+
+```bash
+P="Solarized Darker"   # the profile to check
+T=$(mktemp -d)
+defaults export com.apple.Terminal "$T/installed.plist"
+plutil -extract "Window Settings.$P" xml1 -o "$T/installed.terminal" "$T/installed.plist"
+python3 - "settings/terminal-app/$P.terminal" "$T/installed.terminal" <<'EOF'
+import plistlib, sys
+def tree(v):  # decode a keyed archive (colours, font) into plain values
+    if not (isinstance(v, bytes) and v.startswith(b"bplist")):
+        return v
+    a = plistlib.loads(v)
+    def r(x):
+        if isinstance(x, plistlib.UID): return r(a["$objects"][x.data])
+        if isinstance(x, dict): return {k: r(y) for k, y in x.items()}
+        if isinstance(x, list): return [r(y) for y in x]
+        return x
+    return r(a["$top"])
+repo, installed = (plistlib.load(open(p, "rb")) for p in sys.argv[1:])
+for k in sorted(repo.keys() | installed.keys()):
+    if tree(repo.get(k)) != tree(installed.get(k)):
+        print(k)
+EOF
+```
+
+`defaults read com.apple.Terminal "Default Window Settings"` (and `"Startup Window Settings"`)
+names the profile in use, which is the one to check.
 
 ## Vim
 
