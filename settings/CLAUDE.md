@@ -170,6 +170,11 @@ To make a new profile from an existing one without quitting Terminal:
 
 That's how `Tokyo Night Darker` was made from `Solarized Darker`.
 
+**Install the font before Terminal starts, or set it again after importing.** A `.terminal` file
+imported while Terminal is running, when its font was installed after Terminal started, comes in
+with no font at all. Terminal doesn't complain. Set the font afterwards with AppleScript
+(`set font name of settings set "…" to "MesloLGMNF-Regular"`, and `font size` to 12).
+
 ### Checking a profile against the repo
 
 `diff` and `cmp` can't do it. Terminal re-encodes the colour and font archives whenever it stores
