@@ -190,10 +190,9 @@ its own PR:
 Solarized colours on a black background, with MesloLGM Nerd Font 13 pt so the prompt's icons
 render. What I like about it is that text stays neutral grey, and colour only appears where it
 means something (red executables, cyan directories, and so on). Two colours differ from stock
-Solarized because it assumes its own dark blue background rather than black. Bright black is
+Solarized, because it assumes its own dark blue background rather than black. Bright black is
 Solarized's base01 grey (`#586E75`) instead of the background tone, which vanished on black. The
-selection is a lighter teal (`#2E4F5A`) so selected text stands out. The cursor is also a neutral
-grey (`#969696`), not Solarized's teal-tinted base1 (`#93A1A1`). The window opens at 110×28,
+selection is a lighter teal (`#2E4F5A`) so selected text stands out. The window opens at 110×28,
 because line 1 of the prompt hides its right side when it doesn't fit, which happened often at the
 default 80 columns. Inactive windows turn slightly see-through and blurred.
 
