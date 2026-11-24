@@ -187,12 +187,12 @@ its own PR:
 ## Terminal.app profile
 
 `terminal-app/Solarized Darker.terminal` is the Terminal.app profile I use, and the default:
-Solarized colours on a black background, with MesloLGM Nerd Font 12 pt so the prompt's icons
+Solarized colours on a black background, with MesloLGM Nerd Font 13 pt so the prompt's icons
 render. What I like about it is that text stays neutral grey, and colour only appears where it
 means something (red executables, cyan directories, and so on). Two colours differ from stock
 Solarized, because it assumes its own dark blue background rather than black. Bright black is
 Solarized's base01 grey (`#586E75`) instead of the background tone, which vanished on black. The
-selection is a lighter teal (`#2E4F5A`) so selected text stands out. The window opens at 120×32,
+selection is a lighter teal (`#2E4F5A`) so selected text stands out. The window opens at 110×28,
 because line 1 of the prompt hides its right side when it doesn't fit, which happened often at the
 default 80 columns. Inactive windows turn slightly see-through and blurred.
 
@@ -201,14 +201,15 @@ Solarized Darker differs from it in:
 
 - the black background, replacing Solarized's `#042029`
 - inactive windows at 70% opacity, not 50%
-- the window size, cursor, bright black and selection colours described above
+- the window size, the font size, and the bright black and selection colours described above
+- a cursor in Solarized's base1 (`#93A1A1`), brighter than Solarized Dark's `#475B62`
 
 `terminal-app/Tokyo Night Darker.terminal` was tried as a match for the prompt's *tokyo-night*
 palette, and Solarized Darker won. It uses
 [tokyonight.nvim](https://github.com/folke/tokyonight.nvim)'s "night" colours on black.
 Tokyo Night's lavender text (`#C0CAF5`) tinted everything blue and was harder to read. Even with
 that changed to neutral grey (`#D0D0D0`), Solarized Darker was preferred. It also changes bright
-black (`#565F89`) and the selection (`#33467C`). Everything else is copied from Solarized Darker.
+black (`#565F89`) and the selection (`#33467C`). Everything else was copied from Solarized Darker.
 
 ### Install
 
