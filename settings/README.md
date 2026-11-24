@@ -201,7 +201,8 @@ Solarized Darker differs from it in:
 
 - the black background, replacing Solarized's `#042029`
 - inactive windows at 70% opacity, not 50%
-- the window size, cursor, bright black and selection colours described above
+- the window size, the font size, and the bright black and selection colours described above
+- a cursor in Solarized's base1 (`#93A1A1`), brighter than Solarized Dark's `#475B62`
 
 `terminal-app/Tokyo Night Darker.terminal` was tried as a match for the prompt's *tokyo-night*
 palette, and Solarized Darker won. It uses
