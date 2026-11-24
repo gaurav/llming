@@ -129,11 +129,13 @@ hook itself, so no extra zsh code is needed for the transient prompt.
 ## Terminal.app
 
 The profile lives in `~/Library/Preferences/com.apple.Terminal.plist` under `Window Settings`.
-The `.terminal` file here is that one dictionary, extracted as it is:
+The `.terminal` file here is that one dictionary, extracted as it is. Read it through
+`defaults export`, not from the file, which can lag behind a change (see
+[Checking a profile](#checking-a-profile-against-the-repo)):
 
 ```bash
-plutil -extract "Window Settings.Solarized Darker" xml1 \
-  -o "settings/terminal-app/Solarized Darker.terminal" ~/Library/Preferences/com.apple.Terminal.plist
+defaults export com.apple.Terminal - | plutil -extract "Window Settings.Solarized Darker" xml1 \
+  -o "settings/terminal-app/Solarized Darker.terminal" -
 ```
 
 Re-export after every change and commit it. Colours and the font are keyed archives stored as
@@ -188,8 +190,8 @@ nothing if the profile matches:
 ```bash
 P="Solarized Darker"   # the profile to check
 T=$(mktemp -d)
-defaults export com.apple.Terminal "$T/installed.plist"
-plutil -extract "Window Settings.$P" xml1 -o "$T/installed.terminal" "$T/installed.plist"
+defaults export com.apple.Terminal - \
+  | plutil -extract "Window Settings.$P" xml1 -o "$T/installed.terminal" -
 python3 - "settings/terminal-app/$P.terminal" "$T/installed.terminal" <<'EOF'
 import plistlib, sys
 def tree(v):  # decode a keyed archive (colours, font) into plain values
