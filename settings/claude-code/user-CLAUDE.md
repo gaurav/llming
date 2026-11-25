@@ -12,7 +12,10 @@ as a **draft** (`gh pr create --draft`) and leave it one. I review every PR myse
 it ready, so never run `gh pr ready`.
 
 An approach that was tried and failed belongs in the commit messages, or, if someone is likely to
-try it again, in the code or docs, so they don't go the same wrong way.
+try it again, in the code or docs, so they don't go the same wrong way. In the code or docs, phrase
+it as why the code is the way it is now ("throws rather than skipping, because…"), not as a story
+of what it once did: a reader takes "as this once did" for a description of the code in front of
+them, and the history is already in the commit message.
 
 Don't merge a pull request that no human has reviewed: the merge is mine to make, after a review.
 Suggesting that two PRs be combined, so one long session can review both, is fine.
